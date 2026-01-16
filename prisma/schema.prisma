@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id                String         @id @default(cuid())
+  email             String?        @unique
+  username          String?
+  totalGems         Int            @default(0)
+  totalRiddlesSolved Int          @default(0)
+  currentStreak     Int            @default(0)
+  lastPlayedDate    DateTime?
+  currentLevel      Int            @default(1)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  
+  gameSessions      GameSession[]
+  riddleAttempts    RiddleAttempt[]
+  achievements      UserAchievement[]
+  activityLogs      ActivityLog[]
+}
+
+model Riddle {
+  id          String           @id @default(cuid())
+  question    String
+  answer      String           // JSON array stored as string, parse in app
+  difficulty  String           // 'easy' | 'medium' | 'hard'
+  category    String?
+  hint1       String?          // First letter
+  hint2       String?          // Word length
+  tags        String[]         @default([])
+  isActive    Boolean          @default(true)
+  order       Int?             // Display order
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  
+  attempts    RiddleAttempt[]
+  activityLogs ActivityLog[]
+}
+
+model GameSession {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currentRiddleId String?
+  solvedRiddles   String[]  @default([]) // Array of riddle IDs
+  skippedRiddles  String[]  @default([])
+  userGems        Int       @default(50)
+  currentLevel    Int       @default(1)
+  hintsUsed       Json?     // { riddleId: [1, 2, 3] }
+  startedAt       DateTime  @default(now())
+  lastActivityAt  DateTime  @default(now())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@index([userId])
+}
+
+model RiddleAttempt {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  riddleId      String
+  riddle        Riddle    @relation(fields: [riddleId], references: [id], onDelete: Cascade)
+  isCorrect     Boolean
+  answerGiven   String?
+  hintsUsed     Int[]     @default([]) // Which hints were used
+  gemsEarned    Int       @default(0)
+  gemsSpent     Int       @default(0)
+  timeSpent     Int?      // Time in seconds
+  createdAt     DateTime  @default(now())
+  
+  @@index([userId])
+  @@index([riddleId])
+  @@index([createdAt])
+}
+
+model Achievement {
+  id          String            @id @default(cuid())
+  name        String
+  description String
+  icon        String
+  condition   String            // e.g., "solve_100_riddles", "streak_7_days"
+  reward      Int?              // Gem reward
+  createdAt   DateTime          @default(now())
+  
+  userAchievements UserAchievement[]
+}
+
+model UserAchievement {
+  id            String      @id @default(cuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievementId String
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  unlockedAt    DateTime    @default(now())
+  
+  @@unique([userId, achievementId])
+  @@index([userId])
+}
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  type        String   // e.g., 'riddle_created', 'user_solved', 'admin_action'
+  category    String   // 'admin' | 'user' | 'system'
+  title       String
+  description String
+  metadata    Json?    // Additional data
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  riddleId    String?
+  riddle      Riddle?  @relation(fields: [riddleId], references: [id], onDelete: SetNull)
+  adminId     String?  // Admin user ID if admin action
+  createdAt   DateTime @default(now())
+  
+  @@index([type])
+  @@index([category])
+  @@index([createdAt])
+  @@index([userId])
+}
+
+model GameConfig {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String   // JSON string
+  description String?
+  updatedAt   DateTime @updatedAt
+  updatedBy   String?  // Admin ID
+}

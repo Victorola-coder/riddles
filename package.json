@@ -22,14 +22,21 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "@tanstack/react-query": "^5.62.11",
     "aos": "^2.3.4",
     "axios": "^1.7.9",
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
     "framer-motion": "^11.11.9",
+    "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.471.1",
     "next": "^15.1.4",
     "react": "^19.0.0",
@@ -40,12 +47,14 @@
   },
   "devDependencies": {
     "@types/canvas-confetti": "^1.9.0",
+    "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^20.17.10",
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.1",
     "eslint": "^9.13.0",
     "eslint-config-next": "15.1.4",
     "postcss": "^8",
+    "prisma": "^5.22.0",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.6.3"
   }
