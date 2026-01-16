@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
-import { useGameStore } from '@/lib/store/game-store';
-import { RIDDLES } from '@/lib/constants/riddles';
-import { DifficultyLevel } from '@/types/riddle';
-import { Lock, CheckCircle, Circle, ChevronRight } from 'lucide-react';
-import { ProgressBar } from '@/app/components/molecules';
+import React from "react";
+import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { RIDDLES } from "@/lib/constants/riddles";
+import { DifficultyLevel } from "@/types/riddle";
+import { useGameStore } from "@/lib/store/game-store";
+import { ProgressBar } from "@/app/components/molecules";
+import { Lock, CheckCircle, Circle, ChevronRight } from "lucide-react";
 
 interface LevelTier {
   difficulty: DifficultyLevel;
@@ -21,29 +21,29 @@ interface LevelTier {
 
 const LEVEL_TIERS: LevelTier[] = [
   {
-    difficulty: 'easy',
-    title: 'Easy',
-    description: 'Perfect for beginners',
-    color: 'text-green-400',
-    bgGradient: 'from-green-600/20 to-green-800/20',
+    difficulty: "easy",
+    title: "Easy",
+    description: "Perfect for beginners",
+    color: "text-green-400",
+    bgGradient: "from-green-600/20 to-green-800/20",
     minLevel: 1,
     maxLevel: 10,
   },
   {
-    difficulty: 'medium',
-    title: 'Medium',
-    description: 'Challenge your mind',
-    color: 'text-yellow-400',
-    bgGradient: 'from-yellow-600/20 to-yellow-800/20',
+    difficulty: "medium",
+    title: "Medium",
+    description: "Challenge your mind",
+    color: "text-yellow-400",
+    bgGradient: "from-yellow-600/20 to-yellow-800/20",
     minLevel: 11,
     maxLevel: 25,
   },
   {
-    difficulty: 'hard',
-    title: 'Hard',
-    description: 'For master riddlers',
-    color: 'text-red-400',
-    bgGradient: 'from-red-600/20 to-red-800/20',
+    difficulty: "hard",
+    title: "Hard",
+    description: "For master riddlers",
+    color: "text-red-400",
+    bgGradient: "from-red-600/20 to-red-800/20",
     minLevel: 26,
     maxLevel: 50,
   },
@@ -64,19 +64,19 @@ export default function LevelsPage() {
 
   const isLevelUnlocked = (tier: LevelTier) => {
     // Easy is always unlocked
-    if (tier.difficulty === 'easy') return true;
+    if (tier.difficulty === "easy") return true;
 
     // Medium unlocked after 70% of easy
-    if (tier.difficulty === 'medium') {
-      const easyRiddles = getRiddlesByDifficulty('easy');
-      const easySolved = getSolvedCount('easy');
+    if (tier.difficulty === "medium") {
+      const easyRiddles = getRiddlesByDifficulty("easy");
+      const easySolved = getSolvedCount("easy");
       return easySolved >= Math.ceil(easyRiddles.length * 0.7);
     }
 
     // Hard unlocked after 70% of medium
-    if (tier.difficulty === 'hard') {
-      const mediumRiddles = getRiddlesByDifficulty('medium');
-      const mediumSolved = getSolvedCount('medium');
+    if (tier.difficulty === "hard") {
+      const mediumRiddles = getRiddlesByDifficulty("medium");
+      const mediumSolved = getSolvedCount("medium");
       return mediumSolved >= Math.ceil(mediumRiddles.length * 0.7);
     }
 
@@ -90,13 +90,15 @@ export default function LevelsPage() {
 
     // Navigate to first unsolved riddle in this tier
     const riddlesInTier = getRiddlesByDifficulty(tier.difficulty);
-    const unsolvedRiddle = riddlesInTier.find((r) => !solvedRiddles.includes(r.id));
+    const unsolvedRiddle = riddlesInTier.find(
+      (r) => !solvedRiddles.includes(r.id)
+    );
 
     if (unsolvedRiddle) {
-      router.push('/');
+      router.push("/");
     } else {
       // All solved, go to first riddle in tier
-      router.push('/');
+      router.push("/");
     }
   };
 
@@ -117,11 +119,17 @@ export default function LevelsPage() {
         <div className="glass-card p-6 mb-8">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-2xl font-cinzel font-bold text-white">Your Progress</h2>
-              <p className="text-[var(--text-muted)] text-sm">Current Level: {currentLevel}</p>
+              <h2 className="text-2xl font-cinzel font-bold text-white">
+                Your Progress
+              </h2>
+              <p className="text-[var(--text-muted)] text-sm">
+                Current Level: {currentLevel}
+              </p>
             </div>
             <div className="text-right">
-              <p className="text-3xl font-bold text-purple">{solvedRiddles.length}</p>
+              <p className="text-3xl font-bold text-purple">
+                {solvedRiddles.length}
+              </p>
               <p className="text-[var(--text-muted)] text-sm">Riddles Solved</p>
             </div>
           </div>
@@ -139,7 +147,9 @@ export default function LevelsPage() {
             const solvedCount = getSolvedCount(tier.difficulty);
             const totalCount = riddlesInTier.length;
             const isUnlocked = isLevelUnlocked(tier);
-            const completionPercentage = Math.round((solvedCount / totalCount) * 100);
+            const completionPercentage = Math.round(
+              (solvedCount / totalCount) * 100
+            );
 
             return (
               <motion.div
@@ -150,8 +160,8 @@ export default function LevelsPage() {
                 onClick={() => handleTierClick(tier)}
                 className={`relative glass-card p-6 cursor-pointer transition-all ${
                   isUnlocked
-                    ? 'hover:border-purple hover:scale-105'
-                    : 'opacity-60 cursor-not-allowed'
+                    ? "hover:border-purple hover:scale-105"
+                    : "opacity-60 cursor-not-allowed"
                 }`}
               >
                 {/* Lock Overlay */}
@@ -160,39 +170,58 @@ export default function LevelsPage() {
                     <div className="text-center">
                       <Lock className="text-gray-500 mx-auto mb-2" size={48} />
                       <p className="text-gray-400 text-sm">
-                        Complete more {index === 1 ? 'Easy' : 'Medium'} riddles to unlock
+                        Complete more {index === 1 ? "Easy" : "Medium"} riddles
+                        to unlock
                       </p>
                     </div>
                   </div>
                 )}
 
                 {/* Tier Header */}
-                <div className={`bg-gradient-to-br ${tier.bgGradient} rounded-lg p-4 mb-4`}>
-                  <h3 className={`text-2xl font-cinzel font-bold ${tier.color} mb-1`}>
+                <div
+                  className={`bg-gradient-to-br ${tier.bgGradient} rounded-lg p-4 mb-4`}
+                >
+                  <h3
+                    className={`text-2xl font-cinzel font-bold ${tier.color} mb-1`}
+                  >
                     {tier.title}
                   </h3>
-                  <p className="text-[var(--text-muted)] text-sm">{tier.description}</p>
+                  <p className="text-[var(--text-muted)] text-sm">
+                    {tier.description}
+                  </p>
                 </div>
 
                 {/* Stats */}
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-[var(--text-secondary)] text-sm">Progress</span>
+                    <span className="text-[var(--text-secondary)] text-sm">
+                      Progress
+                    </span>
                     <span className="text-white font-semibold">
                       {solvedCount}/{totalCount}
                     </span>
                   </div>
 
-                  <ProgressBar current={solvedCount} total={totalCount} showPercentage={false} />
+                  <ProgressBar
+                    current={solvedCount}
+                    total={totalCount}
+                    showPercentage={false}
+                  />
 
                   <div className="flex justify-between items-center">
-                    <span className="text-[var(--text-secondary)] text-sm">Completion</span>
-                    <span className={`font-bold ${tier.color}`}>{completionPercentage}%</span>
+                    <span className="text-[var(--text-secondary)] text-sm">
+                      Completion
+                    </span>
+                    <span className={`font-bold ${tier.color}`}>
+                      {completionPercentage}%
+                    </span>
                   </div>
 
                   {/* Riddle List Preview */}
                   <div className="border-t border-[var(--border-default)] pt-4 mt-4">
-                    <p className="text-xs text-[var(--text-muted)] mb-2">Riddles:</p>
+                    <p className="text-xs text-[var(--text-muted)] mb-2">
+                      Riddles:
+                    </p>
                     <div className="space-y-1">
                       {riddlesInTier.slice(0, 3).map((riddle) => {
                         const isSolved = solvedRiddles.includes(riddle.id);
@@ -202,13 +231,18 @@ export default function LevelsPage() {
                             className="flex items-center gap-2 text-sm"
                           >
                             {isSolved ? (
-                              <CheckCircle className="text-green-400" size={14} />
+                              <CheckCircle
+                                className="text-green-400"
+                                size={14}
+                              />
                             ) : (
                               <Circle className="text-gray-500" size={14} />
                             )}
                             <span
                               className={
-                                isSolved ? 'text-gray-400 line-through' : 'text-white'
+                                isSolved
+                                  ? "text-gray-400 line-through"
+                                  : "text-white"
                               }
                             >
                               {riddle.question.substring(0, 30)}...
@@ -227,7 +261,7 @@ export default function LevelsPage() {
                   {/* Action Button */}
                   {isUnlocked && (
                     <button className="w-full mt-4 px-4 py-2 bg-purple text-white rounded-lg hover:bg-purple-dark transition-colors flex items-center justify-center gap-2 font-inter font-medium">
-                      {solvedCount === totalCount ? 'Review' : 'Continue'}
+                      {solvedCount === totalCount ? "Review" : "Continue"}
                       <ChevronRight size={16} />
                     </button>
                   )}
@@ -240,7 +274,7 @@ export default function LevelsPage() {
         {/* Back to Game Button */}
         <div className="mt-8 text-center">
           <button
-            onClick={() => router.push('/')}
+            onClick={() => router.push("/")}
             className="px-6 py-3 bg-midnight-light text-white rounded-lg hover:bg-[var(--border-default)] transition-colors font-inter"
           >
             ← Back to Current Riddle

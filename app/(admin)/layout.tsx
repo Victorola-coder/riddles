@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   LayoutDashboard,
@@ -12,15 +12,15 @@ import {
   Activity,
   ChevronDown,
   ChevronRight,
-} from 'lucide-react';
-import Link from 'next/link';
-import { toast } from 'sonner';
-import { Loader } from '@/app/components/global';
-import { ReactNode, useState, useEffect } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import { getAdminToken, removeAdminToken } from '@/lib/admin-auth';
-import Modal from '@/app/components/ui/modal';
-import Button from '@/app/components/ui/button';
+} from "lucide-react";
+import Link from "next/link";
+import { toast } from "sonner";
+import Modal from "@/app/components/ui/modal";
+import Button from "@/app/components/ui/button";
+import { Loader } from "@/app/components/global";
+import { ReactNode, useState, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { getAdminToken, removeAdminToken } from "@/lib/admin-auth";
 
 interface NavGroup {
   label: string;
@@ -34,31 +34,27 @@ interface NavGroup {
 
 const navGroups: NavGroup[] = [
   {
-    label: 'Overview',
+    label: "Overview",
     icon: BarChart3,
     items: [
-      { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-      { href: '/admin/activity', label: 'Activity Log', icon: Activity },
+      { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/activity", label: "Activity Log", icon: Activity },
     ],
   },
   {
-    label: 'Content Management',
+    label: "Content Management",
     icon: HelpCircle,
-    items: [
-      { href: '/admin/riddles', label: 'Riddles', icon: HelpCircle },
-    ],
+    items: [{ href: "/riddles", label: "Riddles", icon: HelpCircle }],
   },
   {
-    label: 'User Management',
+    label: "User Management",
     icon: Users,
-    items: [{ href: '/admin/users', label: 'Users', icon: Users }],
+    items: [{ href: "/users", label: "Users", icon: Users }],
   },
   {
-    label: 'Settings',
+    label: "Settings",
     icon: Settings,
-    items: [
-      { href: '/admin/settings', label: 'Game Config', icon: Settings },
-    ],
+    items: [{ href: "/settings", label: "Game Config", icon: Settings }],
   },
 ];
 
@@ -74,21 +70,21 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Don't check auth on login page
-    if (pathname === '/admin') {
+    if (pathname === "/admin") {
       setChecking(false);
       return;
     }
 
     // Check for both admin token and authenticated flag
     const token = getAdminToken();
-    const authenticated = sessionStorage.getItem('admin_authenticated');
+    const authenticated = sessionStorage.getItem("admin_authenticated");
 
-    if (token && authenticated === 'true') {
+    if (token && authenticated === "true") {
       setIsAuthenticated(true);
     } else {
       // Clear any stale auth data
       removeAdminToken();
-      router.push('/admin');
+      router.push("/admin");
     }
     setChecking(false);
   }, [pathname, router]);
@@ -97,12 +93,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   const handleLogout = () => {
     removeAdminToken();
-    router.push('/admin');
-    toast.success('Logged out successfully.');
+    router.push("/admin");
+    toast.success("Logged out successfully.");
   };
 
   // Don't show layout on login page
-  if (pathname === '/admin') {
+  if (pathname === "/admin") {
     return <>{children}</>;
   }
 
@@ -128,7 +124,11 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           onClick={() => setSidebarOpen(!sidebarOpen)}
           className="text-white p-2 hover:bg-[#FFFFFF1A] rounded-lg transition-colors"
         >
-          {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          {sidebarOpen ? (
+            <X className="w-6 h-6" />
+          ) : (
+            <Menu className="w-6 h-6" />
+          )}
         </button>
         <h1 className="text-lg font-bold bg-gradient-to-r from-[#8b5cf6] to-[#fbbf24] bg-clip-text text-transparent">
           Admin
@@ -146,7 +146,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         {/* Sidebar */}
         <aside
           className={`${
-            sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
           } md:translate-x-0 fixed md:static inset-y-0 left-0 z-50 w-64 bg-[#0f0f0f] border-r border-[#FFFFFF1A] transition-transform duration-300 md:transition-none`}
         >
           <div className="h-full flex flex-col">
@@ -195,8 +195,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                         }}
                         className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors font-medium ${
                           hasActiveItem
-                            ? 'text-white bg-[#FFFFFF1A]'
-                            : 'text-gray-300 hover:bg-[#FFFFFF1A] hover:text-white'
+                            ? "text-white bg-[#FFFFFF1A]"
+                            : "text-gray-300 hover:bg-[#FFFFFF1A] hover:text-white"
                         }`}
                       >
                         <div className="flex items-center gap-3">
@@ -223,8 +223,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                                   onClick={() => setSidebarOpen(false)}
                                   className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm ${
                                     isActive
-                                      ? 'font-semibold text-white bg-[#FFFFFF1A]'
-                                      : 'text-gray-400 hover:bg-[#FFFFFF1A] hover:text-white'
+                                      ? "font-semibold text-white bg-[#FFFFFF1A]"
+                                      : "text-gray-400 hover:bg-[#FFFFFF1A] hover:text-white"
                                   }`}
                                 >
                                   <ItemIcon className="w-4 h-4" />

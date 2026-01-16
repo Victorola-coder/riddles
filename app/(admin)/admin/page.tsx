@@ -1,25 +1,25 @@
-'use client';
+"use client";
 
-import { toast } from 'sonner';
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Loader } from '@/app/components/global';
-import { getAdminToken, setAdminToken } from '@/lib/admin-auth';
+import { toast } from "sonner";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Loader } from "@/app/components/global";
+import { getAdminToken, setAdminToken } from "@/lib/admin-auth";
 
 export default function AdminPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [accessCode, setAccessCode] = useState('');
+  const [accessCode, setAccessCode] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
 
   useEffect(() => {
     // Check if already authenticated in session
     const token = getAdminToken();
-    const authenticated = sessionStorage.getItem('admin_authenticated');
-    if (token && authenticated === 'true') {
+    const authenticated = sessionStorage.getItem("admin_authenticated");
+    if (token && authenticated === "true") {
       setIsAuthenticated(true);
-      router.push('/admin/dashboard');
+      router.push("/dashboard");
     } else {
       setLoading(false);
     }
@@ -30,17 +30,17 @@ export default function AdminPage() {
     setIsAuthenticating(true);
 
     try {
-      const res = await fetch('/api/admin/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/admin/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ accessCode }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        toast.error(data.error || 'Invalid access code. Please try again.');
-        setAccessCode('');
+        toast.error(data.error || "Invalid access code. Please try again.");
+        setAccessCode("");
         setIsAuthenticating(false);
         return;
       }
@@ -49,15 +49,15 @@ export default function AdminPage() {
       if (data.token) {
         setAdminToken(data.token);
         setIsAuthenticated(true);
-        toast.success('Access granted! Welcome to admin panel.');
-        router.push('/admin/dashboard');
+        toast.success("Access granted! Welcome to admin panel.");
+        router.push("/admin/dashboard");
       } else {
-        toast.error('Authentication failed. Please try again.');
-        setAccessCode('');
+        toast.error("Authentication failed. Please try again.");
+        setAccessCode("");
       }
     } catch (error) {
-      toast.error('Failed to authenticate. Please try again.');
-      setAccessCode('');
+      toast.error("Failed to authenticate. Please try again.");
+      setAccessCode("");
     } finally {
       setIsAuthenticating(false);
     }
@@ -82,9 +82,7 @@ export default function AdminPage() {
           <h1 className="text-2xl sm:text-3xl font-bold mb-2 bg-gradient-to-r from-[#8b5cf6] to-[#fbbf24] bg-clip-text text-transparent">
             🧩 Admin Access
           </h1>
-          <p className="text-gray-400">
-            Enter access code to continue
-          </p>
+          <p className="text-gray-400">Enter access code to continue</p>
         </div>
 
         <form onSubmit={handleAccessCodeSubmit} className="space-y-6">
@@ -106,7 +104,7 @@ export default function AdminPage() {
             disabled={accessCode.length !== 4 || isAuthenticating}
             className="w-full px-4 py-3 bg-gradient-to-r from-[#8b5cf6] to-[#fbbf24] text-black rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed font-medium"
           >
-            {isAuthenticating ? 'Verifying...' : 'Access Admin'}
+            {isAuthenticating ? "Verifying..." : "Access Admin"}
           </button>
         </form>
       </div>
