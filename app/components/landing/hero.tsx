@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, Sparkles, Gem, Target, Lightbulb } from "lucide-react";
+import { ArrowRight, Sparkles, Gem, TrendingUp, Lightbulb } from "lucide-react";
 
 export const Hero = () => {
   return (
@@ -118,7 +118,7 @@ export const Hero = () => {
             transition={{ delay: 0.5, duration: 0.6 }}
             className="text-xl md:text-2xl text-center text-white/60 max-w-2xl leading-relaxed"
           >
-            Riddle Quest is a gamified puzzle platform where you solve riddles,
+            Riddle Quest is a gamified platform where you solve riddles,
             earn gems, and progress through difficulty levels. Test your wits
             and unlock new challenges!
           </motion.p>
@@ -160,7 +160,7 @@ export const Hero = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.9, duration: 0.6 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 w-full max-w-5xl"
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 w-full max-w-4xl"
         >
           {[
             {
@@ -168,15 +168,15 @@ export const Hero = () => {
               title: "Earn Gems",
               desc: "Solve riddles to earn virtual currency and unlock rewards",
               gradient: "from-yellow-500/20 via-amber-500/20 to-orange-500/20",
-              iconColor: "text-yellow-400",
+              iconGradient: "from-yellow-400 to-amber-500",
               borderColor: "border-yellow-500/30",
             },
             {
-              icon: Target,
+              icon: TrendingUp,
               title: "Progressive Levels",
               desc: "Unlock harder challenges as you master each difficulty tier",
               gradient: "from-purple-500/20 via-pink-500/20 to-fuchsia-500/20",
-              iconColor: "text-purple-400",
+              iconGradient: "from-purple-400 to-pink-500",
               borderColor: "border-purple-500/30",
             },
             {
@@ -184,7 +184,7 @@ export const Hero = () => {
               title: "Smart Hints",
               desc: "Get progressive hints when you need a little help",
               gradient: "from-blue-500/20 via-cyan-500/20 to-teal-500/20",
-              iconColor: "text-blue-400",
+              iconGradient: "from-blue-400 to-cyan-500",
               borderColor: "border-blue-500/30",
             },
           ].map((feature, index) => {
@@ -202,7 +202,7 @@ export const Hero = () => {
                 <div
                   className={`absolute -inset-0.5 bg-gradient-to-r ${feature.gradient} rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
                 />
-                
+
                 {/* Card */}
                 <div
                   className={`relative p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/[0.02] border ${feature.borderColor} backdrop-blur-xl overflow-hidden transition-all duration-300 group-hover:border-opacity-60`}
@@ -211,31 +211,36 @@ export const Hero = () => {
                   <div
                     className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}
                   />
-                  
+
                   {/* Content */}
                   <div className="relative z-10">
                     {/* Icon */}
                     <div className="mb-6">
-                      <div
+                      <motion.div
                         className={`inline-flex p-4 rounded-xl bg-gradient-to-br ${feature.gradient} ${feature.borderColor} border backdrop-blur-sm`}
+                        whileHover={{ rotate: 5, scale: 1.05 }}
+                        transition={{ type: "spring", stiffness: 300 }}
                       >
                         <Icon
-                          className={`${feature.iconColor} w-6 h-6 group-hover:scale-110 transition-transform duration-300`}
+                          className={`w-6 h-6 text-white group-hover:scale-110 transition-transform duration-300`}
+                          style={{
+                            filter: "drop-shadow(0 0 8px rgba(255, 255, 255, 0.5))",
+                          }}
                         />
-                      </div>
+                      </motion.div>
                     </div>
-                    
+
                     {/* Title */}
                     <h3 className="text-white font-bold text-xl mb-3 group-hover:text-white transition-colors">
                       {feature.title}
                     </h3>
-                    
+
                     {/* Description */}
                     <p className="text-white/50 text-sm leading-relaxed group-hover:text-white/70 transition-colors">
                       {feature.desc}
                     </p>
                   </div>
-                  
+
                   {/* Shine effect on hover */}
                   <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
                 </div>
