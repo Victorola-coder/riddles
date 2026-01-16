@@ -9,8 +9,9 @@ import {
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
 import { CheckCircle2, XCircle } from "lucide-react";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useGameStore } from "@/lib/store/game-store";
+import { useUserStore } from "@/lib/store/user-store";
 import { motion, AnimatePresence } from "framer-motion";
 import { getRiddleById } from "@/lib/constants/riddles";
 import { calculateGemsEarned } from "@/lib/utils/gem-calculator";
@@ -28,20 +29,38 @@ export default function GamePage() {
     hintsUsed,
   } = useGameStore();
 
+  const {
+    incrementTotalSolved,
+    incrementNoHintSolves,
+    incrementPerfectStreak,
+    resetPerfectStreak,
+    updateFastestTime,
+    addGemsEarned,
+    updateStreak,
+  } = useUserStore();
+
   const [showError, setShowError] = useState(false);
   const [revealedHints, setRevealedHints] = useState<{
     hint1?: string;
     hint2?: string;
     answer?: string;
   }>({});
+  const [wrongAttempts, setWrongAttempts] = useState(0);
+  const startTimeRef = useRef<number>(Date.now());
 
   const currentRiddle = currentRiddleId ? getRiddleById(currentRiddleId) : null;
 
-  // Reset hints when riddle changes
+  // Reset hints and timer when riddle changes
   useEffect(() => {
     setRevealedHints({});
     setShowError(false);
-  }, [currentRiddleId]);
+    setWrongAttempts(0);
+    startTimeRef.current = Date.now();
+    
+    // Update streak on first load
+    updateStreak();
+  }, [currentRiddleId, updateStreak]);
+
 
   if (!currentRiddle) {
     return (
@@ -60,7 +79,25 @@ export default function GamePage() {
     if (validateAnswer(answer, currentRiddle)) {
       // Correct answer!
       const gemsEarned = calculateGemsEarned(currentRiddle.difficulty);
+      const solveTime = (Date.now() - startTimeRef.current) / 1000; // in seconds
+      const usedNoHints = !hasUsedHint(currentRiddle.id, 1) && !hasUsedHint(currentRiddle.id, 2) && !hasUsedHint(currentRiddle.id, 3);
+
       solveRiddle(currentRiddle.id, gemsEarned);
+
+      // Track achievements
+      incrementTotalSolved();
+      addGemsEarned(gemsEarned);
+      updateFastestTime(solveTime);
+
+      if (usedNoHints) {
+        incrementNoHintSolves();
+      }
+
+      if (wrongAttempts === 0) {
+        incrementPerfectStreak();
+      } else {
+        resetPerfectStreak();
+      }
 
       // Confetti animation
       confetti({
@@ -89,6 +126,7 @@ export default function GamePage() {
       }, 1500);
     } else {
       // Wrong answer
+      setWrongAttempts((prev) => prev + 1);
       setShowError(true);
       setTimeout(() => setShowError(false), 500);
 
@@ -101,6 +139,7 @@ export default function GamePage() {
       );
     }
   };
+
 
   const handleHint1 = () => {
     useHint(currentRiddle.id, 1);
