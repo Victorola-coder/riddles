@@ -9,12 +9,12 @@ const BODY_PSEUDO = "before:bg-body after:bg-body";
 
 export default function Loader({
   color = "primary",
-  size = "medium",
+  size = "small",
   className,
 }: {
+  className?: string;
   color?: "primary" | "body";
   size?: "small" | "medium" | "large";
-  className?: string;
 }) {
   const spinSize =
     size === "small" ? SMALL_CONTAINER : size === "large" ? LARGE : MEDIUM;

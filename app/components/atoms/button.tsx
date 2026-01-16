@@ -1,12 +1,17 @@
-import React from 'react';
-import { motion, HTMLMotionProps } from 'framer-motion';
-import { Loader } from '../global';
-import clsx from 'clsx';
+import clsx from "clsx";
+import React from "react";
+import { Loader } from "../global";
+import { motion, HTMLMotionProps } from "framer-motion";
 
-export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'outline';
-export type ButtonSize = 'sm' | 'md' | 'lg';
+export type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "danger"
+  | "ghost"
+  | "outline";
+export type ButtonSize = "sm" | "md" | "lg";
 
-interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'children'> {
+interface ButtonProps extends Omit<HTMLMotionProps<"button">, "children"> {
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;
@@ -16,28 +21,33 @@ interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'children'> {
 }
 
 export const Button: React.FC<ButtonProps> = ({
-  variant = 'primary',
-  size = 'md',
+  variant = "primary",
+  size = "md",
   loading = false,
   disabled = false,
   children,
   className,
   ...props
 }) => {
-  const baseStyles = 'font-inter font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2';
+  const baseStyles =
+    "font-inter font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2";
 
   const variantStyles: Record<ButtonVariant, string> = {
-    primary: 'bg-purple text-white hover:bg-purple-dark glow-purple hover:glow-purple-strong',
-    secondary: 'bg-midnight-light text-white border border-[var(--border-default)] hover:border-[var(--border-focus)] hover:glow-purple',
-    danger: 'bg-[var(--accent-danger)] text-white hover:bg-red-600',
-    ghost: 'bg-transparent text-[var(--text-secondary)] hover:text-white hover:bg-midnight-light',
-    outline: 'bg-transparent border-2 border-purple text-purple hover:bg-purple hover:text-white',
+    primary:
+      "bg-purple text-white hover:bg-purple-dark glow-purple hover:glow-purple-strong",
+    secondary:
+      "bg-midnight-light text-white border border-[var(--border-default)] hover:border-[var(--border-focus)] hover:glow-purple",
+    danger: "bg-[var(--accent-danger)] text-white hover:bg-red-600",
+    ghost:
+      "bg-transparent text-[var(--text-secondary)] hover:text-white hover:bg-midnight-light",
+    outline:
+      "bg-transparent border-2 border-purple text-purple hover:bg-purple hover:text-white",
   };
 
   const sizeStyles: Record<ButtonSize, string> = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-base',
-    lg: 'px-6 py-3 text-lg',
+    sm: "px-3 py-1.5 text-sm",
+    md: "px-4 py-2 text-base",
+    lg: "px-6 py-3 text-lg",
   };
 
   return (
