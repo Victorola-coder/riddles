@@ -34,36 +34,3 @@ export function useKeyboard(
     return () => window.removeEventListener("keydown", listener);
   }, [key, handler, options]);
 }
-
-/**
- * Hook to handle multiple keyboard shortcuts
- * @param shortcuts - Array of shortcut configurations
- */
-export function useKeyboardShortcuts(
-  shortcuts: Array<{
-    key: string;
-    handler: (event: KeyboardEvent) => void;
-    ctrlKey?: boolean;
-    metaKey?: boolean;
-    shiftKey?: boolean;
-    altKey?: boolean;
-  }>
-) {
-  useEffect(() => {
-    const listener = (event: KeyboardEvent) => {
-      shortcuts.forEach((shortcut) => {
-        if (event.key !== shortcut.key) return;
-        if (shortcut.ctrlKey && !event.ctrlKey) return;
-        if (shortcut.metaKey && !event.metaKey) return;
-        if (shortcut.shiftKey && !event.shiftKey) return;
-        if (shortcut.altKey && !event.altKey) return;
-
-        event.preventDefault();
-        shortcut.handler(event);
-      });
-    };
-
-    window.addEventListener("keydown", listener);
-    return () => window.removeEventListener("keydown", listener);
-  }, [shortcuts]);
-}

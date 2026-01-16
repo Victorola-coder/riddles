@@ -2,13 +2,10 @@
 
 import { toast } from "sonner";
 import { useState, useReducer } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/app/components/ui";
-// import { API_URL, API_KEY } from "@/app/constants";
 import { otpReducer, initialOtpState } from "@/app/lib/otp";
 
 export default function OTP() {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [otpState, dispatch] = useReducer(otpReducer, initialOtpState);
 
@@ -36,7 +33,6 @@ export default function OTP() {
       if (data.success) {
         toast.success("OTP verified successfully");
         dispatch({ type: "reset", payload: "" });
-        router.push("/signin");
       } else {
         throw new Error(data.message || "Invalid OTP");
       }
