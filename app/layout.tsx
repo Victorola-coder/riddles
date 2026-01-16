@@ -6,6 +6,7 @@ import { Cinzel, Inter } from "next/font/google";
 import type { Metadata, Viewport } from "next";
 import StructuredData from "./components/global/structured-data";
 import { generateWebsiteStructuredData } from "./lib/structured-data";
+import { Providers } from "./providers";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -111,10 +112,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${cinzel.variable} ${inter.variable} ${geistMono.variable} antialiased`}
       >
-        <StructuredData data={generateWebsiteStructuredData()} />
-        <Toaster richColors />
-        <AOS />
-        {children}
+        <Providers>
+          <StructuredData data={generateWebsiteStructuredData()} />
+          <Toaster richColors />
+          <AOS />
+          {children}
+        </Providers>
       </body>
     </html>
   );
