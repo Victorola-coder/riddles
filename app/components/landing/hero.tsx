@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles, Gem, Target, Lightbulb } from "lucide-react";
 
 export const Hero = () => {
   return (
@@ -160,37 +160,88 @@ export const Hero = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.9, duration: 0.6 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 w-full max-w-3xl"
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 w-full max-w-5xl"
         >
           {[
             {
-              icon: "💎",
+              icon: Gem,
               title: "Earn Gems",
-              desc: "Solve riddles to earn virtual currency",
+              desc: "Solve riddles to earn virtual currency and unlock rewards",
+              gradient: "from-yellow-500/20 via-amber-500/20 to-orange-500/20",
+              iconColor: "text-yellow-400",
+              borderColor: "border-yellow-500/30",
             },
             {
-              icon: "🎯",
+              icon: Target,
               title: "Progressive Levels",
-              desc: "Unlock harder challenges as you progress",
+              desc: "Unlock harder challenges as you master each difficulty tier",
+              gradient: "from-purple-500/20 via-pink-500/20 to-fuchsia-500/20",
+              iconColor: "text-purple-400",
+              borderColor: "border-purple-500/30",
             },
             {
-              icon: "💡",
+              icon: Lightbulb,
               title: "Smart Hints",
-              desc: "Get help when you need it",
+              desc: "Get progressive hints when you need a little help",
+              gradient: "from-blue-500/20 via-cyan-500/20 to-teal-500/20",
+              iconColor: "text-blue-400",
+              borderColor: "border-blue-500/30",
             },
-          ].map((feature, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1 + index * 0.1 }}
-              className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all"
-            >
-              <div className="text-3xl mb-3">{feature.icon}</div>
-              <h3 className="text-white font-semibold mb-2">{feature.title}</h3>
-              <p className="text-white/60 text-sm">{feature.desc}</p>
-            </motion.div>
-          ))}
+          ].map((feature, index) => {
+            const Icon = feature.icon;
+            return (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ delay: 1 + index * 0.15, duration: 0.5 }}
+                whileHover={{ y: -8, scale: 1.02 }}
+                className="group relative"
+              >
+                {/* Glow effect */}
+                <div
+                  className={`absolute -inset-0.5 bg-gradient-to-r ${feature.gradient} rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
+                />
+                
+                {/* Card */}
+                <div
+                  className={`relative p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/[0.02] border ${feature.borderColor} backdrop-blur-xl overflow-hidden transition-all duration-300 group-hover:border-opacity-60`}
+                >
+                  {/* Background gradient overlay */}
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}
+                  />
+                  
+                  {/* Content */}
+                  <div className="relative z-10">
+                    {/* Icon */}
+                    <div className="mb-6">
+                      <div
+                        className={`inline-flex p-4 rounded-xl bg-gradient-to-br ${feature.gradient} ${feature.borderColor} border backdrop-blur-sm`}
+                      >
+                        <Icon
+                          className={`${feature.iconColor} w-6 h-6 group-hover:scale-110 transition-transform duration-300`}
+                        />
+                      </div>
+                    </div>
+                    
+                    {/* Title */}
+                    <h3 className="text-white font-bold text-xl mb-3 group-hover:text-white transition-colors">
+                      {feature.title}
+                    </h3>
+                    
+                    {/* Description */}
+                    <p className="text-white/50 text-sm leading-relaxed group-hover:text-white/70 transition-colors">
+                      {feature.desc}
+                    </p>
+                  </div>
+                  
+                  {/* Shine effect on hover */}
+                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+                </div>
+              </motion.div>
+            );
+          })}
         </motion.div>
       </div>
     </div>
