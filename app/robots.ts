@@ -1,4 +1,3 @@
-
 import type { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
@@ -12,13 +11,9 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "Googlebot",
         allow: ["/"],
-        disallow: "/private/",
-      },
-      {
-        userAgent: ["Applebot", "Bingbot"],
-        disallow: ["/"],
+        disallow: [],
       },
     ],
-    sitemap: "https://sitename.host/sitemap.xml",
+    sitemap: "https://riddle-quest.vercel.app/sitemap.xml",
   };
 }

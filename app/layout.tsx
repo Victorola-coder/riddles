@@ -2,7 +2,7 @@ import "./global.css";
 import { Toaster } from "sonner";
 import localFont from "next/font/local";
 import { AOS } from "./components/global";
-import { Montserrat } from "next/font/google";
+import { Cinzel, Inter } from "next/font/google";
 import type { Metadata, Viewport } from "next";
 
 const geistSans = localFont({
@@ -16,9 +16,15 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
-const montserrat = Montserrat({
+const cinzel = Cinzel({
   subsets: ["latin"],
-  variable: "--font-montserrat",
+  variable: "--font-cinzel",
+  weight: ["400", "500", "600", "700"],
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
@@ -27,18 +33,27 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://nextapptemplate.xyz"),
+  metadataBase: new URL("https://riddle-quest.vercel.app"),
   icons: {
-    icon: "/icon.png",
+    icon: "/favicon.ico",
   },
-  title: "nextjs template",
+  title: "Riddle Quest - Gamified Riddle Platform",
   description:
-    "I fell in love with next.js, im trying to make a template for it also",
-  applicationName: "next Web Application",
-  authors: [{ name: "nextapp template", url: "https://domainname.host" }],
-  keywords: ["NextJs", "reactjs", "template", "typescript"],
-  creator: "VickyJay",
-  publisher: "VickyJay",
+    "Solve riddles, earn gems, and progress through difficulty levels in this engaging gamified riddle platform. Challenge yourself with easy, medium, and hard riddles!",
+  applicationName: "Riddle Quest",
+  authors: [{ name: "Victor", url: "https://github.com/Victorola-coder" }],
+  keywords: [
+    "riddles",
+    "puzzle",
+    "game",
+    "brain teasers",
+    "gamification",
+    "progressive web app",
+    "nextjs",
+    "typescript",
+  ],
+  creator: "Victor",
+  publisher: "Victor",
   generator: "Next.js",
   referrer: "origin",
   robots: {
@@ -47,41 +62,41 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    url: "https://domainname.host",
-    title: "Nextjs template",
-    siteName: "nextapp template",
+    url: "https://riddle-quest.vercel.app",
+    title: "Riddle Quest - Gamified Riddle Platform",
+    siteName: "Riddle Quest",
     locale: "en_US",
+    description:
+      "Solve riddles, earn gems, and progress through difficulty levels. Challenge yourself with engaging brain teasers!",
     images: [
       {
-        url: "linktoopengraphimage.cdn",
+        url: "https://riddle-quest.vercel.app/og-image.png",
         width: 1200,
         height: 630,
-        alt: "next OG Image",
+        alt: "Riddle Quest - Gamified Riddle Platform",
       },
     ],
   },
   twitter: {
-    site: "nextapp",
-    creator: "socialmediahandle",
-    title:
-      "nextapp template - I fell in love with next.js, im trying to make a template for it tooo",
-    description:
-      "I fell in love with next.js, im trying to make a template for it too",
     card: "summary_large_image",
-    images: ["linktoopengraph.com"],
+    title: "Riddle Quest - Gamified Riddle Platform",
+    description:
+      "Solve riddles, earn gems, and progress through difficulty levels. Challenge yourself with engaging brain teasers!",
+    creator: "@Victorola-coder",
+    images: ["https://riddle-quest.vercel.app/og-image.png"],
   },
   appleWebApp: {
     capable: true,
-    title: "nextapp template",
+    title: "Riddle Quest",
     statusBarStyle: "black-translucent",
   },
   formatDetection: {
     telephone: false,
   },
   abstract:
-    "I fell in love with next.js, im trying to make a template for it tooo",
-  category: "Social",
-  classification: "Social",
+    "A gamified riddle-solving platform where users progress through difficulty levels, earn virtual currency (Gems), and experience a premium, mysterious aesthetic.",
+  category: "Games",
+  classification: "Entertainment",
 };
 
 export default function RootLayout({
@@ -92,7 +107,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${montserrat.className} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${cinzel.variable} ${inter.variable} ${geistMono.variable} antialiased`}
       >
         <Toaster richColors />
         <AOS />
