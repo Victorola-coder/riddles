@@ -1,73 +1,135 @@
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    /* Midnight Mystery Color Palette */
+    --bg-primary: #0f0f0f;
+    --bg-secondary: #1a1a1a;
+    --bg-card: rgba(30, 30, 30, 0.8);
+    --bg-card-hover: rgba(40, 40, 40, 0.9);
+
+    /* Accents */
+    --accent-primary: #8b5cf6;
+    --accent-primary-dark: #7c3aed;
+    --accent-secondary: #fbbf24;
+    --accent-success: #10b981;
+    --accent-danger: #ef4444;
+
+    /* Text */
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --text-muted: rgba(255, 255, 255, 0.5);
+
+    /* Borders */
+    --border-default: rgba(139, 92, 246, 0.3);
+    --border-focus: rgba(139, 92, 246, 0.8);
+
+    /* Shadows */
+    --shadow-glow: 0 0 20px rgba(139, 92, 246, 0.3);
+    --shadow-glow-strong: 0 0 30px rgba(139, 92, 246, 0.5);
+  }
+}
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  /* outline: 1px solid red; */
 }
 
 body {
-  color: white;
-  background-color: #0f0f0f;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
   overflow-x: hidden;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+/* Scrollbar Styles */
 body::-webkit-scrollbar {
-  @apply w-1 bg-transparent;
+  width: 8px;
+  background-color: transparent;
 }
 
-body::-webkit-scrollbar-corner {
-  @apply bg-transparent;
-}
-
-/* scrollbar */
 body::-webkit-scrollbar-track {
-  @apply bg-primary;
-}
-
-body::-webkit-scrollbar-track-piece {
-  @apply bg-transparent;
+  background: var(--bg-secondary);
 }
 
 body::-webkit-scrollbar-thumb {
-  @apply transition-all duration-500 
-  rounded-full bg-dark hover:bg-dark/60;
+  background: var(--accent-primary);
+  border-radius: 4px;
+  transition: background 0.3s ease;
 }
 
-html.lenis {
-  height: auto;
+body::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-primary-dark);
 }
 
-.lenis.lenis-smooth {
-  scroll-behavior: auto;
+/* Glassmorphism Effect */
+.glass-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border-default);
+  border-radius: 16px;
+  transition: all 0.3s ease;
 }
 
-.lenis.lenis-smooth [data-lenis-prevent] {
-  overscroll-behavior: contain;
+.glass-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-focus);
+  box-shadow: var(--shadow-glow);
 }
 
-.lenis.lenis-stopped {
-  overflow: hidden;
+/* Typography Classes */
+.font-cinzel {
+  font-family: 'Cinzel', serif;
 }
 
-.lenis.lenis-scrolling iframe {
-  pointer-events: none;
+.font-inter {
+  font-family: 'Inter', sans-serif;
 }
 
-/* CODE TO REMOVE NUMBER RANGE ON INPUT */
-/* Chrome, Safari, Edge, Opera */
+/* Glow Effects */
+.glow-purple {
+  box-shadow: var(--shadow-glow);
+}
+
+.glow-purple-strong {
+  box-shadow: var(--shadow-glow-strong);
+}
+
+/* Remove input number spinners */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-/* Firefox */
 input[type="number"] {
   -moz-appearance: textfield;
+}
+
+/* Focus styles */
+*:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* Selection styles */
+::selection {
+  background-color: var(--accent-primary);
+  color: white;
+}
+
+::-moz-selection {
+  background-color: var(--accent-primary);
+  color: white;
 }
 
 

@@ -1,7 +1,23 @@
 {
-  "name": "next-temp",
-  "version": "0.1.0",
-  "private": true,
+  "name": "riddle-quest",
+  "version": "1.0.0",
+  "description": "A gamified riddle-solving platform with progression, gem economy, and hints",
+  "private": false,
+  "license": "MIT",
+  "author": "Victor",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Victorola-coder/riddles.git"
+  },
+  "keywords": [
+    "riddles",
+    "puzzle",
+    "game",
+    "nextjs",
+    "typescript",
+    "progressive-web-app",
+    "gamification"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
