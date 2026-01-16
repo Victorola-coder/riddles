@@ -4,7 +4,8 @@ import localFont from "next/font/local";
 import { AOS } from "./components/global";
 import { Cinzel, Inter } from "next/font/google";
 import type { Metadata, Viewport } from "next";
-import StructuredData, { generateWebsiteStructuredData } from "./components/global/structured-data";
+import StructuredData from "./components/global/structured-data";
+import { generateWebsiteStructuredData } from "./lib/structured-data";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",

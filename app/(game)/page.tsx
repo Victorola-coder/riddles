@@ -13,8 +13,8 @@ import React, { useState, useEffect } from "react";
 import { useGameStore } from "@/lib/store/game-store";
 import { motion, AnimatePresence } from "framer-motion";
 import { getRiddleById } from "@/lib/constants/riddles";
-import { RiddleCard, AnswerInput, HintPanel } from "../components/organisms";
 import { calculateGemsEarned } from "@/lib/utils/gem-calculator";
+import { RiddleCard, AnswerInput, HintPanel } from "../components/organisms";
 
 export default function GamePage() {
   const {
