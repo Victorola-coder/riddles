@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { motion } from 'framer-motion';
-import Link from 'next/link';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { ArrowRight, Sparkles } from "lucide-react";
 
 export const Hero = () => {
   return (
     <div className="relative min-h-screen flex flex-col justify-center items-center overflow-hidden pt-20">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#0f0f0f] via-[#000000] to-[#0f0f0f]" />
-      
+
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" />
@@ -45,10 +45,69 @@ export const Hero = () => {
           >
             <span className="bg-gradient-to-r from-[#8b5cf6] to-[#fbbf24] bg-clip-text text-transparent">
               Challenge
-            </span>{' '}
-            your mind <br className="hidden md:block" /> with{' '}
-            <span className="bg-white/10 text-white rounded-2xl px-4 py-1 inline-block">
-              riddles
+            </span>{" "}
+            your mind <br className="hidden md:block" /> with{" "}
+            <span className="relative inline-block">
+              <motion.span
+                className="bg-white/10 text-white rounded-2xl px-4 py-1 inline-block font-mono relative z-10"
+                animate={{
+                  textShadow: [
+                    "0 0 10px rgba(139, 92, 246, 0.5)",
+                    "0 0 20px rgba(251, 191, 36, 0.5)",
+                    "0 0 10px rgba(139, 92, 246, 0.5)",
+                  ],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
+                r
+                <motion.span
+                  className="text-[#8b5cf6] inline-block"
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    rotate: [0, 5, -5, 0],
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                >
+                  1
+                </motion.span>
+                ddl
+                <motion.span
+                  className="text-[#fbbf24] inline-block"
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    rotate: [0, -5, 5, 0],
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    delay: 0.5,
+                    ease: "easeInOut",
+                  }}
+                >
+                  3
+                </motion.span>
+                s
+              </motion.span>
+              <motion.span
+                className="absolute inset-0 bg-gradient-to-r from-[#8b5cf6] to-[#fbbf24] rounded-2xl opacity-0 blur-xl"
+                animate={{
+                  opacity: [0, 0.6, 0],
+                  scale: [1, 1.1, 1],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  repeatDelay: 1,
+                }}
+              />
             </span>
           </motion.h1>
 
@@ -104,9 +163,21 @@ export const Hero = () => {
           className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 w-full max-w-3xl"
         >
           {[
-            { icon: '💎', title: 'Earn Gems', desc: 'Solve riddles to earn virtual currency' },
-            { icon: '🎯', title: 'Progressive Levels', desc: 'Unlock harder challenges as you progress' },
-            { icon: '💡', title: 'Smart Hints', desc: 'Get help when you need it' },
+            {
+              icon: "💎",
+              title: "Earn Gems",
+              desc: "Solve riddles to earn virtual currency",
+            },
+            {
+              icon: "🎯",
+              title: "Progressive Levels",
+              desc: "Unlock harder challenges as you progress",
+            },
+            {
+              icon: "💡",
+              title: "Smart Hints",
+              desc: "Get help when you need it",
+            },
           ].map((feature, index) => (
             <motion.div
               key={index}
