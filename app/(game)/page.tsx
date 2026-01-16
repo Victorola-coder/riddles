@@ -1,15 +1,20 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useGameStore } from '@/lib/store/game-store';
-import { getRiddleById } from '@/lib/constants/riddles';
-import { validateAnswer, getFirstLetterHint, getWordLengthHint, getFullAnswer } from '@/lib/utils/riddle-validator';
-import { calculateGemsEarned } from '@/lib/utils/gem-calculator';
-import { RiddleCard, AnswerInput, HintPanel } from '../components/organisms';
-import { toast } from 'sonner';
-import confetti from 'canvas-confetti';
-import { CheckCircle2, XCircle } from 'lucide-react';
+import {
+  validateAnswer,
+  getFullAnswer,
+  getFirstLetterHint,
+  getWordLengthHint,
+} from "@/lib/utils/riddle-validator";
+import { toast } from "sonner";
+import confetti from "canvas-confetti";
+import { CheckCircle2, XCircle } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { useGameStore } from "@/lib/store/game-store";
+import { motion, AnimatePresence } from "framer-motion";
+import { getRiddleById } from "@/lib/constants/riddles";
+import { RiddleCard, AnswerInput, HintPanel } from "../components/organisms";
+import { calculateGemsEarned } from "@/lib/utils/gem-calculator";
 
 export default function GamePage() {
   const {
@@ -62,7 +67,7 @@ export default function GamePage() {
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ['#8b5cf6', '#fbbf24', '#10b981'],
+        colors: ["#8b5cf6", "#fbbf24", "#10b981"],
       });
 
       toast.success(
@@ -120,7 +125,7 @@ export default function GamePage() {
 
   const handleSkip = () => {
     skipRiddle(currentRiddle.id);
-    toast.info('Riddle skipped');
+    toast.info("Riddle skipped");
     nextRiddle();
   };
 
@@ -144,17 +149,26 @@ export default function GamePage() {
           <div className="flex flex-wrap justify-center gap-4 text-sm font-inter">
             {revealedHints.hint1 && (
               <span className="text-[var(--text-secondary)]">
-                First letter: <span className="text-purple font-semibold">{revealedHints.hint1}</span>
+                First letter:{" "}
+                <span className="text-purple font-semibold">
+                  {revealedHints.hint1}
+                </span>
               </span>
             )}
             {revealedHints.hint2 && (
               <span className="text-[var(--text-secondary)]">
-                Length: <span className="text-purple font-semibold">{revealedHints.hint2}</span>
+                Length:{" "}
+                <span className="text-purple font-semibold">
+                  {revealedHints.hint2}
+                </span>
               </span>
             )}
             {revealedHints.answer && (
               <span className="text-[var(--text-secondary)]">
-                Answer: <span className="text-gold font-semibold">{revealedHints.answer}</span>
+                Answer:{" "}
+                <span className="text-gold font-semibold">
+                  {revealedHints.answer}
+                </span>
               </span>
             )}
           </div>

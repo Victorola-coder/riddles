@@ -1,3 +1,9 @@
+export {
+  default as StructuredData,
+  generateWebsiteStructuredData,
+  generateRiddleStructuredData,
+} from "./structured-data";
+
 export { default as AOS } from "./aos";
 export { default as Glow } from "./glow";
 export { default as Loader } from "./loader";

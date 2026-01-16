@@ -4,6 +4,7 @@ import localFont from "next/font/local";
 import { AOS } from "./components/global";
 import { Cinzel, Inter } from "next/font/google";
 import type { Metadata, Viewport } from "next";
+import StructuredData, { generateWebsiteStructuredData } from "./components/global/structured-data";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -70,7 +71,7 @@ export const metadata: Metadata = {
       "Solve riddles, earn gems, and progress through difficulty levels. Challenge yourself with engaging brain teasers!",
     images: [
       {
-        url: "https://riddle-quest.vercel.app/og-image.png",
+        url: "https://riddle-quest.vercel.app/opengraph-image",
         width: 1200,
         height: 630,
         alt: "Riddle Quest - Gamified Riddle Platform",
@@ -83,7 +84,7 @@ export const metadata: Metadata = {
     description:
       "Solve riddles, earn gems, and progress through difficulty levels. Challenge yourself with engaging brain teasers!",
     creator: "@Victorola-coder",
-    images: ["https://riddle-quest.vercel.app/og-image.png"],
+    images: ["https://riddle-quest.vercel.app/opengraph-image"],
   },
   appleWebApp: {
     capable: true,
@@ -109,6 +110,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${cinzel.variable} ${inter.variable} ${geistMono.variable} antialiased`}
       >
+        <StructuredData data={generateWebsiteStructuredData()} />
         <Toaster richColors />
         <AOS />
         {children}

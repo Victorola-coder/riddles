@@ -29,24 +29,38 @@ export default function NotFound() {
 
         <div className="mt-[340px] md:mt-[250px] lg:mt-[400px] text-center mx-auto">
           <h3 className="text-[23px] font-satMed font-semibold">
-            oooops! chief..😢
+            Riddle Not Found! 🧩
           </h3>
           <p className="text-[#FFFFFF99] text-center mx-auto max-w-sm px-3 text-sm font-clashMed font-medium">
-            {"We can't show the page you requested due to legal reasons."}
+            This page seems to be a mystery even we can't solve. Let's get you back to solving real riddles!
           </p>
 
-          <Link
-            href="/"
-            className="relative z-40 cursor-pointer w-[142px] mt-4 md:mt-[27px] mx-auto block bg-gradient-to-l from-[#D9D9D9] to-[#D9D9D900] pt-0.5 pr-0.5"
-          >
-            <motion.button
-              whileTap={{ scale: 1.1 }}
-              whileHover={{ scale: 0.99 }}
-              className="bg-primary px-[22.8px] py-[14.85px] whitespace-nowrap text-[14.5px] font-medium"
+          <div className="flex gap-4 justify-center mt-4 md:mt-[27px]">
+            <Link
+              href="/"
+              className="relative z-40 cursor-pointer w-[142px] block bg-gradient-to-l from-[#D9D9D9] to-[#D9D9D900] pt-0.5 pr-0.5"
             >
-              Back to home
-            </motion.button>
-          </Link>
+              <motion.button
+                whileTap={{ scale: 1.1 }}
+                whileHover={{ scale: 0.99 }}
+                className="bg-primary px-[22.8px] py-[14.85px] whitespace-nowrap text-[14.5px] font-medium"
+              >
+                Back to home
+              </motion.button>
+            </Link>
+            <Link
+              href="/game"
+              className="relative z-40 cursor-pointer w-[142px] block bg-gradient-to-l from-[#8b5cf6] to-[#8b5cf600] pt-0.5 pr-0.5"
+            >
+              <motion.button
+                whileTap={{ scale: 1.1 }}
+                whileHover={{ scale: 0.99 }}
+                className="bg-[#8b5cf6] px-[22.8px] py-[14.85px] whitespace-nowrap text-[14.5px] font-medium"
+              >
+                Play Game
+              </motion.button>
+            </Link>
+          </div>
         </div>
       </section>
     </>
