@@ -4,6 +4,7 @@ import { UserState } from '@/types/user';
 import { ACHIEVEMENTS, getAchievementById } from '@/lib/constants/achievements';
 import { toast } from 'sonner';
 import confetti from 'canvas-confetti';
+import { soundManager } from '@/lib/utils/sound-manager';
 
 interface UserStore extends UserState {
   // Streak methods
@@ -174,6 +175,7 @@ export const useUserStore = create<UserStore>()(
         }));
 
         // Show celebration
+        soundManager.play('achievement');
         confetti({
           particleCount: 150,
           spread: 100,

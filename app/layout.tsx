@@ -7,8 +7,10 @@ import type { Metadata, Viewport } from "next";
 import StructuredData from "./components/global/structured-data";
 import { generateWebsiteStructuredData } from "./lib/structured-data";
 import { Providers } from "./providers";
+import { ThemeProvider } from "./components/global/theme-provider";
 
 const geistSans = localFont({
+
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
   weight: "100 900",
@@ -113,11 +115,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${cinzel.variable} ${inter.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
-          <StructuredData data={generateWebsiteStructuredData()} />
-          <Toaster richColors />
-          <AOS />
-          {children}
+          <ThemeProvider>
+            <StructuredData data={generateWebsiteStructuredData()} />
+            <Toaster richColors />
+            <AOS />
+            {children}
+          </ThemeProvider>
         </Providers>
+
       </body>
     </html>
   );

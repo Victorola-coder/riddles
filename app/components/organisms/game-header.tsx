@@ -1,9 +1,12 @@
 'use client';
 
 import React from 'react';
-import { GemCounter, StreakCounter } from '../molecules';
-import { Trophy } from 'lucide-react';
+import Link from 'next/link';
+import { GemCounter, StreakCounter, SoundToggle, ThemeToggle } from '../molecules';
+import { Trophy, Award } from 'lucide-react';
 import { useUserStore } from '@/lib/store/user-store';
+
+
 
 interface GameHeaderProps {
   gems: number;
@@ -20,14 +23,18 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
 
   return (
     <header className="w-full py-4 px-6 flex justify-between items-center">
-      {/* Level Info */}
-      <div className="flex items-center gap-2">
-        <Trophy className="text-purple" size={24} />
+      {/* Level Info - Clickable to Levels Page */}
+      <Link 
+        href="/levels" 
+        className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer group"
+        title="View Level Selection"
+      >
+        <Trophy className="text-purple group-hover:scale-110 transition-transform" size={24} />
         <div className="flex flex-col">
           <span className="text-xs text-[var(--text-muted)] font-inter">Level</span>
           <span className="text-lg font-cinzel font-semibold text-white">{level}</span>
         </div>
-      </div>
+      </Link>
 
       {/* Streak Counter (Mobile Hidden) */}
       <div className="hidden sm:block">
@@ -40,8 +47,26 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
         <span className="text-lg font-inter font-semibold text-white">{solvedCount}</span>
       </div>
 
+      {/* Achievements Link (Mobile Hidden) */}
+      <Link 
+        href="/achievements" 
+        className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-lg bg-purple/10 hover:bg-purple/20 transition-colors cursor-pointer group"
+        title="View Achievements"
+      >
+        <Award className="text-gold group-hover:scale-110 transition-transform" size={18} />
+        <span className="text-xs font-inter text-white/80 group-hover:text-white">Badges</span>
+      </Link>
+
+      {/* Sound Toggle */}
+      <div className="hidden md:flex items-center gap-2">
+        <ThemeToggle size="md" />
+        <SoundToggle size="md" />
+      </div>
+
+
       {/* Gem Counter */}
       <GemCounter gems={gems} size="md" />
     </header>
   );
 };
+

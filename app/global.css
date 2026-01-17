@@ -24,14 +24,60 @@
     --text-primary: #ffffff;
     --text-secondary: rgba(255, 255, 255, 0.7);
     --text-muted: rgba(255, 255, 255, 0.5);
+    --text-secondary: #a1a1aa;
+    --text-muted: #71717a;
+    --primary-purple: #8b5cf6;
+    --gold: #fbbf24;
+  }
 
-    /* Borders */
-    --border-default: rgba(139, 92, 246, 0.3);
-    --border-focus: rgba(139, 92, 246, 0.8);
+  /* Light Mode */
+  .light-mode {
+    --bg-midnight: #f0fdfa; /* Teal-50 tint for fresh look */
+    --bg-card: rgba(255, 255, 255, 0.7);
+    --border-default: rgba(0, 0, 0, 0.1);
+    --text-primary: #1f2937;
+    --text-secondary: #4b5563;
+    --text-muted: #9ca3af;
+    --primary-purple: #7c3aed; /* Darker purple for contrast */
+    --gold: #d97706; /* Darker gold for contrast */
+  }
 
-    /* Shadows */
-    --shadow-glow: 0 0 20px rgba(139, 92, 246, 0.3);
-    --shadow-glow-strong: 0 0 30px rgba(139, 92, 246, 0.5);
+  body {
+    background-color: var(--bg-midnight);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-[var(--bg-card)] backdrop-blur-md border border-[var(--border-default)] rounded-xl shadow-xl transition-all duration-300;
+  }
+  
+  .glass-button {
+    @apply px-6 py-3 rounded-lg font-cinzel font-semibold backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] active:scale-[0.98];
+  }
+
+  .text-glow {
+    text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(139, 92, 246, 0.3);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(139, 92, 246, 0.5);
   }
 }
 
@@ -41,34 +87,6 @@
   box-sizing: border-box;
 }
 
-body {
-  color: var(--text-primary);
-  background-color: var(--bg-primary);
-  overflow-x: hidden;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Scrollbar Styles */
-body::-webkit-scrollbar {
-  width: 8px;
-  background-color: transparent;
-}
-
-body::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
-}
-
-body::-webkit-scrollbar-thumb {
-  background: var(--accent-primary);
-  border-radius: 4px;
-  transition: background 0.3s ease;
-}
-
-body::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-primary-dark);
-}
 
 /* Glassmorphism Effect */
 .glass-card {
