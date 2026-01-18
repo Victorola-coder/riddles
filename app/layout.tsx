@@ -10,7 +10,6 @@ import { Providers } from "./providers";
 import { ThemeProvider } from "./components/global/theme-provider";
 
 const geistSans = localFont({
-
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
   weight: "100 900",
@@ -39,15 +38,10 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://riddle-quest.vercel.app"),
-  icons: {
-    icon: [
-      { url: "/icon.png", sizes: "32x32", type: "image/png" },
-      { url: "/icon.png", sizes: "16x16", type: "image/png" },
-    ],
-    apple: [
-      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
-    ],
-  },
+  // icons: {
+  //   icon: ["/icon-192.png"],
+  //   apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+  // },
   title: "Riddle Quest - Gamified Riddle Platform",
   description:
     "Solve riddles, earn gems, and progress through difficulty levels in this engaging gamified riddle platform. Challenge yourself with easy, medium, and hard riddles!",
@@ -128,7 +122,6 @@ export default function RootLayout({
             {children}
           </ThemeProvider>
         </Providers>
-
       </body>
     </html>
   );
