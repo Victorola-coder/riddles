@@ -70,13 +70,13 @@ export async function POST(request: NextRequest) {
     });
 
     // Generate JWT token
-    const token = generateToken({
+    const token = await generateToken({
       userId: user.id,
       email: user.email!,
       username: user.username!,
     });
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       token,
       user: {
@@ -85,6 +85,19 @@ export async function POST(request: NextRequest) {
         username: user.username,
       },
     });
+
+    // Set cookie for middleware
+    response.cookies.set({
+      name: 'token',
+      value: token,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 7 * 24 * 60 * 60, // 7 days
+    });
+
+    return response;
   } catch (error) {
     console.error('Signup error:', error);
     return NextResponse.json(

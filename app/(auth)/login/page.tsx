@@ -167,9 +167,19 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-inter text-white/80 mb-2">
-                Password
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-inter text-white/80">
+                  Password
+                </label>
+                {mode === "login" && (
+                  <Link
+                    href="/forgot-password"
+                    className="text-sm text-purple hover:text-purple/80 transition-colors font-inter"
+                  >
+                    Forgot password?
+                  </Link>
+                )}
+              </div>
               <div className="relative">
                 <Lock
                   className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40"
@@ -256,15 +266,36 @@ export default function LoginPage() {
           </button>
         </div>
 
-        {/* Footer */}
-        {/* <div className="text-center mt-6">
+        {/* Footer Links */}
+        <div className="text-center mt-6 space-y-2">
+          {mode === "login" ? (
+            <p className="text-sm text-white/60 font-inter">
+              Don't have an account?{" "}
+              <button
+                onClick={() => setMode("signup")}
+                className="text-purple hover:text-purple/80 transition-colors font-medium"
+              >
+                Sign up
+              </button>
+            </p>
+          ) : (
+            <p className="text-sm text-white/60 font-inter">
+              Already have an account?{" "}
+              <button
+                onClick={() => setMode("login")}
+                className="text-purple hover:text-purple/80 transition-colors font-medium"
+              >
+                Sign in
+              </button>
+            </p>
+          )}
           <Link
-            href="/game"
-            className="text-sm text-white/60 hover:text-white transition-colors font-inter"
+            href="/"
+            className="block text-sm text-white/60 hover:text-white transition-colors font-inter"
           >
-            ← Back to Game
+            ← Back to Home
           </Link>
-        </div> */}
+        </div>
       </div>
     </div>
   );

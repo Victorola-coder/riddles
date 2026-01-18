@@ -86,6 +86,7 @@ export const authApi = {
   signup: (data: any) => client.post<{ token: string; user: any }>('/auth/signup', data),
   forgotPassword: (email: string) => client.post('/auth/forgot-password', { email }),
   resetPassword: (data: any) => client.post('/auth/reset-password', data),
+  updateProfile: (data: any) => client.patch<{ user: any }>('/auth/me', data),
 };
 
 export const gameApi = {

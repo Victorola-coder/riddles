@@ -31,7 +31,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
   noDefault?: boolean;
   size?: "default" | "sm" | "lg";
-  variant?: "primary" | "default" | "secondary" | "danger" | "google";
+  variant?: "primary" | "default" | "secondary" | "danger" | "google" | "ghost" | "outline";
 }
 
 type ModalProps = {
