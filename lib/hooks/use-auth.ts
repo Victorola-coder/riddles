@@ -11,14 +11,22 @@ export function clearAuthToken() {
   removeAuthToken();
 }
 
+export type UserData = {
+  id: string;
+  email: string;
+  username?: string;
+  totalGems: number;
+  currentLevel: number;
+};
+
 /**
  * Get current authenticated user
  * Follows adesina.io pattern
  */
 export function useCurrentUser() {
-  return useQuery({
+  return useQuery<UserData | null>({
     queryKey: ["user", "me"],
-    queryFn: async () => {
+    queryFn: async (): Promise<UserData | null> => {
       const token = getAuthToken();
       if (!token) return null;
 
@@ -30,6 +38,14 @@ export function useCurrentUser() {
         if (error instanceof ApiClientError && error.status === 401) {
           clearAuthToken();
         }
+        // Only show error if it's not a 401 (auth issue)
+        if (
+          error instanceof Error &&
+          !error.message.includes("401") &&
+          !error.message.includes("unauthorized")
+        ) {
+          toast.error(error.message || "Failed to load user data");
+        }
         throw error;
       }
     },
@@ -37,12 +53,6 @@ export function useCurrentUser() {
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false, // Don't refetch on tab switch
-    onError: (error: Error) => {
-      // Only show error if it's not a 401 (auth issue)
-      if (!error.message.includes("401") && !error.message.includes("unauthorized")) {
-        toast.error(error.message || "Failed to load user data");
-      }
-    },
   });
 }
 

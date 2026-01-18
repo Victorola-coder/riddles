@@ -4,7 +4,7 @@ import { useAuthStore } from "@/lib/store/auth";
 import { useEffect, Suspense, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { getAuthToken, setAuthToken, removeAuthToken } from "@/lib/client-auth";
-import { useCurrentUser } from "@/lib/hooks/use-auth";
+import { useCurrentUser, type UserData } from "@/lib/hooks/use-auth";
 
 function AuthProviderInner({ children }: { children: React.ReactNode }) {
   const setUser = useAuthStore((state) => state.setUser);
@@ -51,7 +51,7 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
 
     // Sync user data to Zustand
     if (user) {
-      setUser(user);
+      setUser(user as unknown as UserData);
     } else {
       // No user data - clear auth
       removeAuthToken();

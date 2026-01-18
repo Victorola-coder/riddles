@@ -4,7 +4,8 @@
  */
 
 import { api } from './client';
-import type { LeaderboardEntry } from '@/types';
+
+// LeaderboardEntry is defined globally in types.d.ts
 
 /**
  * Leaderboard API endpoints

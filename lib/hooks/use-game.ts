@@ -1,6 +1,7 @@
 "use client";
 
 import { toast } from "sonner";
+import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { gameApi, ApiClientError } from "@/lib/api";
 import { useGameStore } from "@/lib/store/game-store";
@@ -15,7 +16,7 @@ const STALE_TIME = 5 * 60 * 1000;
  * Syncs server state to Zustand store
  */
 export function useGameSession(userId?: string) {
-  return useQuery({
+  const query = useQuery({
     queryKey: ["game", "session", userId],
     queryFn: async () => {
       try {
@@ -35,24 +36,31 @@ export function useGameSession(userId?: string) {
     refetchOnWindowFocus: false,
     refetchOnMount: true,
     retry: 1,
-    onSuccess: (data) => {
-      // Sync server data to Zustand store
-      if (data.session) {
-        useGameStore.setState({
-          currentRiddleId: data.session.currentRiddleId || null,
-          solvedRiddles: data.session.solvedRiddles || [],
-          skippedRiddles: data.session.skippedRiddles || [],
-          userGems: data.session.userGems || 0,
-          currentLevel: data.session.currentLevel || 1,
-          hintsUsed: data.session.hintsUsed || {},
-        });
-      }
-    },
-    onError: (error: Error) => {
-      // Don't show toast for session errors - handled gracefully
-      console.error("Failed to load game session:", error);
-    },
   });
+
+  // Sync server data to Zustand store when query succeeds
+  useEffect(() => {
+    if (query.data?.session) {
+      useGameStore.setState({
+        currentRiddleId: query.data.session.currentRiddleId || null,
+        solvedRiddles: query.data.session.solvedRiddles || [],
+        skippedRiddles: query.data.session.skippedRiddles || [],
+        userGems: query.data.session.userGems || 0,
+        currentLevel: query.data.session.currentLevel || 1,
+        hintsUsed: query.data.session.hintsUsed || {},
+      });
+    }
+  }, [query.data]);
+
+  // Handle errors silently
+  useEffect(() => {
+    if (query.error) {
+      // Don't show toast for session errors - handled gracefully
+      console.error("Failed to load game session:", query.error);
+    }
+  }, [query.error]);
+
+  return query;
 }
 
 /**
