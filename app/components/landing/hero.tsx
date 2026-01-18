@@ -6,15 +6,7 @@ import { ArrowRight, Sparkles, Gem, TrendingUp, Lightbulb } from "lucide-react";
 
 export const Hero = () => {
   return (
-    <div className="relative flex flex-col justify-center items-center overflow-hidden pt-20 pb-20">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-[var(--bg-midnight)]" />
-
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
-      </div>
+    <div className="relative flex flex-col justify-center items-center overflow-hidden mt-20 mb-20">
 
       <div className="flex flex-col gap-8 max-w-4xl mx-auto px-6 relative z-10 w-full items-center">
         <motion.div

@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Settings, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import Button from '@/app/components/ui/button';
 import Input from '@/app/components/ui/input';
 import { GAME_CONFIG } from '@/lib/constants/game-config';
+import { adminApi, ApiClientError } from '@/lib/api';
 
 export default function SettingsPage() {
   interface Config {
@@ -39,19 +40,73 @@ export default function SettingsPage() {
   });
 
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load settings on mount
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const response = await adminApi.getSettings();
+        if (response.settings) {
+          setConfig({
+            gemRewards: response.settings.gemRewards || {
+              easy: GAME_CONFIG.GEM_REWARDS.easy,
+              medium: GAME_CONFIG.GEM_REWARDS.medium,
+              hard: GAME_CONFIG.GEM_REWARDS.hard,
+            },
+            gemCosts: response.settings.gemCosts || {
+              hint1: GAME_CONFIG.GEM_COSTS.hint1,
+              hint2: GAME_CONFIG.GEM_COSTS.hint2,
+              hint3: GAME_CONFIG.GEM_COSTS.hint3,
+              skip: GAME_CONFIG.GEM_COSTS.skip,
+            },
+            initialGems: response.settings.initialGems ?? GAME_CONFIG.INITIAL_GEMS,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load settings:', error);
+        // Use defaults if loading fails
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadSettings();
+  }, []);
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // TODO: Save to database via API
-      await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate API call
-      toast.success('Settings saved successfully');
+      const response = await adminApi.updateSettings(config);
+      toast.success(response.message || 'Settings saved successfully');
     } catch (error) {
-      toast.error('Failed to save settings');
+      const message =
+        error instanceof ApiClientError
+          ? error.message
+          : 'Failed to save settings';
+      toast.error(message);
     } finally {
       setIsSaving(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div>
+        <div className="mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-[#8b5cf6] to-[#fbbf24] bg-clip-text text-transparent">
+            Game Settings
+          </h1>
+          <p className="text-gray-400">
+            Configure game economy and progression settings
+          </p>
+        </div>
+        <div className="flex items-center justify-center py-12">
+          <p className="text-gray-400">Loading settings...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>

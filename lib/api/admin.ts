@@ -93,4 +93,34 @@ export const adminApi = {
     api.post<{ token: string; success: boolean }>("/api/admin/auth", {
       accessCode,
     }),
+
+  /**
+   * Get game settings
+   */
+  getSettings: () =>
+    api.get<{
+      settings: {
+        gemRewards: { easy: number; medium: number; hard: number };
+        gemCosts: { hint1: number; hint2: number; hint3: number; skip: number };
+        initialGems: number;
+      };
+    }>("/api/admin/settings", { requireAuth: true }),
+
+  /**
+   * Update game settings
+   */
+  updateSettings: (data: {
+    gemRewards: { easy: number; medium: number; hard: number };
+    gemCosts: { hint1: number; hint2: number; hint3: number; skip: number };
+    initialGems: number;
+  }) =>
+    api.post<{
+      success: boolean;
+      message: string;
+      settings: {
+        gemRewards: { easy: number; medium: number; hard: number };
+        gemCosts: { hint1: number; hint2: number; hint3: number; skip: number };
+        initialGems: number;
+      };
+    }>("/api/admin/settings", data, { requireAuth: true }),
 };
