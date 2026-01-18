@@ -6,7 +6,7 @@ import { ArrowRight, Sparkles, Gem, TrendingUp, Lightbulb } from "lucide-react";
 
 export const Hero = () => {
   return (
-    <div className="relative min-h-screen flex flex-col justify-center items-center overflow-hidden pt-20">
+    <div className="relative flex flex-col justify-center items-center overflow-hidden pt-20 pb-20">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-[var(--bg-midnight)]" />
 
@@ -112,6 +112,16 @@ export const Hero = () => {
             </span>
           </motion.h1>
 
+          {/* Tagline */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.6 }}
+            className="text-2xl md:text-3xl font-semibold text-center text-[var(--text-primary)] max-w-2xl"
+          >
+            Riddles, not jokes
+          </motion.p>
+
           {/* Subtitle */}
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -161,7 +171,7 @@ export const Hero = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.9, duration: 0.6 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 w-full max-w-4xl"
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 mb-8 w-full max-w-4xl"
         >
           {[
             {
