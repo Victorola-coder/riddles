@@ -1,8 +1,8 @@
 "use client";
 
 import { toast } from "sonner";
-import { getAdminToken } from "@/lib/admin-auth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { adminApi, ApiClientError } from "@/lib/api";
 
 // Cache duration: 5 minutes (300000ms)
 const CACHE_TIME = 5 * 60 * 1000; // 5 minutes
@@ -13,21 +13,14 @@ export function useAdminStats() {
     queryKey: ["admin", "stats"],
     queryFn: async () => {
       try {
-        const res = await fetch("/api/admin/stats");
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          const error = new Error(
-            data.error || "Failed to fetch dashboard statistics"
-          );
-          toast.error(error.message);
-          throw error;
-        }
-        const data = await res.json();
-        return data.stats as AdminStats;
+        const response = await adminApi.getStats();
+        return response.stats;
       } catch (error) {
-        if (error instanceof Error) {
-          toast.error(error.message || "Failed to load dashboard statistics");
-        }
+        const message =
+          error instanceof ApiClientError
+            ? error.message
+            : "Failed to load dashboard statistics";
+        toast.error(message);
         throw error;
       }
     },
@@ -50,23 +43,16 @@ export function useAdminActivity(options?: {
   return useQuery<ActivityResponse>({
     queryKey: ["admin", "activity", page, pageSize, type, activityType],
     queryFn: async () => {
-      const params = new URLSearchParams({
-        page: String(page),
-        pageSize: String(pageSize),
-      });
-      if (type) params.append("type", type);
-      if (activityType) params.append("activityType", activityType);
-
-      const res = await fetch(`/api/admin/activity?${params.toString()}`);
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Failed to fetch recent activities");
+      try {
+        return await adminApi.getActivity({ page, pageSize, type, activityType });
+      } catch (error) {
+        const message =
+          error instanceof ApiClientError
+            ? error.message
+            : "Failed to fetch recent activities";
+        console.error("Failed to load activities:", error);
+        throw new Error(message);
       }
-      const data = await res.json();
-      return {
-        activities: data.activities as ActivityItem[],
-        meta: data.meta as PaginationMeta,
-      };
     },
     staleTime: 1 * 60 * 1000, // 1 minute - activities should be more fresh
     gcTime: 5 * 60 * 1000,
@@ -85,32 +71,14 @@ export function useAdminRiddles(
   return useQuery<AdminRiddlesResponse>({
     queryKey: ["admin", "riddles", page, pageSize, search, difficulty],
     queryFn: async () => {
-      const params = new URLSearchParams({
-        page: String(page),
-        pageSize: String(pageSize),
-      });
-      if (search) params.append("search", search);
-      if (difficulty && difficulty !== "all") {
-        params.append("difficulty", difficulty);
-      }
-
       try {
-        const res = await fetch(`/api/admin/riddles?${params.toString()}`);
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          const error = new Error(data.error || "Failed to fetch riddles");
-          toast.error(error.message);
-          throw error;
-        }
-        const data = await res.json();
-        return {
-          riddles: data.riddles as AdminRiddle[],
-          meta: data.meta as PaginationMeta,
-        };
+        return await adminApi.getRiddles({ page, pageSize, search, difficulty });
       } catch (error) {
-        if (error instanceof Error) {
-          toast.error(error.message || "Failed to fetch riddles");
-        }
+        const message =
+          error instanceof ApiClientError
+            ? error.message
+            : "Failed to fetch riddles";
+        toast.error(message);
         throw error;
       }
     },
@@ -126,29 +94,14 @@ export function useAdminUsers(page = 1, pageSize = 12, search?: string) {
   return useQuery<AdminUsersResponse>({
     queryKey: ["admin", "users", page, pageSize, search],
     queryFn: async () => {
-      const params = new URLSearchParams({
-        page: String(page),
-        pageSize: String(pageSize),
-      });
-      if (search) params.append("search", search);
-
       try {
-        const res = await fetch(`/api/admin/users?${params.toString()}`);
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          const error = new Error(data.error || "Failed to fetch users");
-          toast.error(error.message);
-          throw error;
-        }
-        const data = await res.json();
-        return {
-          users: data.users as AdminUser[],
-          meta: data.meta as PaginationMeta,
-        };
+        return await adminApi.getUsers({ page, pageSize, search });
       } catch (error) {
-        if (error instanceof Error) {
-          toast.error(error.message || "Failed to fetch users");
-        }
+        const message =
+          error instanceof ApiClientError
+            ? error.message
+            : "Failed to fetch users";
+        toast.error(message);
         throw error;
       }
     },
@@ -166,18 +119,15 @@ export function useCreateRiddle() {
 
   return useMutation({
     mutationFn: async (data: CreateRiddleData) => {
-      const res = await fetch("/api/admin/riddles", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || "Failed to create riddle");
+      try {
+        return await adminApi.createRiddle(data);
+      } catch (error) {
+        const message =
+          error instanceof ApiClientError
+            ? error.message
+            : "Failed to create riddle";
+        throw new Error(message);
       }
-
-      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "riddles"] });
@@ -202,18 +152,15 @@ export function useUpdateRiddle() {
       id: string;
       data: UpdateRiddleData;
     }) => {
-      const res = await fetch(`/api/admin/riddles/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || "Failed to update riddle");
+      try {
+        return await adminApi.updateRiddle(id, data);
+      } catch (error) {
+        const message =
+          error instanceof ApiClientError
+            ? error.message
+            : "Failed to update riddle";
+        throw new Error(message);
       }
-
-      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "riddles"] });
@@ -231,16 +178,15 @@ export function useDeleteRiddle() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/admin/riddles/${id}`, {
-        method: "DELETE",
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || "Failed to delete riddle");
+      try {
+        return await adminApi.deleteRiddle(id);
+      } catch (error) {
+        const message =
+          error instanceof ApiClientError
+            ? error.message
+            : "Failed to delete riddle";
+        throw new Error(message);
       }
-
-      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "riddles"] });
