@@ -29,12 +29,12 @@ class SoundManager {
     if (typeof window === 'undefined') return;
 
     const soundFiles: Record<SoundType, string> = {
-      success: '/sounds/success.mp3',
-      error: '/sounds/error.mp3',
-      hint: '/sounds/hint.mp3',
-      gem: '/sounds/gem.mp3',
-      achievement: '/sounds/achievement.mp3',
-      click: '/sounds/click.mp3',
+      success: '/sounds/success.wav',
+      error: '/sounds/error.wav',
+      hint: '/sounds/hint.wav',
+      gem: '/sounds/gem.wav',
+      achievement: '/sounds/achievement.wav',
+      click: '/sounds/click.wav',
     };
 
     Object.entries(soundFiles).forEach(([type, path]) => {
