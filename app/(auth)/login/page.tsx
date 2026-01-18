@@ -1,22 +1,22 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { authApi, ApiClientError } from '@/lib/api';
-import { supabase } from '@/lib/supabase/client';
-import { Button } from '@/app/components/atoms';
-import { Mail, Lock, User, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import React, { useState } from "react";
+import { authApi, ApiClientError } from "@/lib/api";
+import { supabase } from "@/lib/supabase/client";
+import { Button } from "@/app/components/atoms";
+import { Mail, Lock, User, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [mode, setMode] = useState<'login' | 'signup'>('login');
+  const [mode, setMode] = useState<"login" | "signup">("login");
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    username: '',
+    email: "",
+    password: "",
+    username: "",
   });
 
   const handleEmailAuth = async (e: React.FormEvent) => {
@@ -24,28 +24,31 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      if (mode === 'signup') {
+      if (mode === "signup") {
         const response = await authApi.signup({
           email: formData.email,
           password: formData.password,
           username: formData.username,
         });
 
-        localStorage.setItem('auth_token', response.token);
-        toast.success('Account created successfully!');
-        router.push('/game');
+        localStorage.setItem("auth_token", response.token);
+        toast.success("Account created successfully!");
+        router.push("/game");
       } else {
         const response = await authApi.login({
           email: formData.email,
           password: formData.password,
         });
 
-        localStorage.setItem('auth_token', response.token);
-        toast.success('Welcome back!');
-        router.push('/game');
+        localStorage.setItem("auth_token", response.token);
+        toast.success("Welcome back!");
+        router.push("/game");
       }
     } catch (error: any) {
-      const message = error instanceof ApiClientError ? error.message : 'Authentication failed';
+      const message =
+        error instanceof ApiClientError
+          ? error.message
+          : "Authentication failed";
       toast.error(message);
     } finally {
       setIsLoading(false);
@@ -56,22 +59,24 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider: "google",
         options: {
-          redirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`,
+          redirectTo: `${
+            typeof window !== "undefined" ? window.location.origin : ""
+          }/auth/callback`,
         },
       });
 
       if (error) throw error;
     } catch (error: any) {
-      toast.error(error.message || 'Google sign-in failed');
+      toast.error(error.message || "Google sign-in failed");
       setIsLoading(false);
     }
   };
 
   const handleGuestMode = () => {
-    toast.info('Playing as guest - progress saved locally only');
-    router.push('/game');
+    toast.info("Playing as guest - progress saved locally only");
+    router.push("/game");
   };
 
   return (
@@ -83,7 +88,7 @@ export default function LoginPage() {
             Riddle Quest
           </h1>
           <p className="text-[var(--text-muted)] font-inter">
-            {mode === 'login' ? 'Welcome back, solver!' : 'Begin your journey'}
+            {mode === "login" ? "Welcome back, solver!" : "Begin your journey"}
           </p>
         </div>
 
@@ -92,21 +97,21 @@ export default function LoginPage() {
           {/* Toggle Mode */}
           <div className="flex gap-2 mb-6">
             <button
-              onClick={() => setMode('login')}
+              onClick={() => setMode("login")}
               className={`flex-1 py-2 rounded-lg font-inter font-medium transition-all ${
-                mode === 'login'
-                  ? 'bg-purple text-white'
-                  : 'bg-white/5 text-white/60 hover:bg-white/10'
+                mode === "login"
+                  ? "bg-purple text-white"
+                  : "bg-white/5 text-white/60 hover:bg-white/10"
               }`}
             >
               Login
             </button>
             <button
-              onClick={() => setMode('signup')}
+              onClick={() => setMode("signup")}
               className={`flex-1 py-2 rounded-lg font-inter font-medium transition-all ${
-                mode === 'signup'
-                  ? 'bg-purple text-white'
-                  : 'bg-white/5 text-white/60 hover:bg-white/10'
+                mode === "signup"
+                  ? "bg-purple text-white"
+                  : "bg-white/5 text-white/60 hover:bg-white/10"
               }`}
             >
               Sign Up
@@ -115,20 +120,25 @@ export default function LoginPage() {
 
           {/* Email/Password Form */}
           <form onSubmit={handleEmailAuth} className="space-y-4">
-            {mode === 'signup' && (
+            {mode === "signup" && (
               <div>
                 <label className="block text-sm font-inter text-white/80 mb-2">
                   Username
                 </label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={20} />
+                  <User
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40"
+                    size={20}
+                  />
                   <input
                     type="text"
                     value={formData.username}
-                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, username: e.target.value })
+                    }
                     className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:border-purple transition-colors"
                     placeholder="Choose a username"
-                    required={mode === 'signup'}
+                    required={mode === "signup"}
                   />
                 </div>
               </div>
@@ -139,11 +149,16 @@ export default function LoginPage() {
                 Email
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={20} />
+                <Mail
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40"
+                  size={20}
+                />
                 <input
                   type="email"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:border-purple transition-colors"
                   placeholder="your@email.com"
                   required
@@ -156,11 +171,16 @@ export default function LoginPage() {
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={20} />
+                <Lock
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40"
+                  size={20}
+                />
                 <input
                   type="password"
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
                   className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:border-purple transition-colors"
                   placeholder="••••••••"
                   required
@@ -178,10 +198,12 @@ export default function LoginPage() {
               {isLoading ? (
                 <>
                   <Loader2 className="animate-spin mr-2" size={20} />
-                  {mode === 'login' ? 'Signing in...' : 'Creating account...'}
+                  {mode === "login" ? "Signing in..." : "Creating account..."}
                 </>
+              ) : mode === "login" ? (
+                "Sign In"
               ) : (
-                mode === 'login' ? 'Sign In' : 'Create Account'
+                "Create Account"
               )}
             </Button>
           </form>
@@ -235,14 +257,14 @@ export default function LoginPage() {
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-6">
+        {/* <div className="text-center mt-6">
           <Link
             href="/game"
             className="text-sm text-white/60 hover:text-white transition-colors font-inter"
           >
             ← Back to Game
           </Link>
-        </div>
+        </div> */}
       </div>
     </div>
   );

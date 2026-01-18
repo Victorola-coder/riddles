@@ -272,14 +272,14 @@ export default function LevelsPage() {
         </div>
 
         {/* Back to Game Button */}
-        <div className="mt-8 text-center">
+        {/* <div className="mt-8 text-center">
           <button
             onClick={() => router.push("/")}
             className="px-6 py-3 bg-midnight-light text-white rounded-lg hover:bg-[var(--border-default)] transition-colors font-inter"
           >
             ← Back to Current Riddle
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );
