@@ -9,7 +9,13 @@ import {
   BarChart3,
 } from "lucide-react";
 import Link from "next/link";
-import { useAdminStats, useAdminActivity } from "@/lib/hooks/use-admin";
+import {
+  useAdminStats,
+  useAdminActivity,
+  type ActivityResponse,
+} from "@/lib/hooks/use-admin";
+
+type ActivityItem = ActivityResponse["activities"][number];
 
 export default function DashboardPage() {
   const {
@@ -20,7 +26,20 @@ export default function DashboardPage() {
   } = useAdminStats();
   const { data: activitiesData, isLoading: activitiesLoading } =
     useAdminActivity({ page: 1, pageSize: 4 });
-  const activities = activitiesData?.activities || [];
+
+  const activities: ActivityItem[] =
+    (activitiesData as ActivityResponse | undefined)?.activities ?? [];
+
+  // Type assertion for stats
+  const statsData = stats as
+    | {
+        totalUsers: number;
+        totalRiddles: number;
+        totalSolved: number;
+        totalGemsEarned: number;
+        activeSessions: number;
+      }
+    | undefined;
 
   // Show cached data immediately while refetching in background
   const isRefreshing = isFetching && !loading;
@@ -28,35 +47,35 @@ export default function DashboardPage() {
   const statCards = [
     {
       title: "Total Users",
-      value: stats?.totalUsers || 0,
+      value: statsData?.totalUsers || 0,
       icon: Users,
       color: "bg-blue-600",
       link: "/admin/users",
     },
     {
       title: "Total Riddles",
-      value: stats?.totalRiddles || 0,
+      value: statsData?.totalRiddles || 0,
       icon: HelpCircle,
       color: "bg-purple-600",
       link: "/admin/riddles",
     },
     {
       title: "Riddles Solved",
-      value: stats?.totalSolved || 0,
+      value: statsData?.totalSolved || 0,
       icon: TrendingUp,
       color: "bg-green-600",
       link: "/admin/riddles",
     },
     {
       title: "Total Gems Earned",
-      value: stats?.totalGemsEarned || 0,
+      value: statsData?.totalGemsEarned || 0,
       icon: Gem,
       color: "bg-yellow-600",
       link: "/admin/users",
     },
     {
       title: "Active Sessions",
-      value: stats?.activeSessions || 0,
+      value: statsData?.activeSessions || 0,
       icon: BarChart3,
       color: "bg-indigo-600",
       link: "/admin/users",
@@ -159,7 +178,7 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {activities.map((activity) => {
+              {activities.map((activity: ActivityItem) => {
                 const formatTime = (timestamp: string) => {
                   const date = new Date(timestamp);
                   const now = new Date();

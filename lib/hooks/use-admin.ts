@@ -8,8 +8,16 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 const CACHE_TIME = 5 * 60 * 1000; // 5 minutes
 const STALE_TIME = 5 * 60 * 1000; // 5 minutes
 
+export type AdminStats = {
+  totalUsers: number;
+  totalRiddles: number;
+  totalSolved: number;
+  totalGemsEarned: number;
+  activeSessions: number;
+};
+
 export function useAdminStats() {
-  return useQuery({
+  return useQuery<AdminStats>({
     queryKey: ['admin', 'stats'],
     queryFn: async () => {
       const res = await fetch('/api/admin/stats');
@@ -18,13 +26,7 @@ export function useAdminStats() {
         throw new Error(data.error || 'Failed to fetch dashboard statistics');
       }
       const data = await res.json();
-      return data.stats as {
-        totalUsers: number;
-        totalRiddles: number;
-        totalSolved: number;
-        totalGemsEarned: number;
-        activeSessions: number;
-      };
+      return data.stats as AdminStats;
     },
     staleTime: STALE_TIME,
     gcTime: CACHE_TIME,

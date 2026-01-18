@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Trophy, TrendingUp, Medal, Crown } from 'lucide-react';
+import { ArrowLeft, Trophy, TrendingUp, Medal, Crown, Loader2 } from 'lucide-react';
 import { useUserStore } from '@/lib/store/user-store';
 import { useGameStore } from '@/lib/store/game-store';
 
@@ -17,8 +17,36 @@ type LeaderboardEntry = {
 
 export default function LeaderboardPage() {
   const [activeTab, setActiveTab] = useState<'global' | 'weekly'>('global');
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { totalGemsEarned, totalRiddlesSolved, currentStreak } = useUserStore();
   const { solvedRiddles } = useGameStore();
+
+  useEffect(() => {
+    fetchLeaderboard();
+  }, [activeTab]);
+
+  const fetchLeaderboard = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/leaderboard?type=${activeTab}&limit=50`);
+      const data = await response.json();
+      
+      if (data.leaderboard) {
+        setLeaderboard(data.leaderboard);
+      }
+    } catch (error) {
+      console.error('Failed to fetch leaderboard:', error);
+      // Fallback to mock data if API fails
+      setLeaderboard(getMockData());
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getMockData = (): LeaderboardEntry[] => {
+    return activeTab === 'global' ? mockGlobalLeaderboard : mockWeeklyLeaderboard;
+  };
 
   // Mock data for demonstration (will be replaced with Supabase data)
   const mockGlobalLeaderboard: LeaderboardEntry[] = [
@@ -40,7 +68,7 @@ export default function LeaderboardPage() {
     { rank: 5, username: 'ConsistentSolver', totalGems: 620, riddlesSolved: 31, currentStreak: 5 },
   ];
 
-  const currentLeaderboard = activeTab === 'global' ? mockGlobalLeaderboard : mockWeeklyLeaderboard;
+  const currentLeaderboard = isLoading ? [] : (leaderboard.length > 0 ? leaderboard : getMockData());
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
@@ -107,6 +135,16 @@ export default function LeaderboardPage() {
 
         {/* Leaderboard List */}
         <div className="space-y-2">
+          {isLoading ? (
+            <div className="glass-card p-8 flex flex-col items-center justify-center">
+              <Loader2 className="animate-spin text-purple mb-4" size={32} />
+              <p className="text-white/60 font-inter">Loading leaderboard...</p>
+            </div>
+          ) : currentLeaderboard.length === 0 ? (
+            <div className="glass-card p-8 text-center">
+              <p className="text-white/60 font-inter">No data available yet. Start solving riddles!</p>
+            </div>
+          ) : (
           {currentLeaderboard.map((entry) => (
             <div
               key={entry.rank}
@@ -167,6 +205,7 @@ export default function LeaderboardPage() {
               </div>
             </div>
           ))}
+          )}
         </div>
 
         {/* Info Banner */}
