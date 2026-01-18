@@ -1,7 +1,7 @@
 /**
  * Centralized API Client
  * Provides type-safe API calls with consistent error handling
- * Inspired by adesina.io API integration patterns
+ * Inspired by VickyJay API integration patterns
  */
 
 type RequestMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -45,15 +45,16 @@ function getBaseUrl(): string {
 
 /**
  * Get authentication token
+ * Checks admin token first, then user token
  */
 function getAuthToken(): string | null {
   if (typeof window === "undefined") return null;
 
-  // Try to get admin token first
+  // Try to get admin token first (from sessionStorage)
   const adminToken = sessionStorage.getItem("admin_token");
   if (adminToken) return adminToken;
 
-  // Try to get user token
+  // Try to get user token (from localStorage)
   const userToken = localStorage.getItem("auth_token");
   return userToken;
 }
