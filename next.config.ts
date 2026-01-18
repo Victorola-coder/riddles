@@ -2,6 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  // Enable instant page transitions
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'framer-motion'],
+  },
   // Allow inline scripts for Next.js and third-party libraries
   async headers() {
     return [

@@ -102,12 +102,11 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     return <>{children}</>;
   }
 
-  // Show loader while checking auth
+  // Show layout immediately while checking auth in background
+  // This prevents blocking navigation
   if (checking) {
     return (
-      <div className="min-h-screen bg-[#0f0f0f] text-white flex items-center justify-center">
-        <Loader size="small" />
-      </div>
+      <div className="min-h-screen bg-[#0f0f0f] text-white">{children}</div>
     );
   }
 

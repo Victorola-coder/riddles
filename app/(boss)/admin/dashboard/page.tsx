@@ -64,13 +64,8 @@ export default function DashboardPage() {
     },
   ];
 
-  if (loading && !stats) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader size="medium" />
-      </div>
-    );
-  }
+  // Show page immediately with cached/placeholder data
+  // Data will update when ready
 
   return (
     <div>

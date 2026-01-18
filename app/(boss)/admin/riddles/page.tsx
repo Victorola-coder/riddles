@@ -172,13 +172,7 @@ export default function RiddlesPage() {
     });
   };
 
-  if (loading && riddles.length === 0) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader size="medium" />
-      </div>
-    );
-  }
+  // Show page immediately - data loads in background
 
   return (
     <div>

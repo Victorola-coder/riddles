@@ -63,13 +63,8 @@ export default function AdminPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#0f0f0f] text-white flex items-center justify-center">
-        <Loader size="small" />
-      </div>
-    );
-  }
+  // Don't block - show form immediately
+  // Auth check happens in background
 
   if (isAuthenticated) {
     return null; // Will redirect
