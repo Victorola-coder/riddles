@@ -8,7 +8,7 @@ export const Hero = () => {
   return (
     <div className="relative min-h-screen flex flex-col justify-center items-center overflow-hidden pt-20">
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0f0f0f] via-[#000000] to-[#0f0f0f]" />
+      <div className="absolute inset-0 bg-[var(--bg-midnight)]" />
 
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
@@ -30,9 +30,9 @@ export const Hero = () => {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-white/60 backdrop-blur-sm hover:bg-white/10 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--bg-card)] border border-[var(--border-default)] text-sm text-[var(--text-secondary)] backdrop-blur-sm hover:bg-[var(--bg-card-hover)] transition-colors"
           >
-            <Sparkles className="w-4 h-4 text-[#8b5cf6]" />
+            <Sparkles className="w-4 h-4 text-[var(--accent-primary)]" />
             <span>Open Source on GitHub</span>
           </motion.a>
 
@@ -43,13 +43,14 @@ export const Hero = () => {
             transition={{ delay: 0.3, duration: 0.6 }}
             className="text-5xl md:text-7xl font-bold text-center tracking-tight leading-[1.1]"
           >
-            <span className="bg-gradient-to-r from-[#8b5cf6] to-[#fbbf24] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] bg-clip-text text-transparent">
               Challenge
             </span>{" "}
-            your mind <br className="hidden md:block" /> with{" "}
+            <span className="text-[var(--text-primary)]">your mind</span> <br className="hidden md:block" />{" "}
+            <span className="text-[var(--text-primary)]">with</span>{" "}
             <span className="relative inline-block">
               <motion.span
-                className="bg-white/10 text-white rounded-2xl px-4 py-1 inline-block font-mono relative z-10"
+                className="bg-[var(--bg-card)] text-[var(--text-primary)] rounded-2xl px-4 py-1 inline-block font-mono relative z-10 border border-[var(--border-default)]"
                 animate={{
                   textShadow: [
                     "0 0 10px rgba(139, 92, 246, 0.5)",
@@ -65,7 +66,7 @@ export const Hero = () => {
               >
                 r
                 <motion.span
-                  className="text-[#8b5cf6] inline-block"
+                  className="text-[var(--accent-primary)] inline-block"
                   animate={{
                     scale: [1, 1.2, 1],
                     rotate: [0, 5, -5, 0],
@@ -80,7 +81,7 @@ export const Hero = () => {
                 </motion.span>
                 ddl
                 <motion.span
-                  className="text-[#fbbf24] inline-block"
+                  className="text-[var(--accent-secondary)] inline-block"
                   animate={{
                     scale: [1, 1.2, 1],
                     rotate: [0, -5, 5, 0],
@@ -97,7 +98,7 @@ export const Hero = () => {
                 s
               </motion.span>
               <motion.span
-                className="absolute inset-0 bg-gradient-to-r from-[#8b5cf6] to-[#fbbf24] rounded-2xl opacity-0 blur-xl"
+                className="absolute inset-0 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] rounded-2xl opacity-0 blur-xl"
                 animate={{
                   opacity: [0, 0.6, 0],
                   scale: [1, 1.1, 1],
@@ -116,7 +117,7 @@ export const Hero = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.6 }}
-            className="text-xl md:text-2xl text-center text-white/60 max-w-2xl leading-relaxed"
+            className="text-xl md:text-2xl text-center text-[var(--text-secondary)] max-w-2xl leading-relaxed"
           >
             Riddle Quest is a gamified platform where you solve riddles,
             earn gems, and progress through difficulty levels. Test your wits
@@ -133,7 +134,7 @@ export const Hero = () => {
         >
           <Link
             href="/game"
-            className="w-full sm:w-auto px-8 py-4 bg-white text-black hover:bg-gray-200 rounded-full font-bold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2 group"
+            className="w-full sm:w-auto px-8 py-4 bg-[var(--text-primary)] text-[var(--bg-midnight)] hover:opacity-90 rounded-full font-bold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2 group"
           >
             Start Playing
             <ArrowRight
@@ -145,7 +146,7 @@ export const Hero = () => {
             href="https://github.com/Victorola-coder/riddles"
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full sm:w-auto flex items-center gap-3 text-white/60 px-8 py-4 bg-white/5 hover:bg-white/10 rounded-full border border-white/10 font-medium backdrop-blur-sm transition-all group"
+            className="w-full sm:w-auto flex items-center gap-3 text-[var(--text-secondary)] px-8 py-4 bg-[var(--bg-card)] hover:bg-[var(--bg-card-hover)] rounded-full border border-[var(--border-default)] font-medium backdrop-blur-sm transition-all group"
           >
             <span>View on GitHub</span>
             <ArrowRight
@@ -222,7 +223,7 @@ export const Hero = () => {
                         transition={{ type: "spring", stiffness: 300 }}
                       >
                         <Icon
-                          className={`w-6 h-6 text-white group-hover:scale-110 transition-transform duration-300`}
+                          className={`w-6 h-6 text-[var(--text-primary)] group-hover:scale-110 transition-transform duration-300`}
                           style={{
                             filter: "drop-shadow(0 0 8px rgba(255, 255, 255, 0.5))",
                           }}
@@ -231,12 +232,12 @@ export const Hero = () => {
                     </div>
 
                     {/* Title */}
-                    <h3 className="text-white font-bold text-xl mb-3 group-hover:text-white transition-colors">
+                    <h3 className="text-[var(--text-primary)] font-bold text-xl mb-3 transition-colors">
                       {feature.title}
                     </h3>
 
                     {/* Description */}
-                    <p className="text-white/50 text-sm leading-relaxed group-hover:text-white/70 transition-colors">
+                    <p className="text-[var(--text-secondary)] text-sm leading-relaxed group-hover:text-[var(--text-primary)] transition-colors">
                       {feature.desc}
                     </p>
                   </div>

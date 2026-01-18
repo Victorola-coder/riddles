@@ -1,68 +1,107 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { motion } from "framer-motion";
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { HelpCircle, Home, Play, ArrowRight } from 'lucide-react';
 
 export default function NotFound() {
   return (
-    <>
-      <section className="overflow-hidden mx-auto relative min-h-[100vh]  font-clashMed">
-        <div className="absolute z-10 right-0 left-0 top-[140px] md:top-5">
-          <h2 className="text-[262.916px] lg:text-[547.559px] mx-auto font-semibold rotate-[-0.133deg] bg-gradient-to-r bg-clip-text text-transparent from-[#D9D9D975]/5 to-[#D9D9D900] text-center">
-            404
-          </h2>
-        </div>
-        <div className="absolute -z-50 right-0 left-0 top-[145px] md:-top-4">
-          <h2 className="text-[262.916px] lg:text-[547.559px] mx-auto font-semibold rotate-[-0.133deg] bg-gradient-to-r bg-clip-text text-transparent from-[#FFFFFF03]/5 to-[#D9D9D900] text-center">
-            404
-          </h2>
-        </div>
+    <div className="relative min-h-screen bg-[var(--bg-midnight)] flex items-center justify-center overflow-hidden">
+      {/* Background gradient */}
+      <div className="absolute inset-0 bg-[var(--bg-midnight)]" />
 
-        <div className="mt-[200px] md:mt-[100px] relative">
-          <p className="absolute top-0 left-0 right-0 text-[100.999px] lg:text-[200.477px] mx-auto font-semibold rotate-[-0.133deg] bg-gradient-to-r bg-clip-text text-transparent from-[#FFFFFF03]/40 to-[#D9D9D900] text-center">
-            404
-          </p>
-          <p className="absolute top-3 lg:top-6 left-0 right-0 text-[100.999px] lg:text-[200.477px] mx-auto font-semibold rotate-[-0.133deg] bg-gradient-to-r bg-clip-text text-[#FFFFFF66] from-[#FFFFFF66] to-[#D9D9D900] text-center">
-            404
-          </p>
-        </div>
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      </div>
 
-        <div className="mt-[340px] md:mt-[250px] lg:mt-[400px] text-center mx-auto">
-          <h3 className="text-[23px] font-satMed font-semibold">
-            Riddle Not Found! 🧩
-          </h3>
-          <p className="text-[#FFFFFF99] text-center mx-auto max-w-sm px-3 text-sm font-clashMed font-medium">
-            This page seems to be a mystery even we can't solve. Let's get you back to solving real riddles!
-          </p>
-
-          <div className="flex gap-4 justify-center mt-4 md:mt-[27px]">
-            <Link
-              href="/"
-              className="relative z-40 cursor-pointer w-[142px] block bg-gradient-to-l from-[#D9D9D9] to-[#D9D9D900] pt-0.5 pr-0.5"
+      <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="flex flex-col items-center gap-8"
+        >
+          {/* Large 404 with riddle theme */}
+          <div className="relative">
+            <motion.h1
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+              className="text-8xl md:text-9xl font-bold font-cinzel bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] bg-clip-text text-transparent"
             >
-              <motion.button
-                whileTap={{ scale: 1.1 }}
-                whileHover={{ scale: 0.99 }}
-                className="bg-primary px-[22.8px] py-[14.85px] whitespace-nowrap text-[14.5px] font-medium"
-              >
-                Back to home
-              </motion.button>
-            </Link>
-            <Link
-              href="/game"
-              className="relative z-40 cursor-pointer w-[142px] block bg-gradient-to-l from-[#8b5cf6] to-[#8b5cf600] pt-0.5 pr-0.5"
+              404
+            </motion.h1>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="absolute -top-4 -right-4 md:-top-8 md:-right-8"
             >
-              <motion.button
-                whileTap={{ scale: 1.1 }}
-                whileHover={{ scale: 0.99 }}
-                className="bg-[#8b5cf6] px-[22.8px] py-[14.85px] whitespace-nowrap text-[14.5px] font-medium"
-              >
-                Play Game
-              </motion.button>
-            </Link>
+              <HelpCircle className="w-16 h-16 md:w-24 md:h-24 text-[var(--accent-primary)] opacity-30" />
+            </motion.div>
           </div>
-        </div>
-      </section>
-    </>
+
+          {/* Riddle-themed message */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.6 }}
+            className="space-y-4"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold font-cinzel text-[var(--text-primary)]">
+              This Page is a Mystery
+            </h2>
+            <div className="bg-[var(--bg-card)] backdrop-blur-sm border border-[var(--border-default)] rounded-2xl p-6 md:p-8 max-w-2xl mx-auto">
+              <p className="text-lg md:text-xl text-[var(--text-primary)] font-inter mb-4">
+                <span className="text-[var(--accent-primary)] font-semibold">I speak without a page,</span>
+                <br />
+                <span className="text-[var(--accent-secondary)] font-semibold">I exist without a route.</span>
+                <br />
+                <span className="text-[var(--text-secondary)]">What am I?</span>
+              </p>
+              <p className="text-[var(--text-muted)] text-sm md:text-base font-inter italic">
+                (Answer: A 404 error)
+              </p>
+            </div>
+            <p className="text-[var(--text-secondary)] text-base md:text-lg font-inter max-w-xl mx-auto">
+              The page you're looking for seems to have vanished like a solved riddle.
+              Let's get you back to the real challenges!
+            </p>
+          </motion.div>
+
+          {/* Action buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.6 }}
+            className="flex flex-col sm:flex-row items-center gap-4 mt-8"
+          >
+            <Link href="/">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-6 py-3 bg-[var(--text-primary)] text-[var(--bg-midnight)] rounded-full font-medium hover:opacity-90 transition-opacity flex items-center gap-2 text-sm md:text-base"
+              >
+                <Home size={18} />
+                <span>Back Home</span>
+              </motion.button>
+            </Link>
+            <Link href="/game">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-6 py-3 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] text-[var(--bg-midnight)] rounded-full font-medium hover:opacity-90 transition-opacity flex items-center gap-2 text-sm md:text-base"
+              >
+                <Play size={18} />
+                <span>Play Riddles</span>
+                <ArrowRight size={16} />
+              </motion.button>
+            </Link>
+          </motion.div>
+        </motion.div>
+      </div>
+    </div>
   );
 }

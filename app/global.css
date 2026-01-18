@@ -1,5 +1,5 @@
 /* Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -7,11 +7,13 @@
 
 @layer base {
   :root {
-    /* Midnight Mystery Color Palette */
+    /* Midnight Mystery Color Palette - Dark Mode (Default) */
     --bg-primary: #0f0f0f;
     --bg-secondary: #1a1a1a;
+    --bg-midnight: #0f0f0f;
     --bg-card: rgba(30, 30, 30, 0.8);
     --bg-card-hover: rgba(40, 40, 40, 0.9);
+    --bg-midnight-light: #1a1a1a;
 
     /* Accents */
     --accent-primary: #8b5cf6;
@@ -24,22 +26,53 @@
     --text-primary: #ffffff;
     --text-secondary: rgba(255, 255, 255, 0.7);
     --text-muted: rgba(255, 255, 255, 0.5);
-    --text-secondary: #a1a1aa;
-    --text-muted: #71717a;
+
+    /* Borders */
+    --border-default: rgba(139, 92, 246, 0.3);
+    --border-focus: rgba(139, 92, 246, 0.8);
+
+    /* Shadows */
+    --shadow-glow: 0 0 20px rgba(139, 92, 246, 0.3);
+    --shadow-glow-strong: 0 0 30px rgba(139, 92, 246, 0.5);
+
+    /* Brand Colors */
     --primary-purple: #8b5cf6;
     --gold: #fbbf24;
   }
 
   /* Light Mode */
   .light-mode {
-    --bg-midnight: #f0fdfa; /* Teal-50 tint for fresh look */
-    --bg-card: rgba(255, 255, 255, 0.7);
+    /* Backgrounds */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f9fafb;
+    --bg-midnight: #ffffff;
+    --bg-card: rgba(255, 255, 255, 0.9);
+    --bg-card-hover: rgba(249, 250, 251, 0.95);
+    --bg-midnight-light: #f3f4f6;
+
+    /* Accents - Keep vibrant but ensure contrast */
+    --accent-primary: #7c3aed;
+    --accent-primary-dark: #6d28d9;
+    --accent-secondary: #d97706;
+    --accent-success: #059669;
+    --accent-danger: #dc2626;
+
+    /* Text - Dark for readability on light background */
+    --text-primary: #111827;
+    --text-secondary: #374151;
+    --text-muted: #6b7280;
+
+    /* Borders - Subtle but visible */
     --border-default: rgba(0, 0, 0, 0.1);
-    --text-primary: #1f2937;
-    --text-secondary: #4b5563;
-    --text-muted: #9ca3af;
-    --primary-purple: #7c3aed; /* Darker purple for contrast */
-    --gold: #d97706; /* Darker gold for contrast */
+    --border-focus: rgba(124, 58, 237, 0.4);
+
+    /* Shadows - Subtle for light mode */
+    --shadow-glow: 0 0 15px rgba(124, 58, 237, 0.15);
+    --shadow-glow-strong: 0 0 25px rgba(124, 58, 237, 0.25);
+
+    /* Brand Colors - Darker for contrast */
+    --primary-purple: #7c3aed;
+    --gold: #d97706;
   }
 
   body {
@@ -47,13 +80,39 @@
     color: var(--text-primary);
     transition: background-color 0.3s ease, color 0.3s ease;
   }
+
+  /* Light mode specific overrides */
+  .light-mode body {
+    background-color: var(--bg-midnight);
+  }
+
+  /* Ensure text is readable in light mode */
+  .light-mode {
+    color-scheme: light;
+  }
+
+  .light-mode * {
+    border-color: var(--border-default);
+  }
+
+  /* Ensure gradient text is readable in light mode */
+  .light-mode .bg-gradient-to-r {
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+
+  /* Improve contrast for light mode cards */
+  .light-mode .glass-card {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
 }
 
 @layer components {
   .glass-card {
     @apply bg-[var(--bg-card)] backdrop-blur-md border border-[var(--border-default)] rounded-xl shadow-xl transition-all duration-300;
   }
-  
+
   .glass-button {
     @apply px-6 py-3 rounded-lg font-cinzel font-semibold backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] active:scale-[0.98];
   }
@@ -79,6 +138,15 @@
   ::-webkit-scrollbar-thumb:hover {
     background: rgba(139, 92, 246, 0.5);
   }
+
+  /* Light mode scrollbar */
+  .light-mode ::-webkit-scrollbar-thumb {
+    background: rgba(124, 58, 237, 0.3);
+  }
+
+  .light-mode ::-webkit-scrollbar-thumb:hover {
+    background: rgba(124, 58, 237, 0.5);
+  }
 }
 
 * {
@@ -86,7 +154,6 @@
   padding: 0;
   box-sizing: border-box;
 }
-
 
 /* Glassmorphism Effect */
 .glass-card {
@@ -106,11 +173,11 @@
 
 /* Typography Classes */
 .font-cinzel {
-  font-family: 'Cinzel', serif;
+  font-family: "Cinzel", serif;
 }
 
 .font-inter {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 /* Glow Effects */
@@ -142,13 +209,21 @@ input[type="number"] {
 /* Selection styles */
 ::selection {
   background-color: var(--accent-primary);
-  color: white;
+  color: var(--bg-midnight);
 }
 
 ::-moz-selection {
   background-color: var(--accent-primary);
+  color: var(--bg-midnight);
+}
+
+/* Light mode selection */
+.light-mode ::selection {
+  background-color: var(--accent-primary);
   color: white;
 }
 
-
-
+.light-mode ::-moz-selection {
+  background-color: var(--accent-primary);
+  color: white;
+}

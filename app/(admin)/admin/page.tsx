@@ -50,7 +50,7 @@ export default function AdminPage() {
         setAdminToken(data.token);
         setIsAuthenticated(true);
         toast.success("Access granted! Welcome to admin panel.");
-        router.push("/admin/dashboard");
+        router.push("/dashboard");
       } else {
         toast.error("Authentication failed. Please try again.");
         setAccessCode("");
