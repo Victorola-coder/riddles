@@ -7,18 +7,6 @@ import { Loader } from '@/app/components/global';
 
 const PAGE_SIZE = 12;
 
-type User = {
-  id: string;
-  email?: string;
-  username?: string;
-  totalGems: number;
-  totalRiddlesSolved: number;
-  currentStreak: number;
-  currentLevel: number;
-  lastPlayedDate?: string;
-  createdAt: string;
-};
-
 export default function UsersPage() {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
@@ -123,7 +111,7 @@ export default function UsersPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#FFFFFF1A]">
-                  {users.map((user: User) => (
+                  {users.map((user: AdminUser) => (
                     <tr key={user.id} className="hover:bg-[#1A1A1A]">
                       <td className="px-6 py-4">
                         <div>

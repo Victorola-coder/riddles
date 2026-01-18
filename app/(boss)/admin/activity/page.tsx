@@ -5,26 +5,6 @@ import { Activity } from "lucide-react";
 import { Loader } from "@/app/components/global";
 import { useAdminActivity } from "@/lib/hooks/use-admin";
 
-type ActivityItem = {
-  id: string;
-  type: string;
-  category: "admin" | "user" | "system";
-  title: string;
-  description: string;
-  timestamp: string;
-  metadata?: Record<string, unknown> | null;
-};
-
-type ActivityResponse = {
-  activities: ActivityItem[];
-  meta: {
-    total: number;
-    page: number;
-    pageSize: number;
-    totalPages: number;
-  };
-};
-
 const PAGE_SIZE = 20;
 
 export default function ActivityPage() {

@@ -22,15 +22,7 @@ import { ReactNode, useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { getAdminToken, removeAdminToken } from "@/lib/admin-auth";
 
-interface NavGroup {
-  label: string;
-  icon: typeof LayoutDashboard;
-  items: Array<{
-    href: string;
-    label: string;
-    icon: typeof LayoutDashboard;
-  }>;
-}
+// NavGroup type is now in types.d.ts
 
 const navGroups: NavGroup[] = [
   {

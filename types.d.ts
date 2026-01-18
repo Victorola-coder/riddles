@@ -156,7 +156,13 @@ interface AvatarGroupProps {
 }
 
 // Badge
-type BadgeVariant = "default" | "primary" | "success" | "warning" | "error" | "info";
+type BadgeVariant =
+  | "default"
+  | "primary"
+  | "success"
+  | "warning"
+  | "error"
+  | "info";
 type BadgeSize = "sm" | "md" | "lg";
 
 interface BadgeProps {
@@ -389,3 +395,108 @@ interface RatingProps {
   emptyIcon?: React.ReactNode;
 }
 
+// ============================================
+// Admin Types
+// ============================================
+
+interface AdminStats {
+  totalUsers: number;
+  totalRiddles: number;
+  totalSolved: number;
+  totalGemsEarned: number;
+  activeSessions: number;
+}
+
+interface ActivityItem {
+  id: string;
+  type: string;
+  category: "admin" | "user" | "system";
+  title: string;
+  description: string;
+  timestamp: string;
+  metadata?: Record<string, unknown> | null;
+}
+
+interface ActivityResponse {
+  activities: ActivityItem[];
+  meta: {
+    total: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+  };
+}
+
+interface PaginationMeta {
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+interface AdminRiddle {
+  id: string;
+  question: string;
+  answer: string | string[];
+  difficulty: string;
+  category?: string;
+  hint1?: string;
+  hint2?: string;
+  tags?: string[];
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface AdminRiddlesResponse {
+  riddles: AdminRiddle[];
+  meta: PaginationMeta;
+}
+
+interface AdminUser {
+  id: string;
+  email?: string;
+  username?: string;
+  totalGems: number;
+  totalRiddlesSolved: number;
+  currentStreak: number;
+  currentLevel: number;
+  lastPlayedDate?: string;
+  createdAt: string;
+}
+
+interface AdminUsersResponse {
+  users: AdminUser[];
+  meta: PaginationMeta;
+}
+
+interface CreateRiddleData {
+  question: string;
+  answer: string | string[];
+  difficulty: "easy" | "medium" | "hard";
+  category?: string;
+  hint1?: string;
+  hint2?: string;
+  tags?: string[];
+}
+
+interface UpdateRiddleData {
+  question?: string;
+  answer?: string | string[];
+  difficulty?: "easy" | "medium" | "hard";
+  category?: string;
+  hint1?: string;
+  hint2?: string;
+  tags?: string[];
+  isActive?: boolean;
+}
+
+interface NavGroup {
+  label: string;
+  icon: React.ComponentType<{ className?: string; size?: number }>;
+  items: Array<{
+    href: string;
+    label: string;
+    icon: React.ComponentType<{ className?: string; size?: number }>;
+  }>;
+}

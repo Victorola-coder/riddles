@@ -9,13 +9,7 @@ import {
   BarChart3,
 } from "lucide-react";
 import Link from "next/link";
-import {
-  useAdminStats,
-  useAdminActivity,
-  type ActivityResponse,
-} from "@/lib/hooks/use-admin";
-
-type ActivityItem = ActivityResponse["activities"][number];
+import { useAdminStats, useAdminActivity } from "@/lib/hooks/use-admin";
 
 export default function DashboardPage() {
   const {
@@ -31,15 +25,7 @@ export default function DashboardPage() {
     (activitiesData as ActivityResponse | undefined)?.activities ?? [];
 
   // Type assertion for stats
-  const statsData = stats as
-    | {
-        totalUsers: number;
-        totalRiddles: number;
-        totalSolved: number;
-        totalGemsEarned: number;
-        activeSessions: number;
-      }
-    | undefined;
+  const statsData = stats as AdminStats | undefined;
 
   // Show cached data immediately while refetching in background
   const isRefreshing = isFetching && !loading;

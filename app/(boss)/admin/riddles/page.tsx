@@ -17,20 +17,6 @@ import { Loader } from '@/app/components/global';
 
 const PAGE_SIZE = 12;
 
-type Riddle = {
-  id: string;
-  question: string;
-  answer: string | string[];
-  difficulty: string;
-  category?: string;
-  hint1?: string;
-  hint2?: string;
-  tags?: string[];
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-};
-
 export default function RiddlesPage() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
@@ -41,7 +27,7 @@ export default function RiddlesPage() {
   >('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingRiddle, setEditingRiddle] = useState<Riddle | null>(null);
+  const [editingRiddle, setEditingRiddle] = useState<AdminRiddle | null>(null);
 
   const {
     data: paginatedRiddles,
@@ -112,7 +98,7 @@ export default function RiddlesPage() {
     );
   };
 
-  const handleEdit = (riddle: Riddle) => {
+  const handleEdit = (riddle: AdminRiddle) => {
     setEditingRiddle(riddle);
     setFormData({
       question: riddle.question,
@@ -165,7 +151,7 @@ export default function RiddlesPage() {
     }
   };
 
-  const handleToggleActive = async (riddle: Riddle) => {
+  const handleToggleActive = async (riddle: AdminRiddle) => {
     updateRiddle.mutate({
       id: riddle.id,
       data: { isActive: !riddle.isActive },
@@ -276,7 +262,7 @@ export default function RiddlesPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#FFFFFF1A]">
-                  {riddles.map((riddle: Riddle) => (
+                  {riddles.map((riddle: AdminRiddle) => (
                     <tr key={riddle.id} className="hover:bg-[#1A1A1A]">
                       <td className="px-6 py-4">
                         <div className="max-w-md">
