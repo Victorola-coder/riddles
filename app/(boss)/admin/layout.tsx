@@ -42,12 +42,12 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
-    label: "Content Management",
+    label: "Content",
     icon: HelpCircle,
     items: [{ href: "/admin/riddles", label: "Riddles", icon: HelpCircle }],
   },
   {
-    label: "User Management",
+    label: "Users",
     icon: Users,
     items: [{ href: "/admin/users", label: "Users", icon: Users }],
   },

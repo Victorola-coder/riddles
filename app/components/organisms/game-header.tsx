@@ -3,7 +3,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { GemCounter, StreakCounter, SoundToggle, ThemeToggle } from '../molecules';
-import { Trophy, Award } from 'lucide-react';
+import { Trophy, Award, TrendingUp } from 'lucide-react';
+
 import { useUserStore } from '@/lib/store/user-store';
 
 
@@ -57,11 +58,22 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
         <span className="text-xs font-inter text-white/80 group-hover:text-white">Badges</span>
       </Link>
 
+      {/* Leaderboard Link (Mobile: Icon Only) */}
+      <Link 
+        href="/leaderboard" 
+        className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-purple/10 hover:bg-purple/20 transition-colors cursor-pointer group"
+        title="View Leaderboard"
+      >
+        <TrendingUp className="text-purple group-hover:scale-110 transition-transform" size={18} />
+        <span className="text-xs font-inter text-white/80 group-hover:text-white hidden sm:inline">Ranks</span>
+      </Link>
+
       {/* Sound Toggle */}
       <div className="hidden md:flex items-center gap-2">
         <ThemeToggle size="md" />
         <SoundToggle size="md" />
       </div>
+
 
 
       {/* Gem Counter */}

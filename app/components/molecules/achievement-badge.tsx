@@ -24,7 +24,7 @@ export const AchievementBadge: React.FC<AchievementBadgeProps> = ({
 
   return (
     <motion.div
-      className={`relative glass-card p-6 ${
+      className={`relative glass-card p-6 h-full w-full flex flex-col min-h-[280px] ${
         unlocked ? 'border-gold' : 'border-[var(--border-default)] opacity-60'
       } ${className || ''}`}
       whileHover={{ scale: unlocked ? 1.05 : 1 }}
@@ -56,38 +56,42 @@ export const AchievementBadge: React.FC<AchievementBadgeProps> = ({
       </div>
 
       {/* Content */}
-      <div className="text-center">
-        <h3 className={`text-lg font-cinzel font-semibold mb-1 ${
-          unlocked ? 'text-white' : 'text-gray-400'
-        }`}>
-          {achievement.name}
-        </h3>
-        <p className="text-sm text-[var(--text-muted)] mb-3">
-          {achievement.description}
-        </p>
+      <div className="text-center flex-1 flex flex-col">
+        <div className="flex-1">
+          <h3 className={`text-lg font-cinzel font-semibold mb-2 ${
+            unlocked ? 'text-white' : 'text-gray-400'
+          }`}>
+            {achievement.name}
+          </h3>
+          <p className="text-sm text-[var(--text-muted)] mb-3 line-clamp-2 min-h-[2.5rem]">
+            {achievement.description}
+          </p>
+        </div>
 
         {/* Progress Bar (for locked achievements) */}
-        {!unlocked && progress > 0 && (
-          <div className="mb-3">
-            <div className="w-full h-2 bg-midnight-light rounded-full overflow-hidden">
-              <motion.div
-                className="h-full bg-gradient-to-r from-purple to-purple-light rounded-full"
-                initial={{ width: 0 }}
-                animate={{ width: `${progressPercentage}%` }}
-                transition={{ duration: 0.5 }}
-              />
+        <div className="mt-auto">
+          {!unlocked && progress > 0 && (
+            <div className="mb-3">
+              <div className="w-full h-2 bg-midnight-light rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-purple to-purple-light rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progressPercentage}%` }}
+                  transition={{ duration: 0.5 }}
+                />
+              </div>
+              <p className="text-xs text-[var(--text-muted)] mt-1">
+                {progress} / {achievement.requirement}
+              </p>
             </div>
-            <p className="text-xs text-[var(--text-muted)] mt-1">
-              {progress} / {achievement.requirement}
-            </p>
-          </div>
-        )}
+          )}
 
-        {/* Reward */}
-        <div className={`text-sm font-inter ${
-          unlocked ? 'text-gold' : 'text-gray-500'
-        }`}>
-          +{achievement.reward} gems
+          {/* Reward */}
+          <div className={`text-sm font-inter ${
+            unlocked ? 'text-gold' : 'text-gray-500'
+          }`}>
+            +{achievement.reward} gems
+          </div>
         </div>
       </div>
     </motion.div>
