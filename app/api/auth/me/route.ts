@@ -27,9 +27,15 @@ export async function GET(request: NextRequest) {
         totalGems: true,
         totalRiddlesSolved: true,
         currentStreak: true,
+        longestStreak: true,
         currentLevel: true,
         lastPlayedDate: true,
         createdAt: true,
+        achievements: {
+          select: {
+            achievementId: true,
+          },
+        },
       },
     });
 
@@ -42,7 +48,10 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      user: userData,
+      user: {
+        ...userData,
+        achievements: userData.achievements.map((a) => a.achievementId),
+      },
     });
   } catch (error) {
     console.error('Get user error:', error);

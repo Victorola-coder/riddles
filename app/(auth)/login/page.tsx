@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { authApi, ApiClientError } from '@/lib/api';
 import { supabase } from '@/lib/supabase/client';
 import { Button } from '@/app/components/atoms';
 import { Mail, Lock, User, Loader2 } from 'lucide-react';
@@ -24,33 +25,28 @@ export default function LoginPage() {
 
     try {
       if (mode === 'signup') {
-        const { data, error } = await supabase.auth.signUp({
+        const response = await authApi.signup({
           email: formData.email,
           password: formData.password,
-          options: {
-            data: {
-              username: formData.username,
-            },
-          },
+          username: formData.username,
         });
 
-        if (error) throw error;
-
-        toast.success('Account created! Please check your email to verify.');
+        localStorage.setItem('auth_token', response.token);
+        toast.success('Account created successfully!');
         router.push('/game');
       } else {
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const response = await authApi.login({
           email: formData.email,
           password: formData.password,
         });
 
-        if (error) throw error;
-
+        localStorage.setItem('auth_token', response.token);
         toast.success('Welcome back!');
         router.push('/game');
       }
     } catch (error: any) {
-      toast.error(error.message || 'Authentication failed');
+      const message = error instanceof ApiClientError ? error.message : 'Authentication failed';
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }

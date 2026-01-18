@@ -4,6 +4,7 @@ import { UserState } from '@/types/user';
 import { ACHIEVEMENTS, getAchievementById } from '@/lib/constants/achievements';
 import { toast } from 'sonner';
 import confetti from 'canvas-confetti';
+import { authApi } from '@/lib/api';
 import { soundManager } from '@/lib/utils/sound-manager';
 
 interface UserStore extends UserState {
@@ -25,6 +26,7 @@ interface UserStore extends UserState {
   updateFastestTime: (time: number) => void;
   addGemsEarned: (gems: number) => void;
   incrementTotalSolved: () => void;
+  syncWithServer: () => Promise<void>;
 }
 
 const initialState: UserState = {
@@ -241,6 +243,26 @@ export const useUserStore = create<UserStore>()(
           totalRiddlesSolved: state.totalRiddlesSolved + 1,
         }));
         get().checkAchievements();
+      },
+
+      syncWithServer: async () => {
+        try {
+          const response = await authApi.getMe();
+          if (response.user) {
+            set((state) => ({
+              totalRiddlesSolved: response.user.totalRiddlesSolved,
+              totalGemsEarned: response.user.totalGems,
+              currentStreak: response.user.currentStreak,
+              lastPlayedDate: response.user.lastPlayedDate ? new Date(response.user.lastPlayedDate).toDateString() : null,
+              achievements: response.user.achievements || [],
+              // If longestStreak is returned, use it, otherwise keep local
+              longestStreak: (response.user as any).longestStreak || state.longestStreak,
+            }));
+          }
+        } catch (error) {
+          console.error('Failed to sync with server:', error);
+          // Silent fail - offline mode or guest
+        }
       },
     }),
     {

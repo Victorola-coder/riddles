@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import { GameState, HintLevel } from '@/types/game';
 import { GAME_CONFIG } from '@/lib/constants/game-config';
 import { getNextRiddle, RIDDLES } from '@/lib/constants/riddles';
+import { gameApi } from '@/lib/api';
 
 interface GameStore extends GameState {
   // Actions
@@ -15,6 +16,7 @@ interface GameStore extends GameState {
   earnGems: (amount: number) => void;
   hasEnoughGems: (amount: number) => boolean;
   hasUsedHint: (riddleId: string, hintLevel: HintLevel) => boolean;
+  syncWithServer: () => Promise<void>;
 }
 
 const initialState: GameState = {
@@ -31,11 +33,39 @@ export const useGameStore = create<GameStore>()(
     (set, get) => ({
       ...initialState,
 
-      solveRiddle: (riddleId, gemsEarned) => {
+      solveRiddle: async (riddleId, gemsEarned) => {
+        // Optimistic update
         set((state) => ({
           solvedRiddles: [...state.solvedRiddles, riddleId],
           userGems: state.userGems + gemsEarned,
         }));
+
+        // Sync with server
+        try {
+          const usedHints = get().hintsUsed[riddleId]?.length > 0;
+          await gameApi.submitAttempt({
+            riddleId,
+            solved: true,
+            usedHint: usedHints,
+          });
+        } catch (error) {
+          console.error('Failed to submit attempt:', error);
+          // TODO: Queue for retry or rollback? For now, we trust optimism.
+        }
+      },
+      
+      syncWithServer: async () => {
+        try {
+          const response = await gameApi.syncSession();
+          if (response.session) {
+            // Map session attempts to solved riddles
+            // Assuming response.session.attempts is available and verified
+            // This depends on the exact shape of /game/session response
+            // For now, we rely on user store sync for gems and just ensure session is active
+          }
+        } catch (error) {
+           console.error('Failed to sync game session:', error);
+        }
       },
 
       skipRiddle: (riddleId) => {

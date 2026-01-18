@@ -1,6 +1,8 @@
 "use client";
 
 import { useAuthStore } from "@/lib/store/auth";
+import { useUserStore } from "@/lib/store/user-store";
+import { useGameStore } from "@/lib/store/game-store";
 import { useEffect, Suspense, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { getAuthToken, setAuthToken, removeAuthToken } from "@/lib/client-auth";
@@ -52,6 +54,9 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
     // Sync user data to Zustand
     if (user) {
       setUser(user as unknown as UserData);
+      // Sync other stores
+      useUserStore.getState().syncWithServer();
+      useGameStore.getState().syncWithServer();
     } else {
       // No user data - clear auth
       removeAuthToken();
