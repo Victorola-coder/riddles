@@ -22,7 +22,7 @@ export async function logActivity(data: {
         category: data.category,
         title: data.title,
         description: data.description,
-        metadata: data.metadata ? (data.metadata as any) : null,
+        metadata: data.metadata ? JSON.stringify(data.metadata) : null,
         userId: data.userId || null,
         riddleId: data.riddleId || null,
         adminId: data.adminId || null,

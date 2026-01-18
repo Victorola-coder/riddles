@@ -53,8 +53,8 @@ export async function getRiddlesPaginated(options: {
 
   if (search) {
     where.OR = [
-      { question: { contains: search, mode: 'insensitive' } },
-      { category: { contains: search, mode: 'insensitive' } },
+      { question: { contains: search } },
+      { category: { contains: search } },
     ];
   }
 
@@ -76,6 +76,7 @@ export async function getRiddlesPaginated(options: {
     riddles: riddles.map((r) => ({
       ...r,
       answer: JSON.parse(r.answer as string), // Parse JSON string back to array
+      tags: JSON.parse(r.tags as string), // Parse JSON string back to array
     })),
     total,
     page,
@@ -96,8 +97,8 @@ export async function getUsersPaginated(options: {
 
   if (search) {
     where.OR = [
-      { email: { contains: search, mode: 'insensitive' } },
-      { username: { contains: search, mode: 'insensitive' } },
+      { email: { contains: search } },
+      { username: { contains: search } },
     ];
   }
 
@@ -172,7 +173,7 @@ export async function getActivityLogsPaginated(options: {
       title: activity.title,
       description: activity.description,
       timestamp: activity.createdAt.toISOString(),
-      metadata: activity.metadata,
+      metadata: activity.metadata ? JSON.parse(activity.metadata) : null,
     })),
     total,
     page,

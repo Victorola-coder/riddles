@@ -13,6 +13,8 @@ async function main() {
       ? JSON.stringify(riddle.answer)
       : JSON.stringify([riddle.answer]);
 
+    const tagsJson = riddle.tags ? JSON.stringify(riddle.tags) : '[]';
+
     await prisma.riddle.upsert({
       where: { id: riddle.id },
       update: {
@@ -22,7 +24,7 @@ async function main() {
         category: riddle.category || null,
         hint1: riddle.hint1 || null,
         hint2: riddle.hint2 || null,
-        tags: riddle.tags || [],
+        tags: tagsJson,
         isActive: true,
       },
       create: {
@@ -33,7 +35,7 @@ async function main() {
         category: riddle.category || null,
         hint1: riddle.hint1 || null,
         hint2: riddle.hint2 || null,
-        tags: riddle.tags || [],
+        tags: tagsJson,
         isActive: true,
       },
     });

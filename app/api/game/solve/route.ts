@@ -76,22 +76,33 @@ export async function POST(req: NextRequest) {
       });
 
       // Update or create game session
-      await prisma.gameSession.upsert({
+      const existingSession = await prisma.gameSession.findUnique({
         where: { userId },
-        update: {
-          solvedRiddles: {
-            push: riddleId,
-          },
-          userGems: { increment: gemsEarned },
-          lastActivityAt: new Date(),
-        },
-        create: {
-          userId,
-          solvedRiddles: [riddleId],
-          userGems: user.totalGems + gemsEarned,
-          currentLevel: 1,
-        },
       });
+
+      if (existingSession) {
+        // Parse existing solved riddles JSON string
+        const solvedRiddles = JSON.parse(existingSession.solvedRiddles || '[]') as string[];
+        solvedRiddles.push(riddleId);
+        
+        await prisma.gameSession.update({
+          where: { userId },
+          data: {
+            solvedRiddles: JSON.stringify(solvedRiddles),
+            userGems: { increment: gemsEarned },
+            lastActivityAt: new Date(),
+          },
+        });
+      } else {
+        await prisma.gameSession.create({
+          data: {
+            userId,
+            solvedRiddles: JSON.stringify([riddleId]),
+            userGems: user.totalGems + gemsEarned,
+            currentLevel: 1,
+          },
+        });
+      }
 
       // Log activity
       await logRiddleSolved(userId, riddleId, gemsEarned);

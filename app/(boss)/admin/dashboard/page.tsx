@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   Users,
@@ -7,10 +7,9 @@ import {
   TrendingUp,
   RefreshCw,
   BarChart3,
-} from 'lucide-react';
-import Link from 'next/link';
-import { useAdminStats, useAdminActivity } from '@/lib/hooks/use-admin';
-import { Loader } from '@/app/components/global';
+} from "lucide-react";
+import Link from "next/link";
+import { useAdminStats, useAdminActivity } from "@/lib/hooks/use-admin";
 
 export default function DashboardPage() {
   const {
@@ -28,39 +27,39 @@ export default function DashboardPage() {
 
   const statCards = [
     {
-      title: 'Total Users',
+      title: "Total Users",
       value: stats?.totalUsers || 0,
       icon: Users,
-      color: 'bg-blue-600',
-      link: '/admin/users',
+      color: "bg-blue-600",
+      link: "/admin/users",
     },
     {
-      title: 'Total Riddles',
+      title: "Total Riddles",
       value: stats?.totalRiddles || 0,
       icon: HelpCircle,
-      color: 'bg-purple-600',
-      link: '/admin/riddles',
+      color: "bg-purple-600",
+      link: "/admin/riddles",
     },
     {
-      title: 'Riddles Solved',
+      title: "Riddles Solved",
       value: stats?.totalSolved || 0,
       icon: TrendingUp,
-      color: 'bg-green-600',
-      link: '/admin/riddles',
+      color: "bg-green-600",
+      link: "/admin/riddles",
     },
     {
-      title: 'Total Gems Earned',
+      title: "Total Gems Earned",
       value: stats?.totalGemsEarned || 0,
       icon: Gem,
-      color: 'bg-yellow-600',
-      link: '/admin/users',
+      color: "bg-yellow-600",
+      link: "/admin/users",
     },
     {
-      title: 'Active Sessions',
+      title: "Active Sessions",
       value: stats?.activeSessions || 0,
       icon: BarChart3,
-      color: 'bg-indigo-600',
-      link: '/admin/users',
+      color: "bg-indigo-600",
+      link: "/admin/users",
     },
   ];
 
@@ -88,8 +87,10 @@ export default function DashboardPage() {
           disabled={isFetching}
           className="px-4 py-2 bg-white text-black rounded-lg hover:bg-gray-100 transition-colors text-sm font-medium disabled:opacity-50 flex items-center gap-2"
         >
-          <RefreshCw className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />
-          {isFetching ? 'Refreshing...' : 'Refresh'}
+          <RefreshCw
+            className={`w-4 h-4 ${isFetching ? "animate-spin" : ""}`}
+          />
+          {isFetching ? "Refreshing..." : "Refresh"}
         </button>
       </div>
 
@@ -159,41 +160,40 @@ export default function DashboardPage() {
           ) : (
             <div className="space-y-3">
               {activities.map((activity) => {
-                  const formatTime = (timestamp: string) => {
-                    const date = new Date(timestamp);
-                    const now = new Date();
-                    const diffMs = now.getTime() - date.getTime();
-                    const diffMins = Math.floor(diffMs / 60000);
-                    const diffHours = Math.floor(diffMs / 3600000);
-                    const diffDays = Math.floor(diffMs / 86400000);
+                const formatTime = (timestamp: string) => {
+                  const date = new Date(timestamp);
+                  const now = new Date();
+                  const diffMs = now.getTime() - date.getTime();
+                  const diffMins = Math.floor(diffMs / 60000);
+                  const diffHours = Math.floor(diffMs / 3600000);
+                  const diffDays = Math.floor(diffMs / 86400000);
 
-                    if (diffMins < 1) return 'Just now';
-                    if (diffMins < 60) return `${diffMins}m ago`;
-                    if (diffHours < 24) return `${diffHours}h ago`;
-                    if (diffDays < 7) return `${diffDays}d ago`;
-                    return date.toLocaleDateString();
-                  };
+                  if (diffMins < 1) return "Just now";
+                  if (diffMins < 60) return `${diffMins}m ago`;
+                  if (diffHours < 24) return `${diffHours}h ago`;
+                  if (diffDays < 7) return `${diffDays}d ago`;
+                  return date.toLocaleDateString();
+                };
 
-                  return (
-                    <div
-                      key={activity.id}
-                      className="flex items-start gap-3 p-3 rounded-lg bg-[#1a1a1a] border border-[#FFFFFF0A] hover:border-[#FFFFFF1A] transition-colors"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white text-sm font-medium">
-                          {activity.title}
-                        </p>
-                        <p className="text-gray-400 text-xs truncate">
-                          {activity.description}
-                        </p>
-                        <p className="text-gray-500 text-xs mt-1">
-                          {formatTime(activity.timestamp)}
-                        </p>
-                      </div>
+                return (
+                  <div
+                    key={activity.id}
+                    className="flex items-start gap-3 p-3 rounded-lg bg-[#1a1a1a] border border-[#FFFFFF0A] hover:border-[#FFFFFF1A] transition-colors"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-sm font-medium">
+                        {activity.title}
+                      </p>
+                      <p className="text-gray-400 text-xs truncate">
+                        {activity.description}
+                      </p>
+                      <p className="text-gray-500 text-xs mt-1">
+                        {formatTime(activity.timestamp)}
+                      </p>
                     </div>
-                  );
-                }
-              )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

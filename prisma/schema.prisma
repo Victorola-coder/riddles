@@ -6,9 +6,8 @@ generator client {
 // Run with: npm run db:seed
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -37,7 +36,7 @@ model Riddle {
   category    String?
   hint1       String?          // First letter
   hint2       String?          // Word length
-  tags        String[]         @default([])
+  tags        String           @default("[]") // JSON array
   isActive    Boolean          @default(true)
   order       Int?             // Display order
   createdAt   DateTime         @default(now())
@@ -52,11 +51,11 @@ model GameSession {
   userId          String    @unique
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   currentRiddleId String?
-  solvedRiddles   String[]  @default([]) // Array of riddle IDs
-  skippedRiddles  String[]  @default([])
+  solvedRiddles   String    @default("[]") // JSON array of riddle IDs
+  skippedRiddles  String    @default("[]") // JSON array of riddle IDs
   userGems        Int       @default(50)
   currentLevel    Int       @default(1)
-  hintsUsed       Json?     // { riddleId: [1, 2, 3] }
+  hintsUsed       String?   // JSON string: { riddleId: [1, 2, 3] }
   startedAt       DateTime  @default(now())
   lastActivityAt  DateTime  @default(now())
   createdAt       DateTime  @default(now())
@@ -73,7 +72,7 @@ model RiddleAttempt {
   riddle        Riddle    @relation(fields: [riddleId], references: [id], onDelete: Cascade)
   isCorrect     Boolean
   answerGiven   String?
-  hintsUsed     Int[]     @default([]) // Which hints were used
+  hintsUsed     String    @default("[]") // JSON array of hint numbers
   gemsEarned    Int       @default(0)
   gemsSpent     Int       @default(0)
   timeSpent     Int?      // Time in seconds
@@ -114,7 +113,7 @@ model ActivityLog {
   category    String   // 'admin' | 'user' | 'system'
   title       String
   description String
-  metadata    Json?    // Additional data
+  metadata    String?  // JSON string: Additional data
   userId      String?
   user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   riddleId    String?

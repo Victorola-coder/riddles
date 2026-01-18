@@ -76,14 +76,19 @@ export async function POST(req: NextRequest) {
     });
 
     if (session) {
-      const hintsUsed = (session.hintsUsed as Record<string, number[]>) || {};
+      // Parse hintsUsed JSON (stored as string in SQLite)
+      const hintsUsedStr = typeof session.hintsUsed === 'string' 
+        ? session.hintsUsed 
+        : JSON.stringify(session.hintsUsed || {});
+      const hintsUsed = JSON.parse(hintsUsedStr || '{}') as Record<string, number[]>;
       const riddleHints = hintsUsed[riddleId] || [];
+      
       if (!riddleHints.includes(hintLevel)) {
         hintsUsed[riddleId] = [...riddleHints, hintLevel];
         await prisma.gameSession.update({
           where: { userId },
           data: {
-            hintsUsed: hintsUsed as any,
+            hintsUsed: JSON.stringify(hintsUsed),
             userGems: { decrement: gemsSpent },
             lastActivityAt: new Date(),
           },
