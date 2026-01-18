@@ -500,3 +500,16 @@ interface NavGroup {
     icon: React.ComponentType<{ className?: string; size?: number }>;
   }>;
 }
+
+// ============================================
+// Game Types
+// ============================================
+
+interface LeaderboardEntry {
+  rank: number;
+  username: string;
+  totalGems: number;
+  riddlesSolved: number;
+  currentStreak: number;
+  isCurrentUser?: boolean;
+}
