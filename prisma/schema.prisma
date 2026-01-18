@@ -31,7 +31,7 @@ model User {
 
 model Riddle {
   id          String           @id @default(cuid())
-  question    String
+  question    String           @unique
   answer      String           // JSON array stored as string, parse in app
   difficulty  String           // 'easy' | 'medium' | 'hard'
   category    String?
@@ -89,7 +89,7 @@ model Achievement {
   name        String
   description String
   icon        String
-  condition   String            // e.g., "solve_100_riddles", "streak_7_days"
+  condition   String            @unique // e.g., "solve_100_riddles", "streak_7_days"
   reward      Int?              // Gem reward
   createdAt   DateTime          @default(now())
   

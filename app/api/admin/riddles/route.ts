@@ -13,7 +13,8 @@ export async function GET(req: NextRequest) {
       | 'easy'
       | 'medium'
       | 'hard'
-      | 'all') || 'all';
+      | 'all'
+      | string) || 'all';
 
     const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
     const pageSize =

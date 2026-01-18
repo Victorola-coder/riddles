@@ -21,7 +21,7 @@ export function ColorPicker({
 
   const currentValue = isControlled ? value : internalValue;
 
-  useClickOutside(containerRef, () => setIsOpen(false));
+  useClickOutside(containerRef as React.RefObject<HTMLElement>, () => setIsOpen(false));
 
   const handleColorChange = (newColor: string) => {
     if (!isControlled) {

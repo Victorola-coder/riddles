@@ -42,7 +42,7 @@ export async function getRiddlesPaginated(options: {
   page: number;
   pageSize: number;
   search?: string;
-  difficulty?: 'easy' | 'medium' | 'hard';
+  difficulty?: 'easy' | 'medium' | 'hard' | 'all' | string;
 }) {
   const { page, pageSize, search, difficulty } = options;
   const skip = (page - 1) * pageSize;

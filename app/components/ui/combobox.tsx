@@ -29,7 +29,7 @@ export function Combobox({
   const currentValue = isControlled ? value : internalValue;
   const selectedOption = options.find((opt) => opt.value === currentValue);
 
-  useClickOutside(containerRef, () => setIsOpen(false));
+  useClickOutside(containerRef as React.RefObject<HTMLElement>, () => setIsOpen(false));
   useKeyboard("Escape", () => setIsOpen(false));
 
   const filteredOptions = options.filter((option) =>

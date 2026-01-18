@@ -8,7 +8,22 @@ import Input from '@/app/components/ui/input';
 import { GAME_CONFIG } from '@/lib/constants/game-config';
 
 export default function SettingsPage() {
-  const [config, setConfig] = useState({
+  interface Config {
+    gemRewards: {
+      easy: number;
+      medium: number;
+      hard: number;
+    };
+    gemCosts: {
+      hint1: number;
+      hint2: number;
+      hint3: number;
+      skip: number;
+    };
+    initialGems: number;
+  }
+
+  const [config, setConfig] = useState<Config>({
     gemRewards: {
       easy: GAME_CONFIG.GEM_REWARDS.easy,
       medium: GAME_CONFIG.GEM_REWARDS.medium,
@@ -62,12 +77,12 @@ export default function SettingsPage() {
               <Input
                 type="number"
                 value={config.gemRewards.easy}
-                onChange={(e) =>
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setConfig((prev) => ({
                     ...prev,
                     gemRewards: {
                       ...prev.gemRewards,
-                      easy: parseInt(e.target.value) || 0,
+                      easy: (parseInt(e.target.value) || 0) as number,
                     },
                   }))
                 }
@@ -79,12 +94,12 @@ export default function SettingsPage() {
               <Input
                 type="number"
                 value={config.gemRewards.medium}
-                onChange={(e) =>
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setConfig((prev) => ({
                     ...prev,
                     gemRewards: {
                       ...prev.gemRewards,
-                      medium: parseInt(e.target.value) || 0,
+                      medium: (parseInt(e.target.value) || 0) as number,
                     },
                   }))
                 }
@@ -96,12 +111,12 @@ export default function SettingsPage() {
               <Input
                 type="number"
                 value={config.gemRewards.hard}
-                onChange={(e) =>
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setConfig((prev) => ({
                     ...prev,
                     gemRewards: {
                       ...prev.gemRewards,
-                      hard: parseInt(e.target.value) || 0,
+                      hard: (parseInt(e.target.value) || 0) as number,
                     },
                   }))
                 }
@@ -120,12 +135,12 @@ export default function SettingsPage() {
               <Input
                 type="number"
                 value={config.gemCosts.hint1}
-                onChange={(e) =>
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setConfig((prev) => ({
                     ...prev,
                     gemCosts: {
                       ...prev.gemCosts,
-                      hint1: parseInt(e.target.value) || 0,
+                      hint1: (parseInt(e.target.value) || 0) as number,
                     },
                   }))
                 }
@@ -137,12 +152,12 @@ export default function SettingsPage() {
               <Input
                 type="number"
                 value={config.gemCosts.hint2}
-                onChange={(e) =>
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setConfig((prev) => ({
                     ...prev,
                     gemCosts: {
                       ...prev.gemCosts,
-                      hint2: parseInt(e.target.value) || 0,
+                      hint2: (parseInt(e.target.value) || 0) as number,
                     },
                   }))
                 }
@@ -154,12 +169,12 @@ export default function SettingsPage() {
               <Input
                 type="number"
                 value={config.gemCosts.hint3}
-                onChange={(e) =>
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setConfig((prev) => ({
                     ...prev,
                     gemCosts: {
                       ...prev.gemCosts,
-                      hint3: parseInt(e.target.value) || 0,
+                      hint3: (parseInt(e.target.value) || 0) as number,
                     },
                   }))
                 }
@@ -171,12 +186,12 @@ export default function SettingsPage() {
               <Input
                 type="number"
                 value={config.gemCosts.skip}
-                onChange={(e) =>
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setConfig((prev) => ({
                     ...prev,
                     gemCosts: {
                       ...prev.gemCosts,
-                      skip: parseInt(e.target.value) || 0,
+                      skip: (parseInt(e.target.value) || 0) as number,
                     },
                   }))
                 }
@@ -194,10 +209,10 @@ export default function SettingsPage() {
             <Input
               type="number"
               value={config.initialGems}
-              onChange={(e) =>
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setConfig((prev) => ({
                   ...prev,
-                  initialGems: parseInt(e.target.value) || 0,
+                  initialGems: (parseInt(e.target.value) || 0) as number,
                 }))
               }
               className="w-full max-w-xs bg-[#0f0f0f] border border-[#FFFFFF1A] rounded-lg px-3 py-2 text-sm text-white"

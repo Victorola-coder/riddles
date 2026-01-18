@@ -7,7 +7,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-producti
  */
 export function signAuthToken(userId: string, expiresIn: string = '7d'): string {
   return jwt.sign({ userId, type: 'admin' }, JWT_SECRET, {
-    expiresIn,
+    expiresIn: expiresIn as any,
   });
 }
 

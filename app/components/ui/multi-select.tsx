@@ -28,7 +28,7 @@ export function MultiSelect({
 
   const currentValue = isControlled ? value : internalValue;
 
-  useClickOutside(containerRef, () => setIsOpen(false));
+  useClickOutside(containerRef as React.RefObject<HTMLElement>, () => setIsOpen(false));
 
   const filteredOptions = options.filter((option) =>
     option.label.toLowerCase().includes(searchQuery.toLowerCase())

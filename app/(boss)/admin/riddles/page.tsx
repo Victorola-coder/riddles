@@ -105,7 +105,7 @@ export default function RiddlesPage() {
       answer: Array.isArray(riddle.answer)
         ? riddle.answer.join(', ')
         : riddle.answer,
-      difficulty: riddle.difficulty,
+      difficulty: riddle.difficulty as 'easy' | 'medium' | 'hard',
       category: riddle.category || '',
       hint1: riddle.hint1 || '',
       hint2: riddle.hint2 || '',
@@ -201,7 +201,7 @@ export default function RiddlesPage() {
               type="text"
               placeholder="Search riddles by question or category..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
               className="w-full max-w-md pl-10 pr-4 py-2 bg-[#161616] border border-[#FFFFFF1A] rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]"
             />
           </div>
@@ -394,7 +394,7 @@ export default function RiddlesPage() {
             <Input
               type="text"
               value={formData.answer}
-              onChange={(e) =>
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setFormData((prev) => ({ ...prev, answer: e.target.value }))
               }
               required
@@ -406,7 +406,7 @@ export default function RiddlesPage() {
             <label className="block text-sm text-gray-300 mb-1">Difficulty *</label>
             <select
               value={formData.difficulty}
-              onChange={(e) =>
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                 setFormData((prev) => ({
                   ...prev,
                   difficulty: e.target.value as 'easy' | 'medium' | 'hard',
@@ -425,7 +425,7 @@ export default function RiddlesPage() {
             <Input
               type="text"
               value={formData.category}
-              onChange={(e) =>
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setFormData((prev) => ({ ...prev, category: e.target.value }))
               }
               placeholder="Nature, Technology, etc."
@@ -438,7 +438,7 @@ export default function RiddlesPage() {
               <Input
                 type="text"
                 value={formData.hint1}
-                onChange={(e) =>
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
                   setFormData((prev) => ({ ...prev, hint1: e.target.value }))
                 }
                 placeholder="E"
@@ -451,7 +451,7 @@ export default function RiddlesPage() {
               <Input
                 type="text"
                 value={formData.hint2}
-                onChange={(e) =>
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
                   setFormData((prev) => ({ ...prev, hint2: e.target.value }))
                 }
                 placeholder="4 letters"
@@ -464,7 +464,7 @@ export default function RiddlesPage() {
             <Input
               type="text"
               value={formData.tags}
-              onChange={(e) =>
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setFormData((prev) => ({ ...prev, tags: e.target.value }))
               }
               placeholder="sound, nature, puzzle"
@@ -520,7 +520,7 @@ export default function RiddlesPage() {
             <Input
               type="text"
               value={formData.answer}
-              onChange={(e) =>
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setFormData((prev) => ({ ...prev, answer: e.target.value }))
               }
               required
@@ -531,7 +531,7 @@ export default function RiddlesPage() {
             <label className="block text-sm text-gray-300 mb-1">Difficulty *</label>
             <select
               value={formData.difficulty}
-              onChange={(e) =>
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                 setFormData((prev) => ({
                   ...prev,
                   difficulty: e.target.value as 'easy' | 'medium' | 'hard',
@@ -550,7 +550,7 @@ export default function RiddlesPage() {
             <Input
               type="text"
               value={formData.category}
-              onChange={(e) =>
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setFormData((prev) => ({ ...prev, category: e.target.value }))
               }
               className="w-full bg-[#0f0f0f] border border-[#FFFFFF1A] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#8b5cf6]"
@@ -562,7 +562,7 @@ export default function RiddlesPage() {
               <Input
                 type="text"
                 value={formData.hint1}
-                onChange={(e) =>
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
                   setFormData((prev) => ({ ...prev, hint1: e.target.value }))
                 }
                 maxLength={1}
@@ -574,7 +574,7 @@ export default function RiddlesPage() {
               <Input
                 type="text"
                 value={formData.hint2}
-                onChange={(e) =>
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
                   setFormData((prev) => ({ ...prev, hint2: e.target.value }))
                 }
                 className="w-full bg-[#0f0f0f] border border-[#FFFFFF1A] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#8b5cf6]"
@@ -586,7 +586,7 @@ export default function RiddlesPage() {
             <Input
               type="text"
               value={formData.tags}
-              onChange={(e) =>
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setFormData((prev) => ({ ...prev, tags: e.target.value }))
               }
               className="w-full bg-[#0f0f0f] border border-[#FFFFFF1A] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#8b5cf6]"
