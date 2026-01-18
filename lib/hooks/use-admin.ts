@@ -37,6 +37,24 @@ export function useAdminStats() {
   });
 }
 
+export type ActivityResponse = {
+  activities: Array<{
+    id: string;
+    type: string;
+    category: 'admin' | 'user' | 'system';
+    title: string;
+    description: string;
+    timestamp: string;
+    metadata?: Record<string, unknown> | null;
+  }>;
+  meta: {
+    total: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+  };
+};
+
 export function useAdminActivity(options?: {
   page?: number;
   pageSize?: number;
@@ -45,7 +63,7 @@ export function useAdminActivity(options?: {
 }) {
   const { page = 1, pageSize = 10, type, activityType } = options || {};
 
-  return useQuery({
+  return useQuery<ActivityResponse>({
     queryKey: ['admin', 'activity', page, pageSize, type, activityType],
     queryFn: async () => {
       const params = new URLSearchParams({
@@ -62,14 +80,8 @@ export function useAdminActivity(options?: {
       }
       const data = await res.json();
       return {
-        activities: data.activities as Array<{
-          id: string;
-          type: string;
-          title: string;
-          description: string;
-          timestamp: string;
-        }>,
-        meta: data.meta,
+        activities: data.activities as ActivityResponse['activities'],
+        meta: data.meta as ActivityResponse['meta'],
       };
     },
     staleTime: 1 * 60 * 1000, // 1 minute - activities should be more fresh

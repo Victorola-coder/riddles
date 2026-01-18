@@ -168,6 +168,7 @@ export async function getActivityLogsPaginated(options: {
     activities: activities.map((activity) => ({
       id: activity.id,
       type: activity.type,
+      category: activity.category as 'admin' | 'user' | 'system',
       title: activity.title,
       description: activity.description,
       timestamp: activity.createdAt.toISOString(),

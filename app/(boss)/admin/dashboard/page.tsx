@@ -163,14 +163,7 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {activities.map(
-                (activity: {
-                  id: string;
-                  type: string;
-                  title: string;
-                  description: string;
-                  timestamp: string;
-                }) => {
+              {activities.map((activity) => {
                   const formatTime = (timestamp: string) => {
                     const date = new Date(timestamp);
                     const now = new Date();

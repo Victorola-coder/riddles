@@ -37,24 +37,24 @@ const navGroups: NavGroup[] = [
     label: "Overview",
     icon: BarChart3,
     items: [
-      { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-      { href: "/activity", label: "Activity Log", icon: Activity },
+      { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/admin/activity", label: "Activity Log", icon: Activity },
     ],
   },
   {
     label: "Content Management",
     icon: HelpCircle,
-    items: [{ href: "/riddles", label: "Riddles", icon: HelpCircle }],
+    items: [{ href: "/admin/riddles", label: "Riddles", icon: HelpCircle }],
   },
   {
     label: "User Management",
     icon: Users,
-    items: [{ href: "/users", label: "Users", icon: Users }],
+    items: [{ href: "/admin/users", label: "Users", icon: Users }],
   },
   {
     label: "Settings",
     icon: Settings,
-    items: [{ href: "/settings", label: "Game Config", icon: Settings }],
+    items: [{ href: "/admin/settings", label: "Game Config", icon: Settings }],
   },
 ];
 

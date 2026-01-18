@@ -19,7 +19,7 @@ export default function AdminPage() {
     const authenticated = sessionStorage.getItem("admin_authenticated");
     if (token && authenticated === "true") {
       setIsAuthenticated(true);
-      router.push("/dashboard");
+      router.push("/admin/dashboard");
     } else {
       setLoading(false);
     }
@@ -50,7 +50,7 @@ export default function AdminPage() {
         setAdminToken(data.token);
         setIsAuthenticated(true);
         toast.success("Access granted! Welcome to admin panel.");
-        router.push("/dashboard");
+        router.push("/admin/dashboard");
       } else {
         toast.error("Authentication failed. Please try again.");
         setAccessCode("");
