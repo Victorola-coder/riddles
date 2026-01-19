@@ -5,7 +5,14 @@ import { toast } from "sonner";
 import { Button } from "@/app/components/atoms";
 import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Lock, Loader2, CheckCircle, AlertCircle, Check, X } from "lucide-react";
+import {
+  Lock,
+  Loader2,
+  CheckCircle,
+  AlertCircle,
+  Check,
+  X,
+} from "lucide-react";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -18,7 +25,7 @@ export default function ResetPasswordPage() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState("");
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
-  
+
   // Password requirement checks
   const passwordRequirements = {
     minLength: password.length >= 8,
@@ -61,13 +68,17 @@ export default function ResetPasswordPage() {
       if (response.ok) {
         setIsSuccess(true);
         toast.success("Password reset successfully!");
-        setTimeout(() => router.push("/login"), 3000);
+        setTimeout(() => router.push("/auth"), 3000);
       } else {
         const errorMessage = data.error || "Failed to reset password";
         setError(errorMessage);
-        
+
         // If password validation failed, show requirements
-        if (errorMessage.includes("Password") || errorMessage.includes("password") || data.details) {
+        if (
+          errorMessage.includes("Password") ||
+          errorMessage.includes("password") ||
+          data.details
+        ) {
           const requirements = [
             "At least 8 characters long",
             "At least one uppercase letter (A-Z)",
@@ -179,9 +190,13 @@ export default function ResetPasswordPage() {
                       Password requirements:
                     </p>
                     <div className="space-y-1.5">
-                      <div className={`flex items-center gap-2 text-xs font-inter transition-colors ${
-                        passwordRequirements.minLength ? 'text-green-400' : 'text-white/50'
-                      }`}>
+                      <div
+                        className={`flex items-center gap-2 text-xs font-inter transition-colors ${
+                          passwordRequirements.minLength
+                            ? "text-green-400"
+                            : "text-white/50"
+                        }`}
+                      >
                         {passwordRequirements.minLength ? (
                           <Check size={14} className="text-green-400" />
                         ) : (
@@ -189,9 +204,13 @@ export default function ResetPasswordPage() {
                         )}
                         <span>At least 8 characters</span>
                       </div>
-                      <div className={`flex items-center gap-2 text-xs font-inter transition-colors ${
-                        passwordRequirements.hasUppercase ? 'text-green-400' : 'text-white/50'
-                      }`}>
+                      <div
+                        className={`flex items-center gap-2 text-xs font-inter transition-colors ${
+                          passwordRequirements.hasUppercase
+                            ? "text-green-400"
+                            : "text-white/50"
+                        }`}
+                      >
                         {passwordRequirements.hasUppercase ? (
                           <Check size={14} className="text-green-400" />
                         ) : (
@@ -199,9 +218,13 @@ export default function ResetPasswordPage() {
                         )}
                         <span>One uppercase letter (A-Z)</span>
                       </div>
-                      <div className={`flex items-center gap-2 text-xs font-inter transition-colors ${
-                        passwordRequirements.hasLowercase ? 'text-green-400' : 'text-white/50'
-                      }`}>
+                      <div
+                        className={`flex items-center gap-2 text-xs font-inter transition-colors ${
+                          passwordRequirements.hasLowercase
+                            ? "text-green-400"
+                            : "text-white/50"
+                        }`}
+                      >
                         {passwordRequirements.hasLowercase ? (
                           <Check size={14} className="text-green-400" />
                         ) : (
@@ -209,9 +232,13 @@ export default function ResetPasswordPage() {
                         )}
                         <span>One lowercase letter (a-z)</span>
                       </div>
-                      <div className={`flex items-center gap-2 text-xs font-inter transition-colors ${
-                        passwordRequirements.hasNumber ? 'text-green-400' : 'text-white/50'
-                      }`}>
+                      <div
+                        className={`flex items-center gap-2 text-xs font-inter transition-colors ${
+                          passwordRequirements.hasNumber
+                            ? "text-green-400"
+                            : "text-white/50"
+                        }`}
+                      >
                         {passwordRequirements.hasNumber ? (
                           <Check size={14} className="text-green-400" />
                         ) : (
@@ -257,7 +284,6 @@ export default function ResetPasswordPage() {
                 </div>
               </div>
 
-
               <Button
                 type="submit"
                 variant="primary"
@@ -276,7 +302,7 @@ export default function ResetPasswordPage() {
 
               <div className="text-center">
                 <Link
-                  href="/login"
+                  href="/auth"
                   className="text-sm text-white/60 hover:text-white transition-colors font-inter"
                 >
                   ← Back to Login

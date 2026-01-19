@@ -24,7 +24,7 @@ export default function LoginPage() {
     username: "",
   });
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
-  
+
   // Password requirement checks
   const passwordRequirements = {
     minLength: formData.password.length >= 8,
@@ -39,7 +39,7 @@ export default function LoginPage() {
 
     try {
       let response;
-      
+
       if (mode === "signup") {
         response = await authApi.signup({
           email: formData.email,
@@ -57,7 +57,7 @@ export default function LoginPage() {
 
       // Store token
       setAuthToken(response.token, response.user);
-      
+
       // Update auth store immediately with user data from response
       if (response.user) {
         setUser({
@@ -68,19 +68,19 @@ export default function LoginPage() {
           currentLevel: response.user.currentLevel || 1,
         });
       }
-      
+
       // Invalidate queries to trigger refetch of user data
       queryClient.invalidateQueries({ queryKey: ["user", "me"] });
       queryClient.invalidateQueries({ queryKey: ["game", "session"] });
-      
-      // Redirect to game page
-      router.push("/game");
+
+      // Use window.location for reliable redirect (bypasses Next.js router issues)
+      window.location.href = "/game";
     } catch (error: any) {
       let message =
         error instanceof ApiClientError
           ? error.message
           : "Authentication failed";
-      
+
       // If password validation failed, show requirements
       if (message.includes("Password") || message.includes("password")) {
         const requirements = [
@@ -94,7 +94,7 @@ export default function LoginPage() {
       } else {
         setPasswordErrors([]);
       }
-      
+
       toast.error(message);
     } finally {
       setIsLoading(false);
@@ -253,9 +253,13 @@ export default function LoginPage() {
                     Password requirements:
                   </p>
                   <div className="space-y-1.5">
-                    <div className={`flex items-center gap-2 text-xs font-inter transition-colors ${
-                      passwordRequirements.minLength ? 'text-green-400' : 'text-white/50'
-                    }`}>
+                    <div
+                      className={`flex items-center gap-2 text-xs font-inter transition-colors ${
+                        passwordRequirements.minLength
+                          ? "text-green-400"
+                          : "text-white/50"
+                      }`}
+                    >
                       {passwordRequirements.minLength ? (
                         <Check size={14} className="text-green-400" />
                       ) : (
@@ -263,9 +267,13 @@ export default function LoginPage() {
                       )}
                       <span>At least 8 characters</span>
                     </div>
-                    <div className={`flex items-center gap-2 text-xs font-inter transition-colors ${
-                      passwordRequirements.hasUppercase ? 'text-green-400' : 'text-white/50'
-                    }`}>
+                    <div
+                      className={`flex items-center gap-2 text-xs font-inter transition-colors ${
+                        passwordRequirements.hasUppercase
+                          ? "text-green-400"
+                          : "text-white/50"
+                      }`}
+                    >
                       {passwordRequirements.hasUppercase ? (
                         <Check size={14} className="text-green-400" />
                       ) : (
@@ -273,9 +281,13 @@ export default function LoginPage() {
                       )}
                       <span>One uppercase letter (A-Z)</span>
                     </div>
-                    <div className={`flex items-center gap-2 text-xs font-inter transition-colors ${
-                      passwordRequirements.hasLowercase ? 'text-green-400' : 'text-white/50'
-                    }`}>
+                    <div
+                      className={`flex items-center gap-2 text-xs font-inter transition-colors ${
+                        passwordRequirements.hasLowercase
+                          ? "text-green-400"
+                          : "text-white/50"
+                      }`}
+                    >
                       {passwordRequirements.hasLowercase ? (
                         <Check size={14} className="text-green-400" />
                       ) : (
@@ -283,9 +295,13 @@ export default function LoginPage() {
                       )}
                       <span>One lowercase letter (a-z)</span>
                     </div>
-                    <div className={`flex items-center gap-2 text-xs font-inter transition-colors ${
-                      passwordRequirements.hasNumber ? 'text-green-400' : 'text-white/50'
-                    }`}>
+                    <div
+                      className={`flex items-center gap-2 text-xs font-inter transition-colors ${
+                        passwordRequirements.hasNumber
+                          ? "text-green-400"
+                          : "text-white/50"
+                      }`}
+                    >
                       {passwordRequirements.hasNumber ? (
                         <Check size={14} className="text-green-400" />
                       ) : (
@@ -336,13 +352,13 @@ export default function LoginPage() {
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-2 bg-[var(--bg-card)] text-white/60 font-inter">
-                Or continue with
+                Or
               </span>
             </div>
           </div>
 
           {/* Social Auth */}
-          <button
+          {/* <button
             onClick={handleGoogleAuth}
             disabled={isLoading}
             className="w-full py-3 px-4 bg-white hover:bg-gray-100 text-gray-900 rounded-lg font-inter font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
@@ -366,7 +382,7 @@ export default function LoginPage() {
               />
             </svg>
             Google
-          </button>
+          </button> */}
 
           {/* Guest Mode */}
           <button

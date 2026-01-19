@@ -12,10 +12,10 @@ import {
 } from "lucide-react";
 
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/store/auth";
-import { removeAuthToken } from "@/lib/client-auth";
+import { removeAuthToken, getAuthToken } from "@/lib/client-auth";
 import { useMutation } from "@tanstack/react-query";
 import { authApi, ApiClientError } from "@/lib/api";
 import { useUserStore } from "@/lib/store/user-store";
@@ -29,19 +29,19 @@ export default function ProfilePage() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
-  
-  // Password requirement checks
+  const [formData, setFormData] = useState({
+    username: user?.username || "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  // Password requirement checks (computed from formData)
   const passwordRequirements = {
     minLength: formData.password.length >= 8,
     hasUppercase: /[A-Z]/.test(formData.password),
     hasLowercase: /[a-z]/.test(formData.password),
     hasNumber: /[0-9]/.test(formData.password),
   };
-  const [formData, setFormData] = useState({
-    username: user?.username || "",
-    password: "",
-    confirmPassword: "",
-  });
 
   const updateProfile = useMutation({
     mutationFn: async (data: any) => {
@@ -59,7 +59,7 @@ export default function ProfilePage() {
         error instanceof ApiClientError
           ? error.message
           : "Failed to update profile";
-      
+
       // If password validation failed, show requirements
       if (message.includes("Password") || message.includes("password")) {
         const requirements = [
@@ -80,7 +80,7 @@ export default function ProfilePage() {
   const handleLogout = () => {
     removeAuthToken();
     setUser(null);
-    router.push("/login");
+    router.push("/auth");
     toast.success("Logged out successfully");
   };
 
@@ -106,7 +106,23 @@ export default function ProfilePage() {
     updateProfile.mutate(updateData);
   };
 
-  if (!user) return null;
+  // Client-side protection: redirect to login if not authenticated
+  useEffect(() => {
+    const token = getAuthToken();
+    if (!token || !user) {
+      router.push("/auth");
+    }
+  }, [user, router]);
+
+  if (!user) {
+    return (
+      <div className="container max-w-4xl mx-auto p-4 flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-white/60">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container max-w-4xl mx-auto p-4 space-y-8 pb-20">
@@ -219,9 +235,13 @@ export default function ProfilePage() {
                     Password requirements:
                   </p>
                   <div className="space-y-1.5">
-                    <div className={`flex items-center gap-2 text-xs font-inter transition-colors ${
-                      passwordRequirements.minLength ? 'text-green-400' : 'text-muted-foreground/70'
-                    }`}>
+                    <div
+                      className={`flex items-center gap-2 text-xs font-inter transition-colors ${
+                        passwordRequirements.minLength
+                          ? "text-green-400"
+                          : "text-muted-foreground/70"
+                      }`}
+                    >
                       {passwordRequirements.minLength ? (
                         <Check size={14} className="text-green-400" />
                       ) : (
@@ -229,9 +249,13 @@ export default function ProfilePage() {
                       )}
                       <span>At least 8 characters</span>
                     </div>
-                    <div className={`flex items-center gap-2 text-xs font-inter transition-colors ${
-                      passwordRequirements.hasUppercase ? 'text-green-400' : 'text-muted-foreground/70'
-                    }`}>
+                    <div
+                      className={`flex items-center gap-2 text-xs font-inter transition-colors ${
+                        passwordRequirements.hasUppercase
+                          ? "text-green-400"
+                          : "text-muted-foreground/70"
+                      }`}
+                    >
                       {passwordRequirements.hasUppercase ? (
                         <Check size={14} className="text-green-400" />
                       ) : (
@@ -239,9 +263,13 @@ export default function ProfilePage() {
                       )}
                       <span>One uppercase letter (A-Z)</span>
                     </div>
-                    <div className={`flex items-center gap-2 text-xs font-inter transition-colors ${
-                      passwordRequirements.hasLowercase ? 'text-green-400' : 'text-muted-foreground/70'
-                    }`}>
+                    <div
+                      className={`flex items-center gap-2 text-xs font-inter transition-colors ${
+                        passwordRequirements.hasLowercase
+                          ? "text-green-400"
+                          : "text-muted-foreground/70"
+                      }`}
+                    >
                       {passwordRequirements.hasLowercase ? (
                         <Check size={14} className="text-green-400" />
                       ) : (
@@ -249,9 +277,13 @@ export default function ProfilePage() {
                       )}
                       <span>One lowercase letter (a-z)</span>
                     </div>
-                    <div className={`flex items-center gap-2 text-xs font-inter transition-colors ${
-                      passwordRequirements.hasNumber ? 'text-green-400' : 'text-muted-foreground/70'
-                    }`}>
+                    <div
+                      className={`flex items-center gap-2 text-xs font-inter transition-colors ${
+                        passwordRequirements.hasNumber
+                          ? "text-green-400"
+                          : "text-muted-foreground/70"
+                      }`}
+                    >
                       {passwordRequirements.hasNumber ? (
                         <Check size={14} className="text-green-400" />
                       ) : (

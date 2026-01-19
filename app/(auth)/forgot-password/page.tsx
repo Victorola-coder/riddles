@@ -69,7 +69,7 @@ export default function ForgotPasswordPage() {
                 receive a password reset link shortly.
               </p>
               <Link
-                href="/login"
+                href="/auth"
                 className="inline-flex items-center gap-2 text-purple hover:text-purple/80 transition-colors font-inter"
               >
                 <ArrowLeft size={16} />
@@ -116,7 +116,7 @@ export default function ForgotPasswordPage() {
 
               <div className="text-center">
                 <Link
-                  href="/login"
+                  href="/auth"
                   className="text-sm text-white/60 hover:text-white transition-colors font-inter"
                 >
                   ← Back to Login

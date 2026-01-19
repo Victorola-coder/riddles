@@ -73,9 +73,7 @@ export function useSignup() {
         return await authApi.signup(data);
       } catch (error) {
         const message =
-          error instanceof ApiClientError
-            ? error.message
-            : "Signup failed";
+          error instanceof ApiClientError ? error.message : "Signup failed";
         throw new Error(message);
       }
     },
@@ -107,9 +105,7 @@ export function useLogin() {
         return await authApi.login(data);
       } catch (error) {
         const message =
-          error instanceof ApiClientError
-            ? error.message
-            : "Login failed";
+          error instanceof ApiClientError ? error.message : "Login failed";
         throw new Error(message);
       }
     },
@@ -119,7 +115,9 @@ export function useLogin() {
       toast.success("Login successful!");
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Login failed. Please check your credentials.");
+      toast.error(
+        error.message || "Login failed. Please check your credentials."
+      );
     },
   });
 }
@@ -142,7 +140,7 @@ export function useLogout() {
       clearAuthToken();
       queryClient.clear();
       // Redirect to login
-      window.location.href = "/login";
+      window.location.href = "/auth";
     }
   };
 }
