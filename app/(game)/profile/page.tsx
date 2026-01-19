@@ -16,18 +16,18 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/store/auth";
 import { removeAuthToken, getAuthToken } from "@/lib/client-auth";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { authApi, ApiClientError } from "@/lib/api";
 import { useUserStore } from "@/lib/store/user-store";
 import { Avatar, Button, Input, Card } from "@/app/components/ui";
 
 export default function ProfilePage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { user, setUser } = useAuthStore();
   const { totalRiddlesSolved, currentStreak, totalGemsEarned } = useUserStore();
   const currentLevel = user?.currentLevel || 1;
 
-  const [isLoading, setIsLoading] = useState(false);
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     username: user?.username || "",
@@ -77,11 +77,24 @@ export default function ProfilePage() {
     },
   });
 
-  const handleLogout = () => {
-    removeAuthToken();
-    setUser(null);
-    router.push("/auth");
-    toast.success("Logged out successfully");
+  const handleLogout = async () => {
+    try {
+      // Call logout endpoint to clear server-side session and cookies
+      await authApi.logout();
+      toast.success("Logged out successfully");
+    } catch (error) {
+      console.error("Logout API call failed:", error);
+      // Continue with client-side cleanup even if API fails
+      toast.success("Logged out successfully");
+    } finally {
+      // Always clear client state
+      removeAuthToken();
+      setUser(null);
+      // Clear React Query cache
+      queryClient.clear();
+      // Redirect to login with full page reload
+      window.location.href = "/auth";
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {

@@ -124,16 +124,17 @@ export function useLogin() {
 
 /**
  * Logout user
- * Clears auth state and queries
+ * Clears auth state and queries, calls server to clear session
  */
 export function useLogout() {
   const queryClient = useQueryClient();
 
   return async () => {
     try {
-      // Call server to clear session
-      await fetch("/api/auth/logout", { method: "POST" });
+      // Call server to clear session and cookies
+      await authApi.logout();
     } catch (error) {
+      // Even if API call fails, continue with client-side cleanup
       console.error("Logout API call failed:", error);
     } finally {
       // Always clear client state

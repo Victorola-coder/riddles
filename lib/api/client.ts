@@ -146,7 +146,8 @@ export async function apiClient<T = unknown>(
   };
 
   // Add authentication token if required
-  if (requireAuth) {
+  // For logout, we still send token if available (for activity logging) but don't require it
+  if (requireAuth || endpoint === "/api/auth/logout") {
     const token = getAuthToken();
     if (token) {
       (requestHeaders as Record<string, string>)[

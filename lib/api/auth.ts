@@ -8,7 +8,57 @@ import { api } from "./client";
 /**
  * Auth API endpoints
  */
-export const authApi = {
+export const authApi: {
+  login: (credentials: { email: string; password: string }) => Promise<{
+    success: boolean;
+    token: string;
+    user: {
+      id: string;
+      email: string;
+      username: string;
+      totalGems: number;
+      currentLevel: number;
+    };
+  }>;
+  signup: (data: { email: string; password: string; username?: string }) => Promise<{
+    success: boolean;
+    token: string;
+    user: {
+      id: string;
+      email: string;
+      username?: string;
+      totalGems?: number;
+      currentLevel?: number;
+    };
+  }>;
+  getMe: () => Promise<{
+    user: {
+      id: string;
+      email: string;
+      username: string;
+      totalGems: number;
+      currentLevel: number;
+    };
+  }>;
+  forgotPassword: (email: string) => Promise<{ success: boolean; message: string }>;
+  resetPassword: (data: { token: string; password: string }) => Promise<{ success: boolean; message: string }>;
+  logout: () => Promise<{ success: boolean; message: string }>;
+  updateProfile: (data: {
+    username?: string;
+    password?: string;
+    confirmPassword?: string;
+  }) => Promise<{
+    success: boolean;
+    user: {
+      id: string;
+      email: string;
+      username?: string;
+      totalGems: number;
+      currentLevel: number;
+    };
+    message: string;
+  }>;
+} = {
   /**
    * Login user
    */
@@ -74,4 +124,35 @@ export const authApi = {
       "/api/auth/reset-password",
       data
     ),
+
+  /**
+   * Logout user
+   * Clears server-side session and cookies
+   */
+  logout: () =>
+    api.post<{ success: boolean; message: string }>(
+      "/api/auth/logout",
+      {},
+      { requireAuth: false } // Allow logout even if token is invalid
+    ),
+
+  /**
+   * Update user profile
+   */
+  updateProfile: (data: {
+    username?: string;
+    password?: string;
+    confirmPassword?: string;
+  }) =>
+    api.patch<{
+      success: boolean;
+      user: {
+        id: string;
+        email: string;
+        username?: string;
+        totalGems: number;
+        currentLevel: number;
+      };
+      message: string;
+    }>("/api/auth/me", data, { requireAuth: true }),
 };
