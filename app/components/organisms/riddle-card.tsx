@@ -11,7 +11,12 @@ interface RiddleCardProps {
   className?: string;
 }
 
+import { useGameStore } from '@/lib/store/game-store';
+import { Timer } from '../molecules';
+
 export const RiddleCard: React.FC<RiddleCardProps> = ({ riddle, className }) => {
+  const { timeLeft, totalTime, isTimerActive } = useGameStore();
+
   return (
     <motion.div
       className={`glass-card p-8 md:p-12 ${className || ''}`}
@@ -21,9 +26,16 @@ export const RiddleCard: React.FC<RiddleCardProps> = ({ riddle, className }) => 
       key={riddle.id}
     >
       <div className="flex flex-col gap-6">
-        {/* Difficulty Badge */}
+        {/* Difficulty Badge & Timer */}
         <div className="flex justify-between items-center">
-          <DifficultyBadge difficulty={riddle.difficulty} />
+          <div className="flex items-center gap-4">
+            <DifficultyBadge difficulty={riddle.difficulty} />
+            <Timer 
+              timeLeft={timeLeft} 
+              totalTime={totalTime} 
+              isActive={isTimerActive} 
+            />
+          </div>
           {riddle.category && (
             <span className="text-sm text-[var(--text-muted)] font-inter">
               {riddle.category}

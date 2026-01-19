@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Activity } from "lucide-react";
-import { Loader } from "@/app/components/global";
 import { useAdminActivity } from "@/lib/hooks/use-admin";
 
 const PAGE_SIZE = 20;

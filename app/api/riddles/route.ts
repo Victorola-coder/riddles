@@ -26,29 +26,27 @@ export async function GET(request: NextRequest) {
       where.category = category;
     }
 
-    const [riddles, total] = await Promise.all([
-      prisma.riddle.findMany({
-        where,
-        take: limit,
-        skip: offset,
-        orderBy: [
-          { difficulty: 'asc' }, // Order by difficulty: easy, medium, hard
-          { order: 'asc' }, // Then by order if set
-          { createdAt: 'asc' }, // Then by creation date
-        ],
-        select: {
-          id: true,
-          question: true,
-          difficulty: true,
-          category: true,
-          hint1: true,
-          hint2: true,
-          tags: true,
-          // Don't expose the answer to regular users
-        },
-      }),
-      prisma.riddle.count({ where }),
-    ]);
+    // First get all matching riddles, then randomize
+    const allRiddles = await prisma.riddle.findMany({
+      where,
+      select: {
+        id: true,
+        question: true,
+        difficulty: true,
+        category: true,
+        hint1: true,
+        hint2: true,
+        tags: true,
+        // Don't expose the answer to regular users
+      },
+    });
+
+    // Shuffle the array randomly
+    const shuffled = allRiddles.sort(() => Math.random() - 0.5);
+    
+    // Apply pagination after randomization
+    const riddles = shuffled.slice(offset, offset + limit);
+    const total = allRiddles.length;
 
     return NextResponse.json({
       riddles: riddles.map((r) => ({

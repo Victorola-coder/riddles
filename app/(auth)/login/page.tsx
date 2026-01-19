@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
-import { authApi, ApiClientError } from "@/lib/api";
-import { supabase } from "@/lib/supabase/client";
-import { Button } from "@/app/components/atoms";
-import { Mail, Lock, User, Loader2 } from "lucide-react";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/app/components/atoms";
+import { supabase } from "@/lib/supabase/client";
+import { authApi, ApiClientError } from "@/lib/api";
+import { Mail, Lock, User, Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();

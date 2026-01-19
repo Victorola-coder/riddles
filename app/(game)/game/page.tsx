@@ -62,6 +62,19 @@ export default function GamePage() {
     updateStreak();
   }, [currentRiddleId, updateStreak]);
 
+  // Timer Tick Loop
+  const { tickTimer, isTimerActive } = useGameStore();
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isTimerActive) {
+      interval = setInterval(() => {
+        tickTimer();
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isTimerActive, tickTimer]);
+
 
   if (!currentRiddle) {
     return (

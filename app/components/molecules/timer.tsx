@@ -1,9 +1,7 @@
-'use client';
-
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Timer as TimerIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import clsx from 'clsx';
 
 interface TimerProps {
   timeLeft: number;
@@ -19,7 +17,6 @@ export const Timer: React.FC<TimerProps> = ({
   className,
 }) => {
   // Calculate percentage for circular progress
-  // If totalTime is 0 (infinite), progress is always 100%
   const percentage = totalTime > 0 ? (timeLeft / totalTime) * 100 : 100;
   
   const isWarning = timeLeft <= 10 && totalTime > 0;
@@ -29,7 +26,7 @@ export const Timer: React.FC<TimerProps> = ({
   if (totalTime === 0) return null;
 
   return (
-    <div className={cn("flex items-center gap-3", className)}>
+    <div className={clsx("flex items-center gap-3", className)}>
       <div className="relative w-12 h-12 flex items-center justify-center">
         {/* Background Circle */}
         <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 36 36">
@@ -50,31 +47,31 @@ export const Timer: React.FC<TimerProps> = ({
             cy="18"
             r="16"
             fill="none"
-            className={cn(
+            className={clsx(
               "stroke-current transition-colors duration-300",
               isCritical ? "text-red-500" : isWarning ? "text-orange-500" : "text-primary"
             )}
             strokeWidth="3"
-            strokeDasharray="100 100" // using pathLength instead, but SVG needs base
+            strokeDasharray="100 100" 
             strokeLinecap="round"
           />
         </svg>
         
-        {/* Timer Icon or Text inside */}
+        {/* Timer Text inside */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className={cn(
+          <span className={clsx(
             "text-sm font-bold",
-            isWarning ? "text-red-500 animate-pulse" : "text-foreground"
+            isWarning ? "text-red-500 animate-pulse" : "text-white"
           )}>
             {timeLeft}
           </span>
         </div>
       </div>
       
-      <div className="flex flex-col">
-        <span className={cn(
+      <div className="hidden sm:flex flex-col">
+        <span className={clsx(
           "text-xs font-medium uppercase tracking-wider",
-          isWarning ? "text-red-500" : "text-muted-foreground"
+          isWarning ? "text-red-500" : "text-[var(--text-muted)]"
         )}>
           Time Left
         </span>

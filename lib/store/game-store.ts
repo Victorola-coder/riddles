@@ -6,17 +6,26 @@ import { getNextRiddle, RIDDLES } from '@/lib/constants/riddles';
 import { gameApi } from '@/lib/api';
 
 interface GameStore extends GameState {
+  // Timer State
+  timeLeft: number;
+  totalTime: number; // Duration for current riddle
+  isTimerActive: boolean;
+
   // Actions
   solveRiddle: (riddleId: string, gemsEarned: number) => void;
   skipRiddle: (riddleId: string) => void;
   useHint: (riddleId: string, hintLevel: HintLevel) => void;
   nextRiddle: () => void;
   resetGame: () => void;
-  spendGems: (amount: number) => boolean; // Returns true if successful
+  spendGems: (amount: number) => boolean;
   earnGems: (amount: number) => void;
   hasEnoughGems: (amount: number) => boolean;
   hasUsedHint: (riddleId: string, hintLevel: HintLevel) => boolean;
   syncWithServer: () => Promise<void>;
+  
+  // Timer Actions
+  tickTimer: () => void;
+  stopTimer: () => void;
 }
 
 const initialState: GameState = {
@@ -28,19 +37,30 @@ const initialState: GameState = {
   hintsUsed: {},
 };
 
+const getLevelDuration = (level: number, difficulty: string): number => {
+  if (difficulty === 'easy') return GAME_CONFIG.TIMER.easy;
+  
+  const baseTime = difficulty === 'hard' ? GAME_CONFIG.TIMER.hard : GAME_CONFIG.TIMER.medium;
+  const decrement = (level - 1) * GAME_CONFIG.TIMER.levelDecrement;
+  
+  return Math.max(baseTime - decrement, GAME_CONFIG.TIMER.minTime);
+};
+
 export const useGameStore = create<GameStore>()(
   persist(
     (set, get) => ({
       ...initialState,
+      timeLeft: 0,
+      totalTime: 0,
+      isTimerActive: false,
 
       solveRiddle: async (riddleId, gemsEarned) => {
-        // Optimistic update
         set((state) => ({
           solvedRiddles: [...state.solvedRiddles, riddleId],
           userGems: state.userGems + gemsEarned,
+          isTimerActive: false, // Stop timer on solve
         }));
 
-        // Sync with server
         try {
           const usedHints = get().hintsUsed[riddleId]?.length > 0;
           await gameApi.submitAttempt({
@@ -50,19 +70,12 @@ export const useGameStore = create<GameStore>()(
           });
         } catch (error) {
           console.error('Failed to submit attempt:', error);
-          // TODO: Queue for retry or rollback? For now, we trust optimism.
         }
       },
       
       syncWithServer: async () => {
         try {
           const response = await gameApi.syncSession();
-          if (response.session) {
-            // Map session attempts to solved riddles
-            // Assuming response.session.attempts is available and verified
-            // This depends on the exact shape of /game/session response
-            // For now, we rely on user store sync for gems and just ensure session is active
-          }
         } catch (error) {
            console.error('Failed to sync game session:', error);
         }
@@ -74,6 +87,7 @@ export const useGameStore = create<GameStore>()(
           set((state) => ({
             skippedRiddles: [...state.skippedRiddles, riddleId],
             userGems: state.userGems - cost,
+            isTimerActive: false,
           }));
         }
       },
@@ -89,6 +103,7 @@ export const useGameStore = create<GameStore>()(
               ...state.hintsUsed,
               [riddleId]: [...(state.hintsUsed[riddleId] || []), hintLevel],
             },
+            // Penalty: Reduce time by 10s for using a hint? (Optional)
           }));
         }
       },
@@ -97,14 +112,43 @@ export const useGameStore = create<GameStore>()(
         const currentId = get().currentRiddleId;
         const solvedIds = get().solvedRiddles;
         const nextRiddle = getNextRiddle(currentId, solvedIds);
+        
+        // Calculate Timer
+        let duration = 0;
+        if (nextRiddle) {
+           duration = getLevelDuration(get().currentLevel, nextRiddle.difficulty);
+        }
 
         set({
           currentRiddleId: nextRiddle?.id || null,
+          timeLeft: duration,
+          totalTime: duration,
+          isTimerActive: duration > 0,
         });
       },
 
+      tickTimer: () => {
+        const { timeLeft, isTimerActive } = get();
+        if (isTimerActive && timeLeft > 0) {
+          set({ timeLeft: timeLeft - 1 });
+        } else if (isTimerActive && timeLeft <= 0) {
+          set({ isTimerActive: false }); // Time's up!
+          // Handle Game Over or Timeout Logic here
+          // For now, simpler to just stop. The UI will show 0.
+        }
+      },
+
+      stopTimer: () => {
+        set({ isTimerActive: false });
+      },
+
       resetGame: () => {
-        set(initialState);
+        set({
+          ...initialState,
+          timeLeft: 0,
+          totalTime: 0,
+          isTimerActive: false,
+        });
       },
 
       spendGems: (amount) => {
@@ -134,6 +178,19 @@ export const useGameStore = create<GameStore>()(
     }),
     {
       name: 'riddle-quest-game',
+      partialize: (state) => ({
+        currentRiddleId: state.currentRiddleId,
+        solvedRiddles: state.solvedRiddles,
+        skippedRiddles: state.skippedRiddles,
+        userGems: state.userGems,
+        currentLevel: state.currentLevel,
+        hintsUsed: state.hintsUsed,
+        // Persist timer state so it doesn't disappear on refresh
+        timeLeft: state.timeLeft,
+        totalTime: state.totalTime,
+        isTimerActive: state.isTimerActive,
+      }),
     }
   )
 );
+
