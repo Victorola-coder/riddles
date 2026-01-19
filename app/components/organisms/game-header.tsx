@@ -2,12 +2,11 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { GemCounter, StreakCounter, SoundToggle, ThemeToggle } from '../molecules';
-import { Trophy, Award, TrendingUp } from 'lucide-react';
-
-import { useUserStore } from '@/lib/store/user-store';
-import { useAuthStore } from '@/lib/store/auth';
 import { Avatar } from '../ui';
+import { useAuthStore } from '@/lib/store/auth';
+import { Trophy, Award, TrendingUp } from 'lucide-react';
+import { useUserStore } from '@/lib/store/user-store';
+import { GemCounter, StreakCounter, SoundToggle, ThemeToggle } from '../molecules';
 
 
 

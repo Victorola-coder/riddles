@@ -6,3 +6,4 @@ export { StreakCounter } from './streak-counter';
 export { SoundToggle } from './sound-toggle';
 export { ThemeToggle } from './theme-toggle';
 
+export * from './timer';

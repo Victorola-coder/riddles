@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { ArrowLeft, Mail, Loader2, CheckCircle } from 'lucide-react';
-import { Button } from '@/app/components/atoms';
-import { toast } from 'sonner';
+import Link from "next/link";
+import { toast } from "sonner";
+import React, { useState } from "react";
+import { Button } from "@/app/components/atoms";
+import { ArrowLeft, Mail, Loader2, CheckCircle } from "lucide-react";
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
@@ -16,9 +16,9 @@ export default function ForgotPasswordPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
 
@@ -26,18 +26,18 @@ export default function ForgotPasswordPage() {
 
       if (response.ok) {
         setIsSuccess(true);
-        toast.success('Password reset link sent!');
-        
+        toast.success("Password reset link sent!");
+
         // In development, show the reset link
         if (data.resetLink) {
-          console.log('Reset link:', data.resetLink);
-          toast.info('Check console for reset link (dev mode)');
+          console.log("Reset link:", data.resetLink);
+          toast.info("Check console for reset link (dev mode)");
         }
       } else {
-        toast.error(data.error || 'Failed to send reset link');
+        toast.error(data.error || "Failed to send reset link");
       }
     } catch (error) {
-      toast.error('Something went wrong');
+      toast.error("Something went wrong");
     } finally {
       setIsLoading(false);
     }
@@ -65,7 +65,8 @@ export default function ForgotPasswordPage() {
                 Check Your Email
               </h2>
               <p className="text-white/60 font-inter mb-6">
-                If an account exists with <strong>{email}</strong>, you'll receive a password reset link shortly.
+                If an account exists with <strong>{email}</strong>, you'll
+                receive a password reset link shortly.
               </p>
               <Link
                 href="/login"
@@ -82,7 +83,10 @@ export default function ForgotPasswordPage() {
                   Email Address
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={20} />
+                  <Mail
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40"
+                    size={20}
+                  />
                   <input
                     type="email"
                     value={email}
@@ -106,7 +110,7 @@ export default function ForgotPasswordPage() {
                     Sending...
                   </>
                 ) : (
-                  'Send Reset Link'
+                  "Send Reset Link"
                 )}
               </Button>
 

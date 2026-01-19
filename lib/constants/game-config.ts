@@ -32,6 +32,15 @@ export const GAME_CONFIG = {
   },
 
   // Starting values
+  // Timer Settings (in seconds)
+  TIMER: {
+    easy: 0, // Infinite
+    medium: 120,
+    hard: 60,
+    levelDecrement: 2, // Decrease by 2s per level (optional advanced mode)
+    minTime: 30, // Minimum time floor
+  },
+
   INITIAL_GEMS: 50,
   INITIAL_LEVEL: 1,
 } as const;
