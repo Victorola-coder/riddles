@@ -5,12 +5,12 @@ import { toast } from "sonner";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/app/components/atoms";
-import { supabase } from "@/lib/supabase/client";
-import { authApi, ApiClientError } from "@/lib/api";
-import { Mail, Lock, User, Loader2, Check, X } from "lucide-react";
-import { setAuthToken } from "@/lib/client-auth";
 import { useAuthStore } from "@/lib/store/auth";
+import { supabase } from "@/lib/supabase/client";
+import { setAuthToken } from "@/lib/client-auth";
+import { authApi, ApiClientError } from "@/lib/api";
 import { useQueryClient } from "@tanstack/react-query";
+import { Mail, Lock, User, Loader2, Check, X } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();

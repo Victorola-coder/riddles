@@ -9,17 +9,21 @@ import {
   Star,
   Check,
   X,
+  Camera,
+  Loader2,
 } from "lucide-react";
 
 import { toast } from "sonner";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { useAuthStore } from "@/lib/store/auth";
 import { removeAuthToken, getAuthToken } from "@/lib/client-auth";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { authApi, ApiClientError } from "@/lib/api";
 import { useUserStore } from "@/lib/store/user-store";
-import { Avatar, Button, Input, Card } from "@/app/components/ui";
+import { Avatar, Button } from "@/app/components/ui";
+import { cardEntranceVariants, fadeVariants } from "@/lib/constants/animations";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -35,7 +39,7 @@ export default function ProfilePage() {
     confirmPassword: "",
   });
 
-  // Password requirement checks (computed from formData)
+  // Password requirement checks
   const passwordRequirements = {
     minLength: formData.password.length >= 8,
     hasUppercase: /[A-Z]/.test(formData.password),
@@ -60,7 +64,6 @@ export default function ProfilePage() {
           ? error.message
           : "Failed to update profile";
 
-      // If password validation failed, show requirements
       if (message.includes("Password") || message.includes("password")) {
         const requirements = [
           "At least 8 characters long",
@@ -69,7 +72,7 @@ export default function ProfilePage() {
           "At least one number (0-9)",
         ];
         setPasswordErrors(requirements);
-        toast.error(`Password requirements:\n${requirements.join("\n")}`);
+        toast.error(`Password requirements not met`);
       } else {
         setPasswordErrors([]);
         toast.error(message);
@@ -79,20 +82,15 @@ export default function ProfilePage() {
 
   const handleLogout = async () => {
     try {
-      // Call logout endpoint to clear server-side session and cookies
       await authApi.logout();
       toast.success("Logged out successfully");
     } catch (error) {
       console.error("Logout API call failed:", error);
-      // Continue with client-side cleanup even if API fails
       toast.success("Logged out successfully");
     } finally {
-      // Always clear client state
       removeAuthToken();
       setUser(null);
-      // Clear React Query cache
       queryClient.clear();
-      // Redirect to login with full page reload
       window.location.href = "/auth";
     }
   };
@@ -113,13 +111,13 @@ export default function ProfilePage() {
     }
 
     if (Object.keys(updateData).length === 0) {
+      toast.info("No changes to save");
       return;
     }
 
     updateProfile.mutate(updateData);
   };
 
-  // Client-side protection: redirect to login if not authenticated
   useEffect(() => {
     const token = getAuthToken();
     if (!token || !user) {
@@ -129,225 +127,186 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="container max-w-4xl mx-auto p-4 flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <p className="text-white/60">Loading...</p>
-        </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="container max-w-4xl mx-auto p-4 space-y-8 pb-20">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Avatar
-            alt={user.username || user.email || "Guest"}
-            size="xl"
-            className="ring-1 ring-[var(--border-default)]"
-          />
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
-              My Profile
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={fadeVariants}
+      className="container max-w-5xl mx-auto p-4 md:p-8 space-y-12 pb-32"
+    >
+      {/* Header Section */}
+      <motion.div 
+        variants={cardEntranceVariants}
+        className="glass-card p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden group"
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        
+        <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
+          <div className="relative">
+            <Avatar
+              alt={user.username || user.email || "Guest"}
+              size="xl"
+              className="ring-4 ring-primary/20 w-24 h-24 md:w-32 md:h-32 shadow-xl"
+            />
+            <div className="absolute bottom-0 right-0 bg-primary text-white p-2 rounded-full cursor-pointer hover:bg-primary-dark transition-colors shadow-lg">
+              <Camera size={16} />
+            </div>
+          </div>
+          <div className="text-center md:text-left space-y-2">
+            <h1 className="text-4xl font-bold font-cinzel bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent drop-shadow-sm">
+              {user.username || "Adventurer"}
             </h1>
-            <p className="text-sm text-muted-foreground">
-              {user.username || user.email}
+            <p className="text-[var(--text-secondary)] font-medium flex items-center justify-center md:justify-start gap-2">
+              <Shield size={16} className="text-primary" />
+              {user.email}
             </p>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-bold text-primary tracking-wider uppercase">
+              Member
+            </div>
           </div>
         </div>
 
         <Button
-          variant="ghost"
+          variant="danger"
           onClick={handleLogout}
-          className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
+          className="relative z-10 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 shadow-none hover:shadow-red-500/20"
         >
           <LogOut className="w-4 h-4 mr-2" />
           Logout
         </Button>
-      </div>
+      </motion.div>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="p-4 flex flex-col items-center justify-center space-y-2 bg-gradient-to-b from-blue-900/20 to-transparent border-blue-500/20">
-          <Trophy className="w-8 h-8 text-yellow-400" />
-          <span className="text-2xl font-bold text-white">
-            {totalRiddlesSolved}
-          </span>
-          <span className="text-xs text-muted-foreground uppercase tracking-wider">
-            Solved
-          </span>
-        </Card>
-        <Card className="p-4 flex flex-col items-center justify-center space-y-2 bg-gradient-to-b from-orange-900/20 to-transparent border-orange-500/20">
-          <Flame className="w-8 h-8 text-orange-500" />
-          <span className="text-2xl font-bold text-white">{currentStreak}</span>
-          <span className="text-xs text-muted-foreground uppercase tracking-wider">
-            Day Streak
-          </span>
-        </Card>
-        <Card className="p-4 flex flex-col items-center justify-center space-y-2 bg-gradient-to-b from-purple-900/20 to-transparent border-purple-500/20">
-          <Star className="w-8 h-8 text-purple-400" />
-          <span className="text-2xl font-bold text-white">
-            {totalGemsEarned}
-          </span>
-          <span className="text-xs text-muted-foreground uppercase tracking-wider">
-            Gems
-          </span>
-        </Card>
-        <Card className="p-4 flex flex-col items-center justify-center space-y-2 bg-gradient-to-b from-green-900/20 to-transparent border-green-500/20">
-          <UserIcon className="w-8 h-8 text-green-400" />
-          <span className="text-2xl font-bold text-white">
-            Lvl {currentLevel}
-          </span>
-          <span className="text-xs text-muted-foreground uppercase tracking-wider">
-            Level
-          </span>
-        </Card>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+        {[
+          { icon: Trophy, label: "Riddles Solved", value: totalRiddlesSolved, color: "text-yellow-400", bg: "from-yellow-500/10", border: "border-yellow-500/20" },
+          { icon: Flame, label: "Day Streak", value: currentStreak, color: "text-orange-500", bg: "from-orange-500/10", border: "border-orange-500/20" },
+          { icon: Star, label: "Total Gems", value: totalGemsEarned, color: "text-purple-400", bg: "from-purple-500/10", border: "border-purple-500/20" },
+          { icon: UserIcon, label: "Current Level", value: currentLevel, color: "text-green-400", bg: "from-green-500/10", border: "border-green-500/20" }
+        ].map((stat, index) => (
+          <motion.div
+            key={stat.label}
+            variants={cardEntranceVariants}
+            custom={index}
+            className={`glass-card p-6 flex flex-col items-center justify-center space-y-3 bg-gradient-to-b ${stat.bg} to-transparent ${stat.border} hover:scale-105 transition-transform duration-300`}
+          >
+            <stat.icon className={`w-8 h-8 ${stat.color} drop-shadow-glow`} />
+            <span className="text-3xl font-bold font-cinzel text-[var(--text-primary)]">
+              {stat.value}
+            </span>
+            <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+              {stat.label}
+            </span>
+          </motion.div>
+        ))}
       </div>
 
       {/* Settings Form */}
-      <Card className="p-6 space-y-6">
-        <div className="flex items-center gap-2 mb-6">
-          <Shield className="w-5 h-5 text-primary" />
-          <h2 className="text-xl font-semibold">Account Settings</h2>
+      <motion.div 
+        variants={cardEntranceVariants}
+        className="glass-card p-8 md:p-10 space-y-8 relative overflow-hidden"
+      >
+        <div className="flex items-center gap-3 border-b border-[var(--border-default)] pb-6">
+          <Shield className="w-6 h-6 text-primary" />
+          <h2 className="text-2xl font-bold font-cinzel text-[var(--text-primary)]">Account Settings</h2>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground">
-              Username
+        <form onSubmit={handleSubmit} className="space-y-8 max-w-2xl">
+          <div className="space-y-3">
+            <label className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide ml-1">
+              DisplayName
             </label>
-            <Input
+            <input
               value={formData.username}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setFormData({ ...formData, username: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
               placeholder="Your username"
+              className="w-full p-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all duration-300"
             />
           </div>
 
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <label className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide ml-1">
                 New Password
               </label>
-              <Input
-                type="password"
-                value={formData.password}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setFormData({ ...formData, password: e.target.value });
-                  // Clear errors when user starts typing
-                  if (passwordErrors.length > 0) {
-                    setPasswordErrors([]);
-                  }
-                }}
-                placeholder="Leave blank to keep current"
-              />
+              <div className="relative">
+                <input
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => {
+                    setFormData({ ...formData, password: e.target.value });
+                    if (passwordErrors.length > 0) setPasswordErrors([]);
+                  }}
+                  placeholder="••••••••"
+                  className="w-full p-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all duration-300"
+                />
+              </div>
+              
+              {/* Password Requirements Popover styled inline */}
               {formData.password && (
-                <div className="mt-2 space-y-1">
-                  <p className="text-xs text-muted-foreground mb-2">
-                    Password requirements:
+                <motion.div 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  className="bg-[var(--bg-secondary)]/50 p-4 rounded-lg border border-[var(--border-default)] space-y-2 mt-2"
+                >
+                  <p className="text-xs font-medium text-[var(--text-muted)] mb-2 uppercase tracking-wide">
+                    Security Strength
                   </p>
-                  <div className="space-y-1.5">
-                    <div
-                      className={`flex items-center gap-2 text-xs font-inter transition-colors ${
-                        passwordRequirements.minLength
-                          ? "text-green-400"
-                          : "text-muted-foreground/70"
-                      }`}
-                    >
-                      {passwordRequirements.minLength ? (
-                        <Check size={14} className="text-green-400" />
-                      ) : (
-                        <X size={14} className="text-muted-foreground/50" />
-                      )}
-                      <span>At least 8 characters</span>
-                    </div>
-                    <div
-                      className={`flex items-center gap-2 text-xs font-inter transition-colors ${
-                        passwordRequirements.hasUppercase
-                          ? "text-green-400"
-                          : "text-muted-foreground/70"
-                      }`}
-                    >
-                      {passwordRequirements.hasUppercase ? (
-                        <Check size={14} className="text-green-400" />
-                      ) : (
-                        <X size={14} className="text-muted-foreground/50" />
-                      )}
-                      <span>One uppercase letter (A-Z)</span>
-                    </div>
-                    <div
-                      className={`flex items-center gap-2 text-xs font-inter transition-colors ${
-                        passwordRequirements.hasLowercase
-                          ? "text-green-400"
-                          : "text-muted-foreground/70"
-                      }`}
-                    >
-                      {passwordRequirements.hasLowercase ? (
-                        <Check size={14} className="text-green-400" />
-                      ) : (
-                        <X size={14} className="text-muted-foreground/50" />
-                      )}
-                      <span>One lowercase letter (a-z)</span>
-                    </div>
-                    <div
-                      className={`flex items-center gap-2 text-xs font-inter transition-colors ${
-                        passwordRequirements.hasNumber
-                          ? "text-green-400"
-                          : "text-muted-foreground/70"
-                      }`}
-                    >
-                      {passwordRequirements.hasNumber ? (
-                        <Check size={14} className="text-green-400" />
-                      ) : (
-                        <X size={14} className="text-muted-foreground/50" />
-                      )}
-                      <span>One number (0-9)</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-              {passwordErrors.length > 0 && (
-                <div className="mt-2 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
-                  <p className="text-sm font-semibold text-red-400 mb-1">
-                    Password requirements not met:
-                  </p>
-                  <ul className="text-xs text-red-300 space-y-0.5 ml-4 list-disc">
-                    {passwordErrors.map((error, index) => (
-                      <li key={index}>{error}</li>
+                  <div className="space-y-2">
+                    {Object.entries(passwordRequirements).map(([key, valid]) => (
+                      <div key={key} className={`flex items-center gap-2 text-xs font-medium transition-colors ${valid ? "text-green-400" : "text-[var(--text-muted)]"}`}>
+                        {valid ? <Check size={14} /> : <div className="w-3.5 h-3.5 rounded-full border border-current opacity-50" />}
+                        <span>
+                          {key === "minLength" && "8+ Characters"}
+                          {key === "hasUppercase" && "Uppercase Letter"}
+                          {key === "hasLowercase" && "Lowercase Letter"}
+                          {key === "hasNumber" && "Number"}
+                        </span>
+                      </div>
                     ))}
-                  </ul>
-                </div>
+                  </div>
+                </motion.div>
               )}
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">
+
+            <div className="space-y-3">
+              <label className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide ml-1">
                 Confirm Password
               </label>
-              <Input
+              <input
                 type="password"
                 value={formData.confirmPassword}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setFormData({ ...formData, confirmPassword: e.target.value })
-                }
-                placeholder="Confirm new password"
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                placeholder="••••••••"
+                className="w-full p-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all duration-300"
               />
             </div>
           </div>
 
-          <div className="pt-4 flex justify-end">
+          <div className="pt-6 border-t border-[var(--border-default)] flex justify-end">
             <Button
               type="submit"
-              disabled={
-                updateProfile.isPending ||
-                (!formData.password && formData.username === user.username)
-              }
+              disabled={updateProfile.isPending || (!formData.password && formData.username === user.username)}
+              className="bg-primary hover:bg-primary-dark text-white px-8 py-4 rounded-xl font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all"
             >
-              {updateProfile.isPending ? "Saving..." : "Save Changes"}
+              {updateProfile.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  Saving...
+                </>
+              ) : (
+                "Save Changes"
+              )}
             </Button>
           </div>
         </form>
-      </Card>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
