@@ -6,6 +6,8 @@ import { GemCounter, StreakCounter, SoundToggle, ThemeToggle } from '../molecule
 import { Trophy, Award, TrendingUp } from 'lucide-react';
 
 import { useUserStore } from '@/lib/store/user-store';
+import { useAuthStore } from '@/lib/store/auth';
+import { Avatar } from '../ui';
 
 
 
@@ -21,6 +23,7 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
   solvedCount,
 }) => {
   const { currentStreak, longestStreak } = useUserStore();
+  const { user } = useAuthStore();
 
   return (
     <header className="w-full py-4 px-6 flex justify-between items-center">
@@ -78,6 +81,19 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
 
       {/* Gem Counter */}
       <GemCounter gems={gems} size="md" />
+
+      {/* Profile Link */}
+      <Link 
+        href={user ? "/profile" : "/login"}
+        className="ml-2 cursor-pointer hover:opacity-80 transition-opacity"
+        title={user ? "My Profile" : "Login"}
+      >
+        <Avatar 
+          alt={user?.username || user?.email || 'Guest'} 
+          size="md"
+          className="ring-2 ring-white/10"
+        />
+      </Link>
     </header>
   );
 };
