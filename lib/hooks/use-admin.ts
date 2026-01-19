@@ -8,7 +8,9 @@ import { adminApi, ApiClientError } from "@/lib/api";
 const CACHE_TIME = 5 * 60 * 1000; // 5 minutes
 const STALE_TIME = 5 * 60 * 1000; // 5 minutes
 
-export function useAdminStats() {
+export function useAdminStats(options?: { realTime?: boolean }) {
+  const { realTime = true } = options || {};
+  
   return useQuery<AdminStats>({
     queryKey: ["admin", "stats"],
     queryFn: async () => {
@@ -28,6 +30,8 @@ export function useAdminStats() {
     gcTime: CACHE_TIME,
     refetchOnWindowFocus: true,
     refetchOnMount: false,
+    // Real-time updates: refetch every 10 seconds when enabled
+    refetchInterval: realTime ? 10000 : false,
     retry: 1,
   });
 }
@@ -37,8 +41,9 @@ export function useAdminActivity(options?: {
   pageSize?: number;
   type?: "admin" | "user";
   activityType?: string;
+  realTime?: boolean;
 }) {
-  const { page = 1, pageSize = 10, type, activityType } = options || {};
+  const { page = 1, pageSize = 10, type, activityType, realTime = true } = options || {};
 
   return useQuery<ActivityResponse>({
     queryKey: ["admin", "activity", page, pageSize, type, activityType],
@@ -58,6 +63,8 @@ export function useAdminActivity(options?: {
     gcTime: 5 * 60 * 1000,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
+    // Real-time updates: refetch every 15 seconds when enabled
+    refetchInterval: realTime ? 15000 : false,
     retry: 1,
   });
 }
@@ -66,8 +73,11 @@ export function useAdminRiddles(
   page = 1,
   pageSize = 12,
   search?: string,
-  difficulty?: "easy" | "medium" | "hard" | "all"
+  difficulty?: "easy" | "medium" | "hard" | "all",
+  options?: { realTime?: boolean }
 ) {
+  const { realTime = false } = options || {}; // Riddles don't need real-time by default
+  
   return useQuery<AdminRiddlesResponse>({
     queryKey: ["admin", "riddles", page, pageSize, search, difficulty],
     queryFn: async () => {
@@ -86,11 +96,20 @@ export function useAdminRiddles(
     gcTime: CACHE_TIME,
     refetchOnWindowFocus: true,
     refetchOnMount: false,
+    // Real-time updates: refetch every 20 seconds when enabled
+    refetchInterval: realTime ? 20000 : false,
     retry: 1,
   });
 }
 
-export function useAdminUsers(page = 1, pageSize = 12, search?: string) {
+export function useAdminUsers(
+  page = 1,
+  pageSize = 12,
+  search?: string,
+  options?: { realTime?: boolean }
+) {
+  const { realTime = false } = options || {}; // Users don't need real-time by default
+  
   return useQuery<AdminUsersResponse>({
     queryKey: ["admin", "users", page, pageSize, search],
     queryFn: async () => {
@@ -109,6 +128,8 @@ export function useAdminUsers(page = 1, pageSize = 12, search?: string) {
     gcTime: CACHE_TIME,
     refetchOnWindowFocus: true,
     refetchOnMount: false,
+    // Real-time updates: refetch every 20 seconds when enabled
+    refetchInterval: realTime ? 20000 : false,
     retry: 1,
   });
 }

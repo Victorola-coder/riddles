@@ -8,7 +8,14 @@ import { prisma } from '@/lib/prisma';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId') || 'guest';
+    let userId = searchParams.get('userId');
+
+    // If no userId provided, treat as guest and generate a guest ID
+    // Note: In production, guest ID should come from client-side localStorage
+    if (!userId || userId === 'guest') {
+      // Generate a guest ID: guest_<timestamp>_<random>
+      userId = `guest_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+    }
 
     // Find or create user
     let user = await prisma.user.findUnique({
@@ -16,10 +23,13 @@ export async function GET(request: NextRequest) {
     });
 
     if (!user) {
+      const isGuest = userId.startsWith('guest_');
       user = await prisma.user.create({
         data: {
           id: userId,
-          username: `Player_${userId.slice(0, 8)}`,
+          username: isGuest 
+            ? `Guest_${userId.slice(-8)}` 
+            : `Player_${userId.slice(0, 8)}`,
           totalGems: 50,
         },
       });

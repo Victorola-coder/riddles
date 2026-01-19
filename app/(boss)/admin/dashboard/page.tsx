@@ -17,9 +17,9 @@ export default function DashboardPage() {
     isLoading: loading,
     isFetching,
     refetch,
-  } = useAdminStats();
+  } = useAdminStats({ realTime: true }); // Enable real-time updates
   const { data: activitiesData, isLoading: activitiesLoading } =
-    useAdminActivity({ page: 1, pageSize: 4 });
+    useAdminActivity({ page: 1, pageSize: 4, realTime: true }); // Enable real-time updates
 
   const activities: ActivityItem[] =
     (activitiesData as ActivityResponse | undefined)?.activities ?? [];
