@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { useUserStore } from '@/lib/store/user-store';
-import { ACHIEVEMENTS } from '@/lib/constants/achievements';
-import { AchievementBadge } from '@/app/components/molecules/achievement-badge';
-import { Trophy, Award, Zap, Flame, Gem, Filter } from 'lucide-react';
-import { Achievement } from '@/types/achievement';
+import { motion } from "framer-motion";
+import React, { useState } from "react";
+import { Achievement } from "@/types/achievement";
+import { useUserStore } from "@/lib/store/user-store";
+import { ACHIEVEMENTS } from "@/lib/constants/achievements";
+import { Trophy, Award, Zap, Flame, Gem, Filter } from "lucide-react";
+import { AchievementBadge } from "@/app/components/molecules/achievement-badge";
 
 const typeIcons = {
   milestone: Trophy,
@@ -24,10 +24,10 @@ export default function AchievementsPage() {
     currentStreak,
   } = useUserStore();
 
-  const [filter, setFilter] = useState<Achievement['type'] | 'all'>('all');
+  const [filter, setFilter] = useState<Achievement["type"] | "all">("all");
 
   const filteredAchievements = ACHIEVEMENTS.filter(
-    (a) => filter === 'all' || a.type === filter
+    (a) => filter === "all" || a.type === filter
   );
 
   const unlockedCount = unlockedIds.length;
@@ -55,27 +55,39 @@ export default function AchievementsPage() {
               </p>
             </div>
             <div className="glass-card p-4">
-              <p className="text-[var(--text-muted)] text-sm mb-1">Completion</p>
-              <p className="text-2xl font-bold text-gold">{completionPercentage}%</p>
+              <p className="text-[var(--text-muted)] text-sm mb-1">
+                Completion
+              </p>
+              <p className="text-2xl font-bold text-gold">
+                {completionPercentage}%
+              </p>
             </div>
             <div className="glass-card p-4">
-              <p className="text-[var(--text-muted)] text-sm mb-1">Riddles Solved</p>
-              <p className="text-2xl font-bold text-purple">{totalRiddlesSolved}</p>
+              <p className="text-[var(--text-muted)] text-sm mb-1">
+                Riddles Solved
+              </p>
+              <p className="text-2xl font-bold text-purple">
+                {totalRiddlesSolved}
+              </p>
             </div>
             <div className="glass-card p-4">
-              <p className="text-[var(--text-muted)] text-sm mb-1">Current Streak</p>
-              <p className="text-2xl font-bold text-orange-500">{currentStreak} 🔥</p>
+              <p className="text-[var(--text-muted)] text-sm mb-1">
+                Current Streak
+              </p>
+              <p className="text-2xl font-bold text-orange-500">
+                {currentStreak} 🔥
+              </p>
             </div>
           </div>
 
           {/* Filter Buttons */}
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={() => setFilter('all')}
+              onClick={() => setFilter("all")}
               className={`px-4 py-2 rounded-lg font-inter text-sm transition-all ${
-                filter === 'all'
-                  ? 'bg-purple text-white'
-                  : 'bg-midnight-light text-[var(--text-secondary)] hover:bg-[var(--border-default)]'
+                filter === "all"
+                  ? "bg-purple text-white"
+                  : "bg-midnight-light text-[var(--text-secondary)] hover:bg-[var(--border-default)]"
               }`}
             >
               <Filter size={16} className="inline mr-2" />
@@ -84,11 +96,11 @@ export default function AchievementsPage() {
             {Object.entries(typeIcons).map(([type, Icon]) => (
               <button
                 key={type}
-                onClick={() => setFilter(type as Achievement['type'])}
+                onClick={() => setFilter(type as Achievement["type"])}
                 className={`px-4 py-2 rounded-lg font-inter text-sm transition-all flex items-center gap-2 ${
                   filter === type
-                    ? 'bg-purple text-white'
-                    : 'bg-midnight-light text-[var(--text-secondary)] hover:bg-[var(--border-default)]'
+                    ? "bg-purple text-white"
+                    : "bg-midnight-light text-[var(--text-secondary)] hover:bg-[var(--border-default)]"
                 }`}
               >
                 <Icon size={16} />

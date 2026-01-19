@@ -1,10 +1,8 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
 import { GameHeader } from "../components/organisms";
 import { useGameStore } from "@/lib/store/game-store";
-import { ArrowLeft } from "lucide-react";
 
 export default function GameLayout({
   children,

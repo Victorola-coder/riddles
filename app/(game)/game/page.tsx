@@ -9,14 +9,14 @@ import {
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
 import { CheckCircle2, XCircle } from "lucide-react";
-import React, { useState, useEffect, useRef } from "react";
 import { useGameStore } from "@/lib/store/game-store";
 import { useUserStore } from "@/lib/store/user-store";
 import { motion, AnimatePresence } from "framer-motion";
 import { getRiddleById } from "@/lib/constants/riddles";
+import { soundManager } from "@/lib/utils/sound-manager";
+import React, { useState, useEffect, useRef } from "react";
 import { calculateGemsEarned } from "@/lib/utils/gem-calculator";
 import { RiddleCard, AnswerInput, HintPanel } from "@/app/components/organisms";
-import { soundManager } from "@/lib/utils/sound-manager";
 
 export default function GamePage() {
   const {
@@ -57,7 +57,7 @@ export default function GamePage() {
     setShowError(false);
     setWrongAttempts(0);
     startTimeRef.current = Date.now();
-    
+
     // Update streak on first load
     updateStreak();
   }, [currentRiddleId, updateStreak]);
@@ -74,7 +74,6 @@ export default function GamePage() {
     }
     return () => clearInterval(interval);
   }, [isTimerActive, tickTimer]);
-
 
   if (!currentRiddle) {
     return (
@@ -94,13 +93,16 @@ export default function GamePage() {
       // Correct answer!
       const gemsEarned = calculateGemsEarned(currentRiddle.difficulty);
       const solveTime = (Date.now() - startTimeRef.current) / 1000; // in seconds
-      const usedNoHints = !hasUsedHint(currentRiddle.id, 1) && !hasUsedHint(currentRiddle.id, 2) && !hasUsedHint(currentRiddle.id, 3);
+      const usedNoHints =
+        !hasUsedHint(currentRiddle.id, 1) &&
+        !hasUsedHint(currentRiddle.id, 2) &&
+        !hasUsedHint(currentRiddle.id, 3);
 
       solveRiddle(currentRiddle.id, gemsEarned);
 
       // Play success sounds
-      soundManager.play('success');
-      soundManager.play('gem');
+      soundManager.play("success");
+      soundManager.play("gem");
 
       // Track achievements
       incrementTotalSolved();
@@ -147,9 +149,9 @@ export default function GamePage() {
       setWrongAttempts((prev) => prev + 1);
       setShowError(true);
       setTimeout(() => setShowError(false), 500);
-      
+
       // Play error sound
-      soundManager.play('error');
+      soundManager.play("error");
 
       toast.error(
         <div className="flex items-center gap-2">
@@ -161,12 +163,11 @@ export default function GamePage() {
     }
   };
 
-
   const handleHint1 = () => {
     useHint(currentRiddle.id, 1);
     const hint = getFirstLetterHint(currentRiddle);
     setRevealedHints((prev) => ({ ...prev, hint1: hint }));
-    soundManager.play('hint');
+    soundManager.play("hint");
     toast.info(`Hint: First letter is "${hint}"`);
   };
 
@@ -174,7 +175,7 @@ export default function GamePage() {
     useHint(currentRiddle.id, 2);
     const hint = getWordLengthHint(currentRiddle);
     setRevealedHints((prev) => ({ ...prev, hint2: hint }));
-    soundManager.play('hint');
+    soundManager.play("hint");
     toast.info(`Hint: ${hint}`);
   };
 
@@ -182,7 +183,7 @@ export default function GamePage() {
     useHint(currentRiddle.id, 3);
     const answer = getFullAnswer(currentRiddle);
     setRevealedHints((prev) => ({ ...prev, answer }));
-    soundManager.play('hint');
+    soundManager.play("hint");
     toast.warning(`Answer: ${answer}`, { duration: 5000 });
   };
 

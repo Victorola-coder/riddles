@@ -3,7 +3,6 @@
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Loader } from "@/app/components/global";
 import { getAdminToken, setAdminToken } from "@/lib/admin-auth";
 
 export default function AdminPage() {

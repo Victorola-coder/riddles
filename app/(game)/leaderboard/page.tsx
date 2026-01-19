@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
@@ -15,9 +15,9 @@ import {
   Flame,
   User,
 } from "lucide-react";
+import { Avatar } from "@/app/components/ui";
 import { useUserStore } from "@/lib/store/user-store";
 import { useGameStore } from "@/lib/store/game-store";
-import { Avatar } from "@/app/components/ui";
 
 export default function LeaderboardPage() {
   const [activeTab, setActiveTab] = useState<"global" | "weekly">("global");
@@ -232,7 +232,10 @@ export default function LeaderboardPage() {
                 <div className="flex items-center gap-4 mb-3">
                   <div className="relative">
                     <div className="absolute inset-0 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] blur-xl opacity-50 rounded-full" />
-                    <Trophy className="relative text-[var(--accent-secondary)]" size={40} />
+                    <Trophy
+                      className="relative text-[var(--accent-secondary)]"
+                      size={40}
+                    />
                   </div>
                   <h1 className="text-4xl md:text-5xl font-cinzel font-bold bg-gradient-to-r from-[var(--text-primary)] via-[var(--accent-primary)] to-[var(--accent-secondary)] bg-clip-text text-transparent">
                     Leaderboard
@@ -257,7 +260,11 @@ export default function LeaderboardPage() {
                     <motion.div
                       layoutId="activeTab"
                       className="absolute inset-0 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] rounded-lg"
-                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                      transition={{
+                        type: "spring",
+                        bounce: 0.2,
+                        duration: 0.6,
+                      }}
                     />
                   )}
                   <Trophy
@@ -280,7 +287,11 @@ export default function LeaderboardPage() {
                     <motion.div
                       layoutId="activeTab"
                       className="absolute inset-0 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] rounded-lg"
-                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                      transition={{
+                        type: "spring",
+                        bounce: 0.2,
+                        duration: 0.6,
+                      }}
                     />
                   )}
                   <TrendingUp
@@ -289,7 +300,9 @@ export default function LeaderboardPage() {
                       activeTab === "weekly" ? "text-white" : ""
                     }`}
                   />
-                  <span className="relative z-10 hidden sm:inline">This Week</span>
+                  <span className="relative z-10 hidden sm:inline">
+                    This Week
+                  </span>
                 </button>
               </div>
             </div>
@@ -358,14 +371,20 @@ export default function LeaderboardPage() {
                       <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                         <div className="relative">
                           <div className="absolute inset-0 bg-[var(--accent-secondary)] blur-xl rounded-full opacity-50" />
-                          <Crown className="relative text-[var(--accent-secondary)]" size={32} />
+                          <Crown
+                            className="relative text-[var(--accent-secondary)]"
+                            size={32}
+                          />
                         </div>
                       </div>
                       <div className="flex flex-col items-center text-center mt-4">
                         <div className="relative mb-4">
                           <div className="absolute inset-0 bg-[var(--accent-secondary)]/30 blur-2xl rounded-full" />
                           <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-full bg-gradient-to-br from-[var(--accent-secondary)]/40 to-[var(--accent-primary)]/40 flex items-center justify-center border-2 border-[var(--accent-secondary)]">
-                            <User className="text-[var(--accent-secondary)]" size={40} />
+                            <User
+                              className="text-[var(--accent-secondary)]"
+                              size={40}
+                            />
                           </div>
                         </div>
                         <div className="text-3xl font-cinzel font-bold text-[var(--accent-secondary)] mb-1">
@@ -462,7 +481,10 @@ export default function LeaderboardPage() {
                 exit={{ opacity: 0 }}
                 className="bg-[var(--bg-card)] backdrop-blur-xl rounded-2xl p-12 text-center border border-[var(--border-default)]"
               >
-                <Trophy className="mx-auto mb-4 text-[var(--text-muted)]" size={48} />
+                <Trophy
+                  className="mx-auto mb-4 text-[var(--text-muted)]"
+                  size={48}
+                />
                 <p className="text-[var(--text-secondary)] font-inter text-lg">
                   No data available yet. Start solving riddles!
                 </p>
@@ -475,114 +497,125 @@ export default function LeaderboardPage() {
                 exit={{ opacity: 0 }}
                 className="space-y-3"
               >
-                {restOfLeaderboard.map((entry: LeaderboardEntry, index: number) => {
-                  const progress = getProgressPercentage(entry.totalGems);
-                  return (
-                    <motion.div
-                      key={entry.rank}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.4, delay: index * 0.05 }}
-                      className={`group relative bg-gradient-to-r from-[var(--bg-card)] to-[var(--bg-card-hover)] backdrop-blur-xl rounded-xl p-4 md:p-5 border transition-all duration-300 hover:scale-[1.02] hover:shadow-lg ${
-                        entry.isCurrentUser
-                          ? "border-[var(--accent-primary)]/50 bg-gradient-to-r from-[var(--accent-primary)]/10 to-[var(--accent-secondary)]/10 ring-2 ring-[var(--accent-primary)]/30"
-                          : "border-[var(--border-default)] hover:border-[var(--accent-primary)]/30"
-                      }`}
-                    >
-                      <div className="flex items-center gap-4 md:gap-6">
-                        {/* Rank */}
-                        <div className="w-12 md:w-16 flex items-center justify-center flex-shrink-0">
-                          {getRankIcon(entry.rank)}
-                        </div>
+                {restOfLeaderboard.map(
+                  (entry: LeaderboardEntry, index: number) => {
+                    const progress = getProgressPercentage(entry.totalGems);
+                    return (
+                      <motion.div
+                        key={entry.rank}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.4, delay: index * 0.05 }}
+                        className={`group relative bg-gradient-to-r from-[var(--bg-card)] to-[var(--bg-card-hover)] backdrop-blur-xl rounded-xl p-4 md:p-5 border transition-all duration-300 hover:scale-[1.02] hover:shadow-lg ${
+                          entry.isCurrentUser
+                            ? "border-[var(--accent-primary)]/50 bg-gradient-to-r from-[var(--accent-primary)]/10 to-[var(--accent-secondary)]/10 ring-2 ring-[var(--accent-primary)]/30"
+                            : "border-[var(--border-default)] hover:border-[var(--accent-primary)]/30"
+                        }`}
+                      >
+                        <div className="flex items-center gap-4 md:gap-6">
+                          {/* Rank */}
+                          <div className="w-12 md:w-16 flex items-center justify-center flex-shrink-0">
+                            {getRankIcon(entry.rank)}
+                          </div>
 
-                        {/* Avatar */}
-                        <div className="relative flex-shrink-0">
-                          <Avatar
-                            alt={entry.username}
-                            size="lg"
-                            className="ring-1 ring-[var(--border-default)]"
-                          />
-                          {entry.isCurrentUser && (
-                            <div className="absolute -bottom-1 -right-1 bg-[var(--accent-primary)] rounded-full p-1">
-                              <Zap className="text-white" size={12} />
-                            </div>
-                          )}
-                        </div>
-
-                        {/* User Info */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className="font-cinzel font-semibold text-[var(--text-primary)] text-base md:text-lg truncate">
-                              {entry.username}
-                            </h3>
+                          {/* Avatar */}
+                          <div className="relative flex-shrink-0">
+                            <Avatar
+                              alt={entry.username}
+                              size="lg"
+                              className="ring-1 ring-[var(--border-default)]"
+                            />
                             {entry.isCurrentUser && (
-                              <span className="px-2.5 py-1 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] text-white text-xs rounded-full font-inter font-medium flex-shrink-0">
-                                You
-                              </span>
+                              <div className="absolute -bottom-1 -right-1 bg-[var(--accent-primary)] rounded-full p-1">
+                                <Zap className="text-white" size={12} />
+                              </div>
                             )}
                           </div>
 
-                          {/* Progress Bar */}
-                          <div className="mb-2">
-                            <div className="h-1.5 bg-[var(--bg-midnight-light)] rounded-full overflow-hidden">
-                              <motion.div
-                                initial={{ width: 0 }}
-                                animate={{ width: `${progress}%` }}
-                                transition={{ duration: 0.8, delay: index * 0.05 }}
-                                className={`h-full rounded-full ${
-                                  entry.isCurrentUser
-                                    ? "bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)]"
-                                    : "bg-gradient-to-r from-[var(--accent-primary)]/60 to-[var(--accent-secondary)]/60"
-                                }`}
-                              />
+                          {/* User Info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h3 className="font-cinzel font-semibold text-[var(--text-primary)] text-base md:text-lg truncate">
+                                {entry.username}
+                              </h3>
+                              {entry.isCurrentUser && (
+                                <span className="px-2.5 py-1 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] text-white text-xs rounded-full font-inter font-medium flex-shrink-0">
+                                  You
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Progress Bar */}
+                            <div className="mb-2">
+                              <div className="h-1.5 bg-[var(--bg-midnight-light)] rounded-full overflow-hidden">
+                                <motion.div
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${progress}%` }}
+                                  transition={{
+                                    duration: 0.8,
+                                    delay: index * 0.05,
+                                  }}
+                                  className={`h-full rounded-full ${
+                                    entry.isCurrentUser
+                                      ? "bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)]"
+                                      : "bg-gradient-to-r from-[var(--accent-primary)]/60 to-[var(--accent-secondary)]/60"
+                                  }`}
+                                />
+                              </div>
+                            </div>
+
+                            {/* Mobile Stats */}
+                            <div className="flex flex-wrap gap-x-4 gap-y-1 md:hidden text-xs text-[var(--text-muted)] font-inter">
+                              <span className="flex items-center gap-1">
+                                <Gem size={12} />
+                                {entry.totalGems.toLocaleString()}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Zap size={12} />
+                                {entry.riddlesSolved}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Flame size={12} />
+                                {entry.currentStreak}
+                              </span>
                             </div>
                           </div>
 
-                          {/* Mobile Stats */}
-                          <div className="flex flex-wrap gap-x-4 gap-y-1 md:hidden text-xs text-[var(--text-muted)] font-inter">
-                            <span className="flex items-center gap-1">
-                              <Gem size={12} />
-                              {entry.totalGems.toLocaleString()}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Zap size={12} />
-                              {entry.riddlesSolved}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Flame size={12} />
-                              {entry.currentStreak}
-                            </span>
+                          {/* Desktop Stats */}
+                          <div className="hidden md:flex items-center gap-6">
+                            <div className="text-center">
+                              <div className="flex items-center justify-center gap-1 text-[var(--accent-secondary)] font-semibold mb-1">
+                                <Gem size={16} />
+                                <span>{entry.totalGems.toLocaleString()}</span>
+                              </div>
+                              <div className="text-[var(--text-muted)] text-xs">
+                                Gems
+                              </div>
+                            </div>
+                            <div className="text-center">
+                              <div className="flex items-center justify-center gap-1 text-[var(--text-primary)] font-semibold mb-1">
+                                <Zap size={16} />
+                                <span>{entry.riddlesSolved}</span>
+                              </div>
+                              <div className="text-[var(--text-muted)] text-xs">
+                                Solved
+                              </div>
+                            </div>
+                            <div className="text-center">
+                              <div className="flex items-center justify-center gap-1 text-[#f59e0b] font-semibold mb-1">
+                                <Flame size={16} />
+                                <span>{entry.currentStreak}</span>
+                              </div>
+                              <div className="text-[var(--text-muted)] text-xs">
+                                Streak
+                              </div>
+                            </div>
                           </div>
                         </div>
-
-                        {/* Desktop Stats */}
-                        <div className="hidden md:flex items-center gap-6">
-                          <div className="text-center">
-                            <div className="flex items-center justify-center gap-1 text-[var(--accent-secondary)] font-semibold mb-1">
-                              <Gem size={16} />
-                              <span>{entry.totalGems.toLocaleString()}</span>
-                            </div>
-                            <div className="text-[var(--text-muted)] text-xs">Gems</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="flex items-center justify-center gap-1 text-[var(--text-primary)] font-semibold mb-1">
-                              <Zap size={16} />
-                              <span>{entry.riddlesSolved}</span>
-                            </div>
-                            <div className="text-[var(--text-muted)] text-xs">Solved</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="flex items-center justify-center gap-1 text-[#f59e0b] font-semibold mb-1">
-                              <Flame size={16} />
-                              <span>{entry.currentStreak}</span>
-                            </div>
-                            <div className="text-[var(--text-muted)] text-xs">Streak</div>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  );
-                })}
+                      </motion.div>
+                    );
+                  }
+                )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -599,7 +632,8 @@ export default function LeaderboardPage() {
                 <>
                   <div className="text-2xl">🌍</div>
                   <p className="text-[var(--text-primary)] font-inter font-medium text-base md:text-lg">
-                    Rankings update in real-time. Keep solving to climb the ladder!
+                    Rankings update in real-time. Keep solving to climb the
+                    ladder!
                   </p>
                 </>
               ) : (
