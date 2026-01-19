@@ -3,7 +3,8 @@ import type { NextRequest } from 'next/server';
 import { verifyToken } from '@/lib/utils/jwt';
 
 // Paths that require authentication
-const PROTECTED_PATHS = ['/game', '/profile'];
+// Allow `/game` for guest play; keep profile protected
+const PROTECTED_PATHS = ['/profile'];
 const ADMIN_PATHS = ['/admin'];
 const PUBLIC_PATHS = ['/login', '/signup', '/auth', '/verify-email', '/forgot-password', '/reset-password', '/'];
 

@@ -289,12 +289,12 @@ export default function LoginPage() {
               </button>
             </p>
           )}
-          <Link
+          {/* <Link
             href="/"
             className="block text-sm text-white/60 hover:text-white transition-colors font-inter"
           >
             ← Back to Home
-          </Link>
+          </Link> */}
         </div>
       </div>
     </div>
