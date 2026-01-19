@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
       where.category = category;
     }
 
-    // First get all matching riddles, then randomize
+    // Get all matching riddles
     const allRiddles = await prisma.riddle.findMany({
       where,
       select: {
@@ -41,11 +41,52 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Shuffle the array randomly
-    const shuffled = allRiddles.sort(() => Math.random() - 0.5);
+    // Improved randomization: Group by difficulty and category, then shuffle
+    const grouped: Record<string, typeof allRiddles> = {};
+    
+    allRiddles.forEach((riddle) => {
+      const key = `${riddle.difficulty}_${riddle.category || 'uncategorized'}`;
+      if (!grouped[key]) {
+        grouped[key] = [];
+      }
+      grouped[key].push(riddle);
+    });
+
+    // Shuffle each group independently using Fisher-Yates algorithm for better randomness
+    const shuffleArray = <T>(array: T[]): T[] => {
+      const shuffled = [...array];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    };
+
+    Object.keys(grouped).forEach((key) => {
+      grouped[key] = shuffleArray(grouped[key]);
+    });
+
+    // Interleave groups for better distribution (round-robin style)
+    // This ensures users see a mix of categories/difficulties, not all from one group
+    const shuffled: typeof allRiddles = [];
+    const groups = Object.values(grouped);
+    const maxLength = Math.max(...groups.map(g => g.length), 0);
+    
+    for (let i = 0; i < maxLength; i++) {
+      // Shuffle the order of groups each iteration for more randomness
+      const shuffledGroups = shuffleArray(groups);
+      shuffledGroups.forEach((group) => {
+        if (group[i]) {
+          shuffled.push(group[i]);
+        }
+      });
+    }
+
+    // Final Fisher-Yates shuffle to ensure true randomness across all groups
+    const finalShuffled = shuffleArray(shuffled);
     
     // Apply pagination after randomization
-    const riddles = shuffled.slice(offset, offset + limit);
+    const riddles = finalShuffled.slice(offset, offset + limit);
     const total = allRiddles.length;
 
     return NextResponse.json({

@@ -4,70 +4,350 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
 
-A gamified riddle-solving platform where users progress through difficulty levels, earn virtual currency (Gems), and experience a premium, mysterious aesthetic.
+A gamified riddle-solving platform where users progress through difficulty levels, earn virtual currency (Gems), and experience a premium, mysterious aesthetic. **Riddles, not jokes.**
 
 ## 🎯 Overview
 
-Riddle Quest is a Progressive Web App that combines puzzle-solving with game mechanics. Users solve riddles across three difficulty tiers (Easy, Medium, Hard), earn gems for correct answers, and can spend gems on hints to progress when stuck.
+Riddle Quest is a Progressive Web App that combines puzzle-solving with game mechanics. Users solve riddles across three difficulty tiers (Easy, Medium, Hard), earn gems for correct answers, and can spend gems on hints to progress when stuck. The platform features user authentication, leaderboards, achievements, and an admin panel for managing riddles and game settings.
 
 ## 🎮 How It Works
 
-1. **Start Playing**: Begin with your first riddle (Easy difficulty)
+1. **Start Playing**: Begin with your first riddle (Easy difficulty) - no account required!
 2. **Solve Riddles**: Type your answer and submit - get instant feedback!
 3. **Earn Gems**:
-   - Easy riddle: +10 gems
-   - Medium riddle: +20 gems
-   - Hard riddle: +50 gems
+   - Easy riddle: Configurable (default: 10 gems)
+   - Medium riddle: Configurable (default: 20 gems)
+   - Hard riddle: Configurable (default: 50 gems)
 4. **Use Hints** (when stuck):
-   - Hint 1: First letter (-15 gems)
-   - Hint 2: Word length (-10 gems)
-   - Hint 3: Full answer (-50 gems)
-5. **Progress**: Unlock harder difficulties as you complete 70% of current tier
-6. **Persistence**: Your progress and gems are saved automatically
+   - Hint 1: First letter (configurable cost)
+   - Hint 2: Word length (configurable cost)
+   - Hint 3: Full answer (configurable cost)
+5. **Progress**: Unlock harder difficulties as you complete riddles
+6. **Track Progress**: View your stats, achievements, and position on the leaderboard
+7. **Guest Mode**: Play without an account, then migrate your progress when you sign up
 
 ## ✨ Features
 
-### Phase 1 (MVP) - ✅ Implemented
+### Core Game Features ✅
 
-- ✅ **Riddle System**: Display riddles with difficulty indicators and instant feedback
+- ✅ **Riddle System**: 37+ riddles with randomized distribution across categories
 - ✅ **Gem Economy**: Earn gems by solving riddles, spend on hints and skips
 - ✅ **Hint System**: Progressive hints (first letter, word length, full answer)
-- ✅ **Progression System**: Level-based progression with auto-unlock mechanics
-- ✅ **Local Persistence**: Save progress using Zustand with localStorage persistence
-- ✅ **Premium Design**: "Midnight Mystery" theme with glassmorphism effects
-- ✅ **Animations**: Success/error feedback with Framer Motion and confetti celebrations
-- ✅ **State Management**: Zustand store for game state management
+- ✅ **Progression System**: Level-based progression with difficulty tiers
 - ✅ **Answer Validation**: Support for multiple valid answers per riddle
-- ✅ **Component Library**: Full atomic design component structure (atoms, molecules, organisms)
+- ✅ **Randomized Riddles**: Smart randomization per category/difficulty for varied gameplay
 
-### Phase 2 (Planned)
+### User Features ✅
 
-- 🔥 Daily streak system
-- 🏆 Achievements & badges
-- 🔊 Sound effects
-- 🌓 Dark/Light mode toggle
-- 📱 50+ riddles across categories
+- ✅ **User Authentication**: Sign up, login, password reset via email
+- ✅ **Guest Mode**: Play without an account, migrate progress later
+- ✅ **Profile Page**: View stats, update username/password
+- ✅ **Leaderboard**: Global and weekly leaderboards with rankings
+- ✅ **Achievements**: Track milestones and unlock achievements
+- ✅ **Avatar System**: DiceBear avatars for users and guests
+- ✅ **Session Persistence**: Progress saved across devices
 
-### Phase 3 (Future)
+### Admin Features ✅
 
-- 🔐 User authentication
-- 📈 Leaderboard
-- 🤝 Social sharing
-- 🛠️ Admin panel
+- ✅ **Admin Dashboard**: Real-time statistics and activity monitoring
+- ✅ **Riddle Management**: Create, edit, activate/deactivate riddles
+- ✅ **User Management**: View users, stats, and activity
+- ✅ **Game Settings**: Configure gem rewards, costs, and initial values
+- ✅ **Activity Logs**: Track all admin and user activities
+- ✅ **Real-time Updates**: Auto-refreshing dashboard with live data
+
+### Technical Features ✅
+
+- ✅ **Database**: PostgreSQL with Prisma ORM
+- ✅ **API**: RESTful API with type-safe client
+- ✅ **State Management**: Zustand stores with React Query
+- ✅ **Email Service**: Nodemailer integration for password reset
+- ✅ **JWT Authentication**: Secure token-based auth
+- ✅ **Rate Limiting**: API protection against abuse
+- ✅ **Type Safety**: Full TypeScript coverage
 
 ## 🛠️ Tech Stack
 
+### Frontend
 - **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/) + Custom CSS Variables
-- **State Management**: [Zustand](https://zustand-demo.pmnd.rs/) with persistence middleware
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) + Custom CSS Variables
+- **State Management**: [Zustand](https://zustand-demo.pmnd.rs/) + [React Query](https://tanstack.com/query)
 - **Animations**: [Framer Motion](https://www.framer.com/motion/)
 - **Celebrations**: [Canvas Confetti](https://github.com/catdad/canvas-confetti)
 - **Icons**: [Lucide React](https://lucide.dev/)
 - **Fonts**: Google Fonts (Cinzel, Inter) + Geist Sans/Mono
-- **Validation**: [Zod](https://zod.dev/)
 - **Notifications**: [Sonner](https://sonner.emilkowal.ski/)
-- **Animations Library**: [AOS](https://michalsnik.github.io/aos/) (Animate On Scroll)
+
+### Backend
+- **Database**: [PostgreSQL](https://www.postgresql.org/)
+- **ORM**: [Prisma](https://www.prisma.io/)
+- **Authentication**: JWT (jose) + Supabase (optional)
+- **Email**: [Nodemailer](https://nodemailer.com/)
+- **Validation**: [Zod](https://zod.dev/)
+- **HTTP Client**: [Axios](https://axios-http.com/)
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18+ or [Bun](https://bun.sh/)
+- PostgreSQL database (local or hosted)
+- npm, yarn, pnpm, or bun package manager
+
+### Installation
+
+1. **Clone the repository:**
+
+```bash
+git clone https://github.com/Victorola-coder/riddles.git
+cd riddles
+```
+
+2. **Install dependencies:**
+
+```bash
+# Using npm
+npm install
+
+# Using bun
+bun install
+```
+
+3. **Set up environment variables:**
+
+Copy `.env.example` to `.env.local` and fill in your values:
+
+```bash
+cp .env.example .env.local
+```
+
+Required environment variables:
+
+```env
+# Database
+DATABASE_URL="postgresql://user:password@localhost:5432/riddle_quest?schema=public"
+DIRECT_URL="postgresql://user:password@localhost:5432/riddle_quest?schema=public"
+
+# Authentication
+JWT_SECRET="your-secret-key-change-in-production"
+ADMIN_ACCESS_CODE="your-admin-code"
+
+# Application URLs
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+
+# Email (Optional - for password reset)
+SMTP_HOST="smtp.gmail.com"
+SMTP_PORT="587"
+SMTP_USER="your-email@gmail.com"
+SMTP_PASS="your-app-password"
+EMAIL_FROM="Riddle Quest <no-reply@riddle-quest.test>"
+
+# Supabase (Optional)
+NEXT_PUBLIC_SUPABASE_URL="https://your-project.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key"
+```
+
+4. **Set up the database:**
+
+```bash
+# Generate Prisma Client
+npm run db:generate
+
+# Push schema to database
+npm run db:push
+
+# Seed the database with initial data
+npm run db:seed
+```
+
+5. **Run the development server:**
+
+```bash
+# Using npm
+npm run dev
+
+# Using bun
+bun dev
+```
+
+6. **Open [http://localhost:3000](http://localhost:3000) in your browser.**
+
+## 📜 Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+- `npm run db:generate` - Generate Prisma Client
+- `npm run db:push` - Push schema changes to database
+- `npm run db:migrate` - Create and run migrations
+- `npm run db:studio` - Open Prisma Studio (database GUI)
+- `npm run db:seed` - Seed database with initial data
+
+## 📁 Project Structure
+
+```
+riddles/
+├── app/
+│   ├── (auth)/                    # Authentication routes
+│   │   ├── login/
+│   │   ├── forgot-password/
+│   │   └── reset-password/
+│   │
+│   ├── (boss)/                    # Admin routes (protected)
+│   │   └── admin/
+│   │       ├── dashboard/
+│   │       ├── riddles/
+│   │       ├── users/
+│   │       └── settings/
+│   │
+│   ├── (game)/                    # Game routes
+│   │   ├── game/
+│   │   ├── leaderboard/
+│   │   ├── profile/
+│   │   └── achievements/
+│   │
+│   ├── api/                       # API routes
+│   │   ├── auth/
+│   │   ├── game/
+│   │   ├── admin/
+│   │   ├── riddles/
+│   │   └── leaderboard/
+│   │
+│   ├── components/
+│   │   ├── atoms/                # Basic building blocks
+│   │   ├── molecules/            # Component combinations
+│   │   ├── organisms/            # Complex components
+│   │   ├── ui/                   # Reusable UI components
+│   │   ├── landing/              # Landing page components
+│   │   └── providers/            # Context providers
+│   │
+│   ├── global.css                 # Global styles & CSS variables
+│   ├── layout.tsx                 # Root layout
+│   └── page.tsx                   # Landing page
+│
+├── lib/
+│   ├── api/                       # API client functions
+│   │   ├── client.ts             # Base API client
+│   │   ├── auth.ts
+│   │   ├── game.ts
+│   │   ├── admin.ts
+│   │   └── riddles.ts
+│   │
+│   ├── hooks/                     # React Query hooks
+│   │   ├── use-auth.ts
+│   │   ├── use-game.ts
+│   │   └── use-admin.ts
+│   │
+│   ├── store/                     # Zustand stores
+│   │   ├── auth.ts
+│   │   ├── game-store.ts
+│   │   └── user-store.ts
+│   │
+│   ├── utils/                     # Utility functions
+│   │   ├── avatar.ts             # DiceBear avatar generation
+│   │   ├── email.ts              # Email sending
+│   │   ├── guest-session.ts     # Guest user management
+│   │   └── riddle-validator.ts   # Answer validation
+│   │
+│   ├── constants/                 # Game configuration
+│   │   ├── game-config.ts
+│   │   └── riddles.ts
+│   │
+│   ├── prisma.ts                  # Prisma client
+│   └── services.ts                # Business logic services
+│
+├── prisma/
+│   ├── schema.prisma             # Database schema
+│   └── seed.ts                   # Database seeding script
+│
+├── types.d.ts                     # Global type definitions
+└── public/                        # Static assets
+```
+
+## 🎨 Design System
+
+### Color Palette - "Midnight Mystery"
+
+- **Background**: Deep charcoal (#0f0f0f) with dark slate accents
+- **Primary Accent**: Mysterious purple (#8b5cf6)
+- **Secondary Accent**: Gold (#fbbf24)
+- **Success**: Green (#10b981)
+- **Danger**: Red (#ef4444)
+- **Text Primary**: White (#ffffff)
+- **Text Secondary**: Gray (#9ca3af)
+
+### Typography
+
+- **Headings**: Cinzel (elegant, classic)
+- **Body**: Inter/Geist Sans (clean, readable)
+- **Monospace**: Geist Mono (for hints/answers)
+
+## 🔌 API Endpoints
+
+### Public Endpoints
+
+- `GET /api/riddles` - Fetch riddles (supports filtering by difficulty/category)
+- `GET /api/leaderboard` - Get leaderboard data
+
+### Authentication Endpoints
+
+- `POST /api/auth/signup` - Create new account
+- `POST /api/auth/login` - Login user
+- `GET /api/auth/me` - Get current user
+- `PATCH /api/auth/me` - Update user profile
+- `POST /api/auth/forgot-password` - Request password reset
+- `POST /api/auth/reset-password` - Reset password with token
+- `POST /api/auth/migrate-guest` - Migrate guest data to user account
+
+### Game Endpoints
+
+- `GET /api/game/session` - Get or create game session
+- `POST /api/game/session` - Update game session
+- `POST /api/game/solve` - Submit riddle answer
+- `POST /api/game/hint` - Get hint for riddle
+
+### Admin Endpoints (Protected)
+
+- `GET /api/admin/stats` - Get dashboard statistics
+- `GET /api/admin/activity` - Get activity logs
+- `GET /api/admin/riddles` - List riddles (paginated)
+- `POST /api/admin/riddles` - Create riddle
+- `PATCH /api/admin/riddles/[id]` - Update riddle
+- `DELETE /api/admin/riddles/[id]` - Delete riddle
+- `GET /api/admin/users` - List users (paginated)
+- `GET /api/admin/settings` - Get game settings
+- `POST /api/admin/settings` - Update game settings
+
+## 📋 Development Status
+
+See [TASKS.md](./TASKS.md) for the complete task list and progress tracking.
+
+**Current Phase**: Phase 3 (Backend) - ✅ Completed
+
+### ✅ Completed Features
+
+- **Backend Infrastructure**: PostgreSQL database with Prisma ORM
+- **User Authentication**: JWT-based auth with password reset
+- **API Layer**: Type-safe API client with React Query hooks
+- **Admin Panel**: Full CRUD for riddles, users, and settings
+- **Leaderboard**: Global and weekly rankings
+- **Achievements**: Achievement tracking system
+- **Guest Mode**: Play without account, migrate progress
+- **Email Service**: Password reset emails via Nodemailer
+- **Avatar System**: DiceBear integration for user avatars
+- **Real-time Updates**: Auto-refreshing admin dashboard
+- **Randomized Riddles**: Smart randomization per category/difficulty
+
+### 🚧 Future Enhancements
+
+- Daily streak system
+- Sound effects
+- Dark/Light mode toggle
+- More riddles (expand beyond 37)
+- Social sharing features
+- Mobile app (React Native)
 
 ## 🤝 Contributing
 
@@ -79,186 +359,12 @@ We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md)
 - How to submit pull requests
 - How to report bugs or suggest features
 
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js 18+ or [Bun](https://bun.sh/)
-- npm, yarn, pnpm, or bun package manager
-
-### Installation
-
-1. Clone the repository:
-
-```bash
-git clone https://github.com/Victorola-coder/riddles.git
-cd riddles
-```
-
-2. Install dependencies:
-
-```bash
-# Using npm
-npm install
-
-# Using bun
-bun install
-```
-
-3. Run the development server:
-
-```bash
-# Using npm
-npm run dev
-
-# Using bun
-bun dev
-```
-
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-## 📜 Available Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-
-## 📁 Project Structure
-
-```
-riddles/
-├── app/
-│   ├── (game)/                    # Route group for game pages
-│   │   ├── layout.tsx            # Game-specific layout with header
-│   │   └── page.tsx              # Main game page (riddle display & interaction)
-│   │
-│   ├── (marketing)/               # Route group for public pages (future)
-│   │
-│   ├── components/
-│   │   ├── atoms/                # Basic building blocks
-│   │   │   ├── badge.tsx
-│   │   │   ├── button.tsx
-│   │   │   └── index.ts
-│   │   │
-│   │   ├── molecules/            # Component combinations
-│   │   │   ├── difficulty-badge.tsx
-│   │   │   ├── gem-counter.tsx
-│   │   │   ├── progress-bar.tsx
-│   │   │   └── index.ts
-│   │   │
-│   │   ├── organisms/            # Complex components
-│   │   │   ├── answer-input.tsx
-│   │   │   ├── game-header.tsx
-│   │   │   ├── hint-panel.tsx
-│   │   │   ├── riddle-card.tsx
-│   │   │   └── index.ts
-│   │   │
-│   │   ├── global/               # Global components
-│   │   │   ├── animation.tsx
-│   │   │   ├── aos.tsx
-│   │   │   ├── glow.tsx
-│   │   │   ├── loader.tsx
-│   │   │   └── index.ts
-│   │   │
-│   │   └── ui/                   # Reusable UI component library
-│   │       ├── accordion.tsx
-│   │       ├── alert.tsx
-│   │       ├── button.tsx
-│   │       ├── card.tsx
-│   │       ├── input.tsx
-│   │       ├── modal.tsx
-│   │       └── ... (27 components)
-│   │
-│   ├── hooks/                     # Custom React hooks
-│   │   ├── use-click-outside.ts
-│   │   ├── use-keyboard.ts
-│   │   └── index.ts
-│   │
-│   ├── global.css                 # Global styles & CSS variables
-│   ├── layout.tsx                 # Root layout
-│   └── page.tsx                   # Homepage
-│
-├── lib/
-│   ├── store/                     # Zustand stores
-│   │   └── game-store.ts         # Game state management with persistence
-│   │
-│   ├── constants/                 # Game configuration
-│   │   ├── animations.ts         # Framer Motion variants
-│   │   ├── game-config.ts        # Gem costs, rewards, level config
-│   │   └── riddles.ts            # Riddle data (15+ riddles)
-│   │
-│   └── utils/                      # Utility functions
-│       ├── gem-calculator.ts      # Calculate gem rewards
-│       └── riddle-validator.ts    # Answer validation & hint helpers
-│
-├── types/                          # TypeScript type definitions
-│   ├── game.ts                    # GameState, HintLevel, GameAction
-│   ├── riddle.ts                  # Riddle, DifficultyLevel
-│   └── user.ts                    # User state (future)
-│
-└── public/                         # Static assets
-    └── images/
-        └── logo.svg
-```
-
-## 🎨 Design System
-
-### Color Palette - "Midnight Mystery"
-
-- **Background**: Deep charcoal (#0f0f0f) with dark slate accents
-- **Primary Accent**: Mysterious purple (#8b5cf6)
-- **Gem Color**: Gold (#fbbf24)
-- **Success**: Green (#10b981)
-- **Danger**: Red (#ef4444)
-
-### Typography
-
-- **Headings**: Cinzel (elegant, classic)
-- **Body**: Inter/Geist Sans (clean, readable)
-- **Monospace**: Geist Mono (for hints/answers)
-
-## 📋 Development Status
-
-See [TASKS.md](./TASKS.md) for the complete task list and progress tracking.
-
-**Current Phase**: Phase 1 (MVP) - ✅ Core Features Implemented
-
-### ✅ Completed Features
-
-- **Game Foundation**: Zustand store with localStorage persistence
-- **Riddle System**: 15 riddles (5 Easy, 5 Medium, 5 Hard) with categories and tags
-- **Answer Validation**: Case-insensitive validation with multiple answer support
-- **Gem Economy**:
-  - Earn: 10 gems (Easy), 20 gems (Medium), 50 gems (Hard)
-  - Spend: 15 gems (Hint 1), 10 gems (Hint 2), 50 gems (Hint 3), 30 gems (Skip)
-  - Starting gems: 50
-- **Hint System**: Three-level progressive hint system (first letter, word length, full answer)
-- **UI Components**:
-  - Atomic Design structure (atoms, molecules, organisms)
-  - 27+ reusable UI components
-  - Game-specific components (riddle card, answer input, hint panel, gem counter)
-- **Animations**: Success/error animations with confetti celebrations
-- **Game Logic**:
-  - Riddle progression and auto-unlock mechanics
-  - Gem calculation utilities
-  - Hint management and tracking
-  - Answer validation with multiple answer support
-- **Type Safety**: Complete TypeScript type definitions for all game entities
-- **Route Groups**: Organized game and marketing route groups
-
-### 🚧 In Progress / Planned
-
-- Level selection page
-- More riddles (target: 50+)
-- Daily streak system
-- Achievements & badges
-
 ## 📖 Documentation
 
 - [Product Requirements Document (PRD)](./PRD.md) - Complete product specifications
 - [Task List](./TASKS.md) - Development tasks and progress
 - [Contributing Guide](./CONTRIBUTING.md) - How to contribute to the project
+- [`.env.example`](./.env.example) - Environment variables reference
 
 ## 🎯 Success Metrics
 
@@ -274,6 +380,16 @@ See [TASKS.md](./TASKS.md) for the complete task list and progress tracking.
 - Firefox (last 2 versions)
 - Mobile: iOS Safari 14+, Chrome Android 90+
 
+## 🔒 Security
+
+- JWT token-based authentication
+- Password hashing with bcrypt
+- Rate limiting on API endpoints
+- Input validation with Zod
+- SQL injection protection via Prisma
+- CORS configuration
+- Environment variable security
+
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
@@ -282,17 +398,21 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 
 Thank you to all contributors who help make Riddle Quest better!
 
-<!-- Add contributors list here or use GitHub's contributor feature -->
-
 ## 👤 Author
 
 **Victor** - Product Owner & Maintainer
 
+- GitHub: [@Victorola-coder](https://github.com/Victorola-coder)
+
 ---
 
-**Version**: 1.0  
-**Last Updated**: 2026-01-16
+**Version**: 1.0.0  
+**Last Updated**: January 2025
 
 ## ⭐ Show Your Support
 
 If you find this project helpful, please consider giving it a star on GitHub!
+
+---
+
+**Tagline**: Riddles, not jokes. 🧩

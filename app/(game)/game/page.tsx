@@ -128,7 +128,7 @@ export default function GamePage() {
       });
 
       toast.success(
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-nowrap">
           <CheckCircle2 className="text-green-400" />
           <div>
             <p className="font-semibold">Correct! +{gemsEarned} gems</p>
