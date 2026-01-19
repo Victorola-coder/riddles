@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { generateResetToken } from '@/lib/utils/jwt';
+import { sendPasswordResetEmail } from '@/lib/utils/email';
 
 /**
  * POST /api/auth/forgot-password
@@ -34,20 +35,22 @@ export async function POST(request: NextRequest) {
     // Generate reset token
     const resetToken = generateResetToken(email);
 
-    // In production, send email with reset link
-    // For now, we'll just return the token (you can log it or send via email service)
-    const resetLink = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
+    const resetLink = `${
+      process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    }/reset-password?token=${resetToken}`;
 
-    console.log('Password reset link:', resetLink);
-
-    // TODO: Send email using nodemailer or your email service
-    // await sendPasswordResetEmail(email, resetLink);
+    // Send email (falls back to console logging in dev if SMTP isn't configured)
+    await sendPasswordResetEmail({
+      to: email,
+      resetLink,
+    });
 
     return NextResponse.json({
       success: true,
       message: 'If an account exists with this email, a password reset link has been sent.',
-      // Remove this in production - only for development
-      resetLink: process.env.NODE_ENV === 'development' ? resetLink : undefined,
+      // Only expose resetLink in development for easier testing
+      resetLink:
+        process.env.NODE_ENV === 'development' ? resetLink : undefined,
     });
   } catch (error) {
     console.error('Forgot password error:', error);
