@@ -370,6 +370,103 @@ async function main() {
       hint2: "5 letters",
       tags: JSON.stringify(["time", "everyday"]),
     },
+    
+    // NEW CONTENT (PHASE 7 EXPANSION)
+    // EASY
+    {
+      question: "What has legs, but doesn't walk?",
+      answer: JSON.stringify(["table", "a table"]),
+      difficulty: "easy",
+      category: "Objects",
+      hint1: "T",
+      hint2: "5 letters",
+      tags: JSON.stringify(["furniture", "everyday"]),
+    },
+    {
+      question: "What can you break, even if you never pick it up or touch it?",
+      answer: JSON.stringify(["promise", "a promise"]),
+      difficulty: "easy",
+      category: "Abstract",
+      hint1: "P",
+      hint2: "7 letters",
+      tags: JSON.stringify(["abstract", "ethics"]),
+    },
+    {
+      question: "What falls but never breaks? What breaks but never falls?",
+      answer: JSON.stringify(["night and day", "day and night"]),
+      difficulty: "easy",
+      category: "Wordplay",
+      hint1: "N and D",
+      hint2: "Time periods",
+      tags: JSON.stringify(["time", "nature"]),
+    },
+
+    // MEDIUM
+    {
+      question: "What is always in front of you but can't be seen?",
+      answer: JSON.stringify(["future", "the future"]),
+      difficulty: "medium",
+      category: "Abstract",
+      hint1: "F",
+      hint2: "6 letters",
+      tags: JSON.stringify(["time", "abstract"]),
+    },
+    {
+      question: "I shave every day, but my beard stays the same. What am I?",
+      answer: JSON.stringify(["barber", "a barber"]),
+      difficulty: "medium",
+      category: "People",
+      hint1: "B",
+      hint2: "6 letters",
+      tags: JSON.stringify(["occupation", "tricky"]),
+    },
+    {
+      question: "What has many keys but can't open a single lock?",
+      answer: JSON.stringify(["piano", "a piano"]),
+      difficulty: "medium",
+      category: "Objects",
+      hint1: "P",
+      hint2: "5 letters",
+      tags: JSON.stringify(["music", "instrument"]),
+    },
+    {
+      question: "Where does today come before yesterday?",
+      answer: JSON.stringify(["dictionary", "the dictionary"]),
+      difficulty: "medium",
+      category: "Wordplay",
+      hint1: "D",
+      hint2: "10 letters",
+      tags: JSON.stringify(["books", "language"]),
+    },
+
+    // HARD
+    {
+      question: "Pronounced as 1 letter, And written with 3, Two letters there are to appear are in me. I'm double, I'm single, I'm black, blue, and grey, I'm read from both ends, And the same either way. What am I?",
+      answer: JSON.stringify(["eye", "an eye"]),
+      difficulty: "hard",
+      category: "Lateral Thinking",
+      hint1: "E",
+      hint2: "3 letters",
+      tags: JSON.stringify(["body", "riddle"]),
+    },
+    {
+      question: "Only one color, but not one size, Stuck at the bottom, yet easily flies. Present in sun, but not in rain, Doing no harm, and feeling no pain. What am I?",
+      answer: JSON.stringify(["shadow", "a shadow"]),
+      difficulty: "hard",
+      category: "Nature",
+      hint1: "S",
+      hint2: "6 letters",
+      tags: JSON.stringify(["light", "darkness"]),
+    },
+    {
+      question: "What 4-letter word can be written forward, backward or upside down, and can still be read from left to right?",
+      answer: JSON.stringify(["noon"]),
+      difficulty: "hard",
+      category: "Wordplay",
+      hint1: "N",
+      hint2: "Time of day",
+      tags: JSON.stringify(["time", "palindrome"]),
+    },
   ];
 
   for (const riddle of riddles) {

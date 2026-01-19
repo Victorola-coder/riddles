@@ -92,8 +92,15 @@ export async function PATCH(request: NextRequest) {
           { status: 400 }
         );
       }
-      // TODO: Add password validation here
-      const { hashPassword } = await import('@/lib/utils/password');
+      // Validate password strength
+      const { validatePassword, hashPassword } = await import('@/lib/utils/password');
+      const validation = validatePassword(password);
+      if (!validation.valid) {
+        return NextResponse.json(
+          { error: validation.errors.join(', ') },
+          { status: 400 }
+        );
+      }
       data.password = await hashPassword(password);
     }
 
