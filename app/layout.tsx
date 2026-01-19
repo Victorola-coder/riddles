@@ -1,13 +1,14 @@
 import "./global.css";
 import { Toaster } from "sonner";
 import localFont from "next/font/local";
-import { AOS } from "./components/global";
-import { Cinzel, Inter } from "next/font/google";
-import type { Metadata, Viewport } from "next";
-import StructuredData from "./components/global/structured-data";
-import { generateWebsiteStructuredData } from "./lib/structured-data";
 import { Providers } from "./providers";
+import { AOS } from "./components/global";
+import type { Metadata, Viewport } from "next";
+import { Cinzel, Inter } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import StructuredData from "./components/global/structured-data";
 import { ThemeProvider } from "./components/global/theme-provider";
+import { generateWebsiteStructuredData } from "./lib/structured-data";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -122,6 +123,7 @@ export default function RootLayout({
             {children}
           </ThemeProvider>
         </Providers>
+        <Analytics />
       </body>
     </html>
   );
