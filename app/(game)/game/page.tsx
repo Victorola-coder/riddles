@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { soundManager } from "@/lib/utils/sound-manager";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { RiddleCard, AnswerInput, HintPanel } from "@/app/components/organisms";
+import Skeleton from "@/app/components/ui/skeleton";
 import { useCurrentUser } from "@/lib/hooks/use-auth";
 import { getGuestId } from "@/lib/utils/guest-session";
 import {
@@ -154,12 +155,34 @@ export default function GamePage() {
   // Loading state
   if (sessionLoading || riddlesLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-purple mx-auto mb-4" />
-          <p className="text-[var(--text-secondary)] font-inter">
-            Loading game...
-          </p>
+      <div className="w-full max-w-4xl mx-auto flex flex-col gap-8">
+        {/* Riddle Card Skeleton */}
+        <div className="glass-card p-6 md:p-8 space-y-6">
+          <div className="flex justify-between items-center">
+            <Skeleton className="h-6 w-24 rounded-full" />
+            <div className="flex gap-2">
+              <Skeleton className="h-6 w-20 rounded-full" />
+              <Skeleton className="h-6 w-20 rounded-full" />
+            </div>
+          </div>
+          <Skeleton className="h-32 w-full rounded-xl" />
+          <div className="flex justify-between items-center pt-4">
+             <Skeleton className="h-8 w-32" />
+             <Skeleton className="h-10 w-10 rounded-full" />
+          </div>
+        </div>
+
+        {/* Input Skeleton */}
+         <div className="glass-card p-2 flex items-center gap-2">
+            <Skeleton className="h-14 flex-1 rounded-xl" />
+            <Skeleton className="h-14 w-14 rounded-xl" />
+         </div>
+
+        {/* Hint Panel Skeleton */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+           {[...Array(4)].map((_, i) => (
+             <Skeleton key={i} className="h-16 rounded-xl" />
+           ))}
         </div>
       </div>
     );

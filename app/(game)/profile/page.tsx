@@ -25,6 +25,8 @@ import { useUserStore } from "@/lib/store/user-store";
 import { Avatar, Button } from "@/app/components/ui";
 import { cardEntranceVariants, fadeVariants } from "@/lib/constants/animations";
 
+import Skeleton from "@/app/components/ui/skeleton";
+
 export default function ProfilePage() {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -127,8 +129,51 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="container max-w-5xl mx-auto p-4 md:p-8 space-y-12 pb-32">
+        {/* Header Skeleton */}
+        <div className="glass-card p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex flex-col md:flex-row items-center gap-6 w-full">
+            <Skeleton className="w-24 h-24 md:w-32 md:h-32 rounded-full" />
+            <div className="space-y-4 text-center md:text-left flex-1">
+              <Skeleton className="h-10 w-48 mx-auto md:mx-0" />
+              <Skeleton className="h-4 w-64 mx-auto md:mx-0" />
+              <Skeleton className="h-6 w-20 rounded-full mx-auto md:mx-0" />
+            </div>
+          </div>
+          <Skeleton className="h-12 w-32" />
+        </div>
+
+        {/* Stats Skeleton */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="glass-card p-6 flex flex-col items-center justify-center space-y-3">
+              <Skeleton className="w-8 h-8 rounded-full" />
+              <Skeleton className="h-8 w-16" />
+              <Skeleton className="h-3 w-24" />
+            </div>
+          ))}
+        </div>
+
+        {/* Settings Form Skeleton */}
+        <div className="glass-card p-8 md:p-10 space-y-8">
+           <Skeleton className="h-8 w-48" />
+           <div className="space-y-8 max-w-2xl">
+              <div className="space-y-3">
+                 <Skeleton className="h-4 w-24" />
+                 <Skeleton className="h-14 w-full rounded-xl" />
+              </div>
+              <div className="grid md:grid-cols-2 gap-6">
+                 <div className="space-y-3">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-14 w-full rounded-xl" />
+                 </div>
+                 <div className="space-y-3">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-14 w-full rounded-xl" />
+                 </div>
+              </div>
+           </div>
+        </div>
       </div>
     );
   }

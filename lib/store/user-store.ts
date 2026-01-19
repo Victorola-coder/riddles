@@ -102,10 +102,13 @@ export const useUserStore = create<UserStore>()(
       checkAchievements: () => {
         const state = get();
         const unlockedIds = state.achievements;
+        const newProgress: Record<string, number> = { ...state.achievementProgress };
+        const newUnlockedIds: string[] = [];
+        let gemsToAdd = 0;
 
         ACHIEVEMENTS.forEach((achievement) => {
-          // Skip if already unlocked
-          if (unlockedIds.includes(achievement.id)) return;
+          // Skip if already unlocked or just unlocked
+          if (unlockedIds.includes(achievement.id) || newUnlockedIds.includes(achievement.id)) return;
 
           let currentProgress = 0;
           let shouldUnlock = false;
@@ -151,19 +154,40 @@ export const useUserStore = create<UserStore>()(
               break;
           }
 
-          // Update progress
-          set((state) => ({
-            achievementProgress: {
-              ...state.achievementProgress,
-              [achievement.id]: currentProgress,
-            },
-          }));
+          // Update progress in local object
+          newProgress[achievement.id] = currentProgress;
 
-          // Unlock if requirement met
+          // Check if unlock needed
           if (shouldUnlock) {
-            get().unlockAchievement(achievement.id);
+            newUnlockedIds.push(achievement.id);
+            gemsToAdd += achievement.reward;
+            
+            // Side effects (toast/sound) outside of render cycle
+            setTimeout(() => {
+              soundManager.play('achievement');
+              confetti({
+                particleCount: 150,
+                spread: 100,
+                origin: { y: 0.6 },
+                colors: ['#8b5cf6', '#fbbf24', '#10b981'],
+              });
+              toast.success(
+                `🏆 ${achievement.name} Unlocked! ${achievement.description} (+${achievement.reward} gems)`,
+                { duration: 5000 }
+              );
+            }, 0);
           }
         });
+
+        // SINGLE batch update if needed
+        const hasProgressChanges = JSON.stringify(newProgress) !== JSON.stringify(state.achievementProgress);
+        if (newUnlockedIds.length > 0 || hasProgressChanges) {
+           set((state) => ({
+             achievementProgress: newProgress,
+             achievements: [...state.achievements, ...newUnlockedIds],
+             totalGemsEarned: state.totalGemsEarned + gemsToAdd,
+           }));
+        }
       },
 
       unlockAchievement: (id: string) => {
