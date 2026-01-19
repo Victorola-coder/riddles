@@ -16,6 +16,15 @@ export default function Input({
   const inputType =
     type === "password" ? (showPassword ? "text" : "password") : type;
 
+  const baseStyles = clsx(
+    "w-full p-4 rounded-[12px] font-aloe text-base leading-[22.4px] transition-all duration-300",
+    "bg-[var(--bg-secondary)] text-[var(--text-primary)]",
+    "placeholder:text-[var(--text-muted)]",
+    "border border-[var(--border-default)]",
+    "focus:outline-none focus:border-[var(--accent-primary)] focus:ring-1 focus:ring-[var(--accent-primary)]/50",
+    error && "border-red-500 focus:border-red-500 focus:ring-red-500/50"
+  );
+
   return (
     <fieldset>
       <div className="relative">
@@ -23,10 +32,7 @@ export default function Input({
           <textarea
             {...(props as React.TextareaHTMLAttributes<HTMLTextAreaElement>)}
             placeholder={placeholder}
-            className={clsx(
-              "w-full bg-[#283142] p-4 rounded-[12px] text-white placeholder:text-[#FFFFFF80] font-aloe text-base leading-[22.4px] focus:outline-none focus:ring-0",
-              error && "border-1 border-red-500"
-            )}
+            className={baseStyles}
           />
         ) : (
           <input
@@ -34,24 +40,20 @@ export default function Input({
             type={inputType}
             placeholder={placeholder}
             autoComplete="off"
-            className={clsx(
-              "w-full bg-[#283142] h-full p-4 rounded-[12px] text-white placeholder:text-[#FFFFFF80] font-aloe text-base leading-[22.4px] focus:outline-none focus:ring-0",
-              error && "border-1 border-red-500",
-              type === "password" && "pr-12"
-            )}
+            className={clsx(baseStyles, "h-full", type === "password" && "pr-12")}
           />
         )}
         {type === "password" && (
           <span
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-[#FFFFFF80] hover:text-white transition-colors"
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
           >
-            <EyeIcon fill={showPassword ? "white" : "#FFFFFF80"} />
+            <EyeIcon fill={showPassword ? "currentColor" : "currentColor"} className="opacity-70" />
           </span>
         )}
       </div>
       {error && (
-        <p className="text-red-500 font-aloe text-xs leading-[22.4px] mt-1">
+        <p className="text-red-500 font-aloe text-xs leading-[22.4px] mt-1 ml-1">
           {error}
         </p>
       )}

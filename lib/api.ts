@@ -93,6 +93,7 @@ export const authApi = {
     client.post("/auth/forgot-password", { email }),
   resetPassword: (data: any) => client.post("/auth/reset-password", data),
   updateProfile: (data: any) => client.patch<{ user: any }>("/auth/me", data),
+  logout: () => client.post("/auth/logout", {}),
 };
 
 export const gameApi = {

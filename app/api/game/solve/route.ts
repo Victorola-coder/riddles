@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       {
-        isCorrect,
+        correct: isCorrect,
         gemsEarned,
         message: isCorrect ? 'Correct! 🎉' : 'Incorrect. Try again!',
       },

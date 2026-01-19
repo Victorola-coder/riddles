@@ -27,7 +27,8 @@ export default function GamePage() {
   const userId = currentUser?.id || getGuestId();
 
   // Fetch game session from backend
-  const { data: sessionData, isLoading: sessionLoading } = useGameSession(userId);
+  const { data: sessionData, isLoading: sessionLoading } =
+    useGameSession(userId);
 
   // Fetch all riddles from backend
   const { data: riddlesData, isLoading: riddlesLoading } = useQuery({
@@ -49,7 +50,6 @@ export default function GamePage() {
     hasUsedHint,
     tickTimer,
     isTimerActive,
-    nextRiddle: storeNextRiddle,
   } = useGameStore();
 
   const {
@@ -81,7 +81,7 @@ export default function GamePage() {
   // Convert API riddle to app riddle format
   const riddlesMap = useMemo(() => {
     if (!riddlesData) return new Map<string, Riddle>();
-    
+
     const map = new Map<string, Riddle>();
     riddlesData.forEach((apiRiddle) => {
       // API doesn't return answer, so we'll need to handle validation server-side
@@ -100,22 +100,24 @@ export default function GamePage() {
   }, [riddlesData]);
 
   // Get current riddle
-  const currentRiddle = currentRiddleId ? riddlesMap.get(currentRiddleId) : null;
+  const currentRiddle = currentRiddleId
+    ? riddlesMap.get(currentRiddleId)
+    : null;
 
   // Initialize session and get next riddle if needed
   useEffect(() => {
     if (!sessionLoading && sessionData?.session && riddlesData) {
       const session = sessionData.session;
-      
+
       // If no current riddle, get the first unsolved one
       if (!session.currentRiddleId && riddlesData.length > 0) {
         const solvedSet = new Set(session.solvedRiddles || []);
         const skippedSet = new Set(session.skippedRiddles || []);
-        
+
         const nextRiddle = riddlesData.find(
           (r) => !solvedSet.has(r.id) && !skippedSet.has(r.id)
         );
-        
+
         if (nextRiddle) {
           // Update session with first riddle
           updateSessionMutation.mutate({
@@ -181,7 +183,7 @@ export default function GamePage() {
   if (!currentRiddle) {
     const solvedSet = new Set(solvedRiddles || []);
     const allSolved = riddlesData.every((r) => solvedSet.has(r.id));
-    
+
     if (allSolved) {
       return (
         <div className="text-center">
@@ -219,9 +221,9 @@ export default function GamePage() {
 
   const handleSubmit = async (answer: string) => {
     if (isSubmitting || !userId) return;
-    
+
     setIsSubmitting(true);
-    
+
     try {
       const solveTime = (Date.now() - startTimeRef.current) / 1000;
       const usedNoHints =
@@ -236,7 +238,7 @@ export default function GamePage() {
         answer,
       });
 
-      if (result.isCorrect) {
+      if (result.correct) {
         // Correct answer!
         const gemsEarned = result.gemsEarned || 0;
 
@@ -272,9 +274,7 @@ export default function GamePage() {
             <CheckCircle2 className="text-green-400" />
             <div>
               <p className="font-semibold">Correct! +{gemsEarned} gems</p>
-              <p className="text-sm text-[var(--text-muted)]">
-                {result.message || "Well done!"}
-              </p>
+              <p className="text-sm text-[var(--text-muted)]">Well done!</p>
             </div>
           </div>,
           { duration: 3000 }
@@ -301,14 +301,11 @@ export default function GamePage() {
             userId,
             solvedRiddles: [...solvedRiddles, currentRiddle.id],
             userGems: userGems + gemsEarned,
-            currentRiddleId: null,
+            currentRiddleId: undefined,
           });
         }
 
-        // Move to next riddle after delay
-        setTimeout(() => {
-          storeNextRiddle();
-        }, 1500);
+        // Session update will trigger re-render with next riddle
       } else {
         // Wrong answer
         setWrongAttempts((prev) => prev + 1);
@@ -321,7 +318,7 @@ export default function GamePage() {
         toast.error(
           <div className="flex items-center gap-2">
             <XCircle className="text-red-400" />
-            <span>{result.message || "Not quite! Try again."}</span>
+            <span>Not quite! Try again.</span>
           </div>,
           { duration: 2000 }
         );
@@ -344,9 +341,16 @@ export default function GamePage() {
         hintLevel: 1,
       });
 
-      setRevealedHints((prev) => ({ ...prev, hint1: result.hint }));
+      const hint = (
+        result as unknown as {
+          hint: string;
+          gemsSpent: number;
+          remainingGems: number;
+        }
+      ).hint;
+      setRevealedHints((prev) => ({ ...prev, hint1: hint }));
       soundManager.play("hint");
-      toast.info(`Hint: First letter is "${result.hint}"`);
+      toast.info(`Hint: First letter is "${hint}"`);
     } catch (error) {
       console.error("Failed to get hint:", error);
     }
@@ -362,9 +366,16 @@ export default function GamePage() {
         hintLevel: 2,
       });
 
-      setRevealedHints((prev) => ({ ...prev, hint2: result.hint }));
+      const hint = (
+        result as unknown as {
+          hint: string;
+          gemsSpent: number;
+          remainingGems: number;
+        }
+      ).hint;
+      setRevealedHints((prev) => ({ ...prev, hint2: hint }));
       soundManager.play("hint");
-      toast.info(`Hint: ${result.hint}`);
+      toast.info(`Hint: ${hint}`);
     } catch (error) {
       console.error("Failed to get hint:", error);
     }
@@ -380,9 +391,16 @@ export default function GamePage() {
         hintLevel: 3,
       });
 
-      setRevealedHints((prev) => ({ ...prev, answer: result.hint }));
+      const hint = (
+        result as unknown as {
+          hint: string;
+          gemsSpent: number;
+          remainingGems: number;
+        }
+      ).hint;
+      setRevealedHints((prev) => ({ ...prev, answer: hint }));
       soundManager.play("hint");
-      toast.warning(`Answer: ${result.hint}`, { duration: 5000 });
+      toast.warning(`Answer: ${hint}`, { duration: 5000 });
     } catch (error) {
       console.error("Failed to reveal answer:", error);
     }
@@ -398,11 +416,11 @@ export default function GamePage() {
       await updateSessionMutation.mutateAsync({
         userId,
         skippedRiddles: [...skippedRiddles, currentRiddle.id],
-        currentRiddleId: nextRiddle?.id || null,
+        currentRiddleId: nextRiddle?.id,
       });
 
       toast.info("Riddle skipped");
-      storeNextRiddle();
+      // Session update will trigger re-render with next riddle
     } catch (error) {
       console.error("Failed to skip riddle:", error);
       toast.error("Failed to skip riddle");

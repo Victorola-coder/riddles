@@ -19,31 +19,45 @@ export default function Button(props: ButtonProps) {
       disabled={loading || disabled}
       className={clsx(
         !noDefault &&
-          "transition-all duration-300 active:scale-[0.99] px-[21px] py-[10px] font-medium text-[18px] leading-normal font-aloeMed disabled:cursor-not-allowed disabled:bg-opacity-60",
+          "transition-all duration-300 active:scale-[0.99] font-medium leading-normal font-aloeMed disabled:cursor-not-allowed disabled:opacity-60",
         {
-          "px-[21px] py-[12.5px] text-[18px]": size === "default",
+          "px-[21px] py-[10px] text-[18px]": size === "default",
           "px-3 py-2 text-sm": size === "sm",
           "px-6 py-3 text-lg": size === "lg",
-          "bg-gradient-to-r from-primary-100 to-primary rounded-[10px]  text-white":
-            variant === "default",
-          "bg-[#FFFFFF] text-black rounded-[16px]": variant === "secondary",
-          "bg-red-500/10 hover:bg-red-500/20 text-red-500":
+          
+          // Primary Gradient (Purple)
+          "bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-primary-dark)] rounded-[10px] text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30":
+            variant === "default" || variant === "primary",
+            
+          // Secondary (White/Light)
+          "bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--border-default)] rounded-[16px] hover:bg-[var(--bg-secondary)]": 
+            variant === "secondary",
+            
+          // Danger (Red)
+          "bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20":
             variant === "danger",
-          "bg-[#6B39FF] hover:bg-[#6B39FF]/80 rounded-[12px] active:bg-[#6B39FF]/90 text-white":
-            variant === "primary",
-          "bg-[#283142] rounded-[12px] text-[#FFFFFF]": variant === "google",
-          "bg-transparent hover:bg-slate-100 text-slate-700": variant === "ghost",
-          "bg-transparent border border-slate-200 hover:bg-slate-100 text-slate-900": variant === "outline",
+            
+          // Google/Neutral
+          "bg-[var(--bg-secondary)] rounded-[12px] text-[var(--text-primary)] border border-[var(--border-default)] hover:bg-[var(--bg-card-hover)]": 
+            variant === "google",
+            
+          // Ghost
+          "bg-transparent hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]": 
+            variant === "ghost",
+            
+          // Outline
+          "bg-transparent border border-[var(--border-default)] hover:bg-[var(--bg-secondary)] text-[var(--text-primary)]": 
+            variant === "outline",
         },
         className
       )}
-      arial-busy={loading?.toString()}
+      aria-busy={loading ? "true" : "false"}
       {...prop}
     >
-      <div className="flex items-center justify-center">
+      <div className="flex items-center justify-center gap-2">
         {loading ? (
           <svg
-            className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+            className="animate-spin h-5 w-5 text-current"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
