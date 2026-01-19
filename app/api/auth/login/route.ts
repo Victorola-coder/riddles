@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { comparePassword } from '@/lib/utils/password';
 import { generateToken } from '@/lib/utils/jwt';
+import { authLimiter } from '@/lib/rate-limit';
 
 /**
  * POST /api/auth/login
@@ -11,6 +12,24 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { email, password } = body;
+
+    // Rate Limiting
+    const ip = request.headers.get("x-forwarded-for") ?? "127.0.0.1";
+    const { success, limit, reset, remaining } = authLimiter.check(ip);
+
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many attempts. Please try again later." },
+        { 
+          status: 429,
+          headers: {
+            "X-RateLimit-Limit": limit.toString(),
+            "X-RateLimit-Remaining": remaining.toString(),
+            "X-RateLimit-Reset": reset.toString()
+          }
+        }
+      );
+    }
 
     // Validation
     if (!email || !password) {

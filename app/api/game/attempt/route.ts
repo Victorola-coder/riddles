@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getUserFromRequest } from '@/lib/utils/jwt';
+import { gameLimiter } from '@/lib/rate-limit';
 
 /**
  * POST /api/game/attempt
@@ -66,6 +68,24 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
     const riddleId = searchParams.get('riddleId');
+
+    // Rate Limiting
+    const ip = request.headers.get("x-forwarded-for") ?? "127.0.0.1";
+    const { success, limit, reset, remaining } = gameLimiter.check(ip);
+
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many attempts. Please slow down." },
+        {
+          status: 429,
+          headers: {
+            "X-RateLimit-Limit": limit.toString(),
+            "X-RateLimit-Remaining": remaining.toString(),
+            "X-RateLimit-Reset": reset.toString()
+          }
+        }
+      );
+    }
 
     if (!userId) {
       return NextResponse.json(

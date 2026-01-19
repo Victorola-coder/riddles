@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { hashPassword } from '@/lib/utils/password';
 import { generateToken } from '@/lib/utils/jwt';
+import { signupLimiter } from '@/lib/rate-limit';
 import { validateEmail, validatePassword } from '@/lib/utils/password';
 
 /**
@@ -12,6 +13,24 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { email, password, username } = body;
+
+    // Rate Limiting
+    const ip = request.headers.get("x-forwarded-for") ?? "127.0.0.1";
+    const { success, limit, reset, remaining } = signupLimiter.check(ip);
+
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many accounts created from this IP. Please try again later." },
+        { 
+          status: 429,
+          headers: {
+            "X-RateLimit-Limit": limit.toString(),
+            "X-RateLimit-Remaining": remaining.toString(),
+            "X-RateLimit-Reset": reset.toString()
+          }
+        }
+      );
+    }
 
     // Validation
     if (!email || !password) {
