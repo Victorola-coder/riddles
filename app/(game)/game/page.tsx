@@ -25,11 +25,21 @@ import type { Riddle } from "@/types/riddle";
 export default function GamePage() {
   // Get user ID (authenticated or guest)
   const { data: currentUser } = useCurrentUser();
-  const userId = currentUser?.id || getGuestId();
+  const [userId, setUserId] = useState<string | null>(null);
+
+  // Get guest ID only on client to avoid hydration mismatch
+  useEffect(() => {
+    if (!currentUser?.id) {
+      setUserId(getGuestId());
+    } else {
+      setUserId(currentUser.id);
+    }
+  }, [currentUser?.id]);
 
   // Fetch game session from backend
-  const { data: sessionData, isLoading: sessionLoading } =
-    useGameSession(userId);
+  const { data: sessionData, isLoading: sessionLoading } = useGameSession(
+    userId || undefined
+  );
 
   // Fetch all riddles from backend
   const { data: riddlesData, isLoading: riddlesLoading } = useQuery({
@@ -43,25 +53,23 @@ export default function GamePage() {
   });
 
   // Game store state
-  const {
-    currentRiddleId,
-    solvedRiddles,
-    skippedRiddles,
-    userGems,
-    hasUsedHint,
-    tickTimer,
-    isTimerActive,
-  } = useGameStore();
+  // Game store state
+  const currentRiddleId = useGameStore((state) => state.currentRiddleId);
+  const solvedRiddles = useGameStore((state) => state.solvedRiddles);
+  const skippedRiddles = useGameStore((state) => state.skippedRiddles);
+  const userGems = useGameStore((state) => state.userGems);
+  const hasUsedHint = useGameStore((state) => state.hasUsedHint);
+  const tickTimer = useGameStore((state) => state.tickTimer);
+  const isTimerActive = useGameStore((state) => state.isTimerActive);
 
-  const {
-    incrementTotalSolved,
-    incrementNoHintSolves,
-    incrementPerfectStreak,
-    resetPerfectStreak,
-    updateFastestTime,
-    addGemsEarned,
-    updateStreak,
-  } = useUserStore();
+  // User store state
+  const incrementTotalSolved = useUserStore((state) => state.incrementTotalSolved);
+  const incrementNoHintSolves = useUserStore((state) => state.incrementNoHintSolves);
+  const incrementPerfectStreak = useUserStore((state) => state.incrementPerfectStreak);
+  const resetPerfectStreak = useUserStore((state) => state.resetPerfectStreak);
+  const updateFastestTime = useUserStore((state) => state.updateFastestTime);
+  const addGemsEarned = useUserStore((state) => state.addGemsEarned);
+  const updateStreak = useUserStore((state) => state.updateStreak);
 
   // Mutations
   const solveMutation = useSolveRiddle();
@@ -105,30 +113,45 @@ export default function GamePage() {
     ? riddlesMap.get(currentRiddleId)
     : null;
 
+  // Track if we've initialized the session to prevent infinite loops
+  const hasInitialized = useRef(false);
+
   // Initialize session and get next riddle if needed
   useEffect(() => {
-    if (!sessionLoading && sessionData?.session && riddlesData) {
-      const session = sessionData.session;
-
-      // If no current riddle, get the first unsolved one
-      if (!session.currentRiddleId && riddlesData.length > 0) {
-        const solvedSet = new Set(session.solvedRiddles || []);
-        const skippedSet = new Set(session.skippedRiddles || []);
-
-        const nextRiddle = riddlesData.find(
-          (r) => !solvedSet.has(r.id) && !skippedSet.has(r.id)
-        );
-
-        if (nextRiddle) {
-          // Update session with first riddle
-          updateSessionMutation.mutate({
-            userId,
-            currentRiddleId: nextRiddle.id,
-          });
-        }
-      }
+    if (
+      !userId ||
+      hasInitialized.current ||
+      sessionLoading ||
+      !sessionData?.session ||
+      !riddlesData
+    ) {
+      return;
     }
-  }, [sessionLoading, sessionData, riddlesData, userId, updateSessionMutation]);
+
+    const session = sessionData.session;
+
+    // If no current riddle, get the first unsolved one
+    if (!session.currentRiddleId && riddlesData.length > 0) {
+      const solvedSet = new Set(session.solvedRiddles || []);
+      const skippedSet = new Set(session.skippedRiddles || []);
+
+      const nextRiddle = riddlesData.find(
+        (r) => !solvedSet.has(r.id) && !skippedSet.has(r.id)
+      );
+
+      if (nextRiddle) {
+        hasInitialized.current = true;
+        // Update session with first riddle
+        updateSessionMutation.mutate({
+          userId,
+          currentRiddleId: nextRiddle.id,
+        });
+      }
+    } else if (session.currentRiddleId) {
+      // Mark as initialized if we already have a riddle
+      hasInitialized.current = true;
+    }
+  }, [sessionLoading, sessionData, riddlesData, userId]);
 
   // Reset hints and timer when riddle changes
   useEffect(() => {
@@ -152,8 +175,8 @@ export default function GamePage() {
     return () => clearInterval(interval);
   }, [isTimerActive, tickTimer]);
 
-  // Loading state
-  if (sessionLoading || riddlesLoading) {
+  // Loading state - wait for userId to be set
+  if (!userId || sessionLoading || riddlesLoading) {
     return (
       <div className="w-full max-w-4xl mx-auto flex flex-col gap-8">
         {/* Riddle Card Skeleton */}
@@ -167,22 +190,22 @@ export default function GamePage() {
           </div>
           <Skeleton className="h-32 w-full rounded-xl" />
           <div className="flex justify-between items-center pt-4">
-             <Skeleton className="h-8 w-32" />
-             <Skeleton className="h-10 w-10 rounded-full" />
+            <Skeleton className="h-8 w-32" />
+            <Skeleton className="h-10 w-10 rounded-full" />
           </div>
         </div>
 
         {/* Input Skeleton */}
-         <div className="glass-card p-2 flex items-center gap-2">
-            <Skeleton className="h-14 flex-1 rounded-xl" />
-            <Skeleton className="h-14 w-14 rounded-xl" />
-         </div>
+        <div className="glass-card p-2 flex items-center gap-2">
+          <Skeleton className="h-14 flex-1 rounded-xl" />
+          <Skeleton className="h-14 w-14 rounded-xl" />
+        </div>
 
         {/* Hint Panel Skeleton */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-           {[...Array(4)].map((_, i) => (
-             <Skeleton key={i} className="h-16 rounded-xl" />
-           ))}
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-16 rounded-xl" />
+          ))}
         </div>
       </div>
     );

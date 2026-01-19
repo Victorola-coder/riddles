@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Avatar } from "../ui";
 import { useAuthStore } from "@/lib/store/auth";
@@ -26,6 +26,12 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
 }) => {
   const { currentStreak, longestStreak } = useUserStore();
   const { user } = useAuthStore();
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Prevent hydration mismatch by only rendering avatar after mount
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   return (
     <header className="w-full py-4 px-6 flex justify-between items-center">
@@ -109,17 +115,22 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
       <GemCounter gems={gems} size="md" />
 
       {/* Profile Link */}
-      <Link
-        href={user ? "/profile" : "/auth"}
-        className="ml-2 cursor-pointer hover:opacity-80 transition-opacity"
-        title={user ? "My Profile" : "Login"}
-      >
-        <Avatar
-          alt={user?.username || user?.email || "Guest"}
-          size="md"
-          className="ring-2 ring-white/10"
-        />
-      </Link>
+      {isMounted && (
+        <Link
+          href={user ? "/profile" : "/auth"}
+          className="ml-2 cursor-pointer hover:opacity-80 transition-opacity"
+          title={user ? "My Profile" : "Login"}
+        >
+          <Avatar
+            alt={user?.username || user?.email || "Guest"}
+            size="md"
+            className="ring-2 ring-white/10"
+          />
+        </Link>
+      )}
+      {!isMounted && (
+        <div className="ml-2 w-10 h-10 rounded-full bg-purple/20 animate-pulse" />
+      )}
     </header>
   );
 };
