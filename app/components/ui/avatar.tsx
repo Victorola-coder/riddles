@@ -40,7 +40,11 @@ export function Avatar({
 }: AvatarProps) {
   const [imageError, setImageError] = useState(false);
 
-  const generatedSrc = useMemo(() => getAvatarUrl(alt || fallback || "riddle-quest"), [alt, fallback]);
+  // Adesina-style: deterministic for real users, stable random seed for guests
+  const generatedSrc = useMemo(
+    () => getAvatarUrl(alt || fallback),
+    [alt, fallback]
+  );
   const finalSrc = src || generatedSrc;
 
   // Generate initials from alt text

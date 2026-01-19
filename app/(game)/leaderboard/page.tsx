@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useUserStore } from "@/lib/store/user-store";
 import { useGameStore } from "@/lib/store/game-store";
+import { Avatar } from "@/app/components/ui";
 
 export default function LeaderboardPage() {
   const [activeTab, setActiveTab] = useState<"global" | "weekly">("global");
@@ -496,16 +497,11 @@ export default function LeaderboardPage() {
 
                         {/* Avatar */}
                         <div className="relative flex-shrink-0">
-                          <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-br from-[var(--accent-primary)]/30 to-[var(--accent-secondary)]/30 flex items-center justify-center border border-[var(--border-default)]">
-                            <User
-                              className={`${
-                                entry.isCurrentUser
-                                  ? "text-[var(--accent-primary)]"
-                                  : "text-[var(--text-muted)]"
-                              }`}
-                              size={entry.isCurrentUser ? 28 : 24}
-                            />
-                          </div>
+                          <Avatar
+                            alt={entry.username}
+                            size="lg"
+                            className="ring-1 ring-[var(--border-default)]"
+                          />
                           {entry.isCurrentUser && (
                             <div className="absolute -bottom-1 -right-1 bg-[var(--accent-primary)] rounded-full p-1">
                               <Zap className="text-white" size={12} />

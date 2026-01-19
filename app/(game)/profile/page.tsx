@@ -3,7 +3,7 @@
 import { useAuthStore } from '@/lib/store/auth';
 import { useUserStore } from '@/lib/store/user-store';
 import { authApi, ApiClientError } from '@/lib/api';
-import { Button, Input, Card } from '@/app/components/ui';
+import { Avatar, Button, Input, Card } from '@/app/components/ui';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -78,10 +78,27 @@ export default function ProfilePage() {
   return (
     <div className="container max-w-4xl mx-auto p-4 space-y-8 pb-20">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
-          My Profile
-        </h1>
-        <Button variant="ghost" onClick={handleLogout} className="text-red-400 hover:text-red-300 hover:bg-red-900/20">
+        <div className="flex items-center gap-4">
+          <Avatar
+            alt={user.username || user.email || 'Guest'}
+            size="xl"
+            className="ring-1 ring-[var(--border-default)]"
+          />
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
+              My Profile
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {user.username || user.email}
+            </p>
+          </div>
+        </div>
+
+        <Button
+          variant="ghost"
+          onClick={handleLogout}
+          className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
+        >
           <LogOut className="w-4 h-4 mr-2" />
           Logout
         </Button>
