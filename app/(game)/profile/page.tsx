@@ -7,6 +7,8 @@ import {
   Trophy,
   Flame,
   Star,
+  Check,
+  X,
 } from "lucide-react";
 
 import { toast } from "sonner";
@@ -27,6 +29,14 @@ export default function ProfilePage() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+  
+  // Password requirement checks
+  const passwordRequirements = {
+    minLength: formData.password.length >= 8,
+    hasUppercase: /[A-Z]/.test(formData.password),
+    hasLowercase: /[a-z]/.test(formData.password),
+    hasNumber: /[0-9]/.test(formData.password),
+  };
   const [formData, setFormData] = useState({
     username: user?.username || "",
     password: "",
@@ -204,16 +214,52 @@ export default function ProfilePage() {
                 placeholder="Leave blank to keep current"
               />
               {formData.password && (
-                <div className="mt-2">
-                  <p className="text-xs text-muted-foreground mb-1">
-                    Password must contain:
+                <div className="mt-2 space-y-1">
+                  <p className="text-xs text-muted-foreground mb-2">
+                    Password requirements:
                   </p>
-                  <ul className="text-xs text-muted-foreground/70 space-y-0.5 ml-4 list-disc">
-                    <li>At least 8 characters</li>
-                    <li>One uppercase letter (A-Z)</li>
-                    <li>One lowercase letter (a-z)</li>
-                    <li>One number (0-9)</li>
-                  </ul>
+                  <div className="space-y-1.5">
+                    <div className={`flex items-center gap-2 text-xs font-inter transition-colors ${
+                      passwordRequirements.minLength ? 'text-green-400' : 'text-muted-foreground/70'
+                    }`}>
+                      {passwordRequirements.minLength ? (
+                        <Check size={14} className="text-green-400" />
+                      ) : (
+                        <X size={14} className="text-muted-foreground/50" />
+                      )}
+                      <span>At least 8 characters</span>
+                    </div>
+                    <div className={`flex items-center gap-2 text-xs font-inter transition-colors ${
+                      passwordRequirements.hasUppercase ? 'text-green-400' : 'text-muted-foreground/70'
+                    }`}>
+                      {passwordRequirements.hasUppercase ? (
+                        <Check size={14} className="text-green-400" />
+                      ) : (
+                        <X size={14} className="text-muted-foreground/50" />
+                      )}
+                      <span>One uppercase letter (A-Z)</span>
+                    </div>
+                    <div className={`flex items-center gap-2 text-xs font-inter transition-colors ${
+                      passwordRequirements.hasLowercase ? 'text-green-400' : 'text-muted-foreground/70'
+                    }`}>
+                      {passwordRequirements.hasLowercase ? (
+                        <Check size={14} className="text-green-400" />
+                      ) : (
+                        <X size={14} className="text-muted-foreground/50" />
+                      )}
+                      <span>One lowercase letter (a-z)</span>
+                    </div>
+                    <div className={`flex items-center gap-2 text-xs font-inter transition-colors ${
+                      passwordRequirements.hasNumber ? 'text-green-400' : 'text-muted-foreground/70'
+                    }`}>
+                      {passwordRequirements.hasNumber ? (
+                        <Check size={14} className="text-green-400" />
+                      ) : (
+                        <X size={14} className="text-muted-foreground/50" />
+                      )}
+                      <span>One number (0-9)</span>
+                    </div>
+                  </div>
                 </div>
               )}
               {passwordErrors.length > 0 && (

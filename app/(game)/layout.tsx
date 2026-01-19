@@ -1,15 +1,21 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { GameHeader } from "../components/organisms";
 import { useGameStore } from "@/lib/store/game-store";
+import { useAuthStore } from "@/lib/store/auth";
+import { useGameSession } from "@/lib/hooks/use-game";
 
 export default function GameLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { user } = useAuthStore();
   const { userGems, currentLevel, solvedRiddles } = useGameStore();
+  
+  // Load game session when user is authenticated
+  const { isLoading: isLoadingSession } = useGameSession(user?.id);
 
   return (
     <div className="min-h-screen bg-midnight flex flex-col">

@@ -7,10 +7,15 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/app/components/atoms";
 import { supabase } from "@/lib/supabase/client";
 import { authApi, ApiClientError } from "@/lib/api";
-import { Mail, Lock, User, Loader2 } from "lucide-react";
+import { Mail, Lock, User, Loader2, Check, X } from "lucide-react";
+import { setAuthToken } from "@/lib/client-auth";
+import { useAuthStore } from "@/lib/store/auth";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function LoginPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const setUser = useAuthStore((state) => state.setUser);
   const [isLoading, setIsLoading] = useState(false);
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [formData, setFormData] = useState({
@@ -19,32 +24,57 @@ export default function LoginPage() {
     username: "",
   });
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+  
+  // Password requirement checks
+  const passwordRequirements = {
+    minLength: formData.password.length >= 8,
+    hasUppercase: /[A-Z]/.test(formData.password),
+    hasLowercase: /[a-z]/.test(formData.password),
+    hasNumber: /[0-9]/.test(formData.password),
+  };
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
+      let response;
+      
       if (mode === "signup") {
-        const response = await authApi.signup({
+        response = await authApi.signup({
           email: formData.email,
           password: formData.password,
           username: formData.username,
         });
-
-        localStorage.setItem("auth_token", response.token);
         toast.success("Account created successfully!");
-        router.push("/game");
       } else {
-        const response = await authApi.login({
+        response = await authApi.login({
           email: formData.email,
           password: formData.password,
         });
-
-        localStorage.setItem("auth_token", response.token);
         toast.success("Welcome back!");
-        router.push("/game");
       }
+
+      // Store token
+      setAuthToken(response.token, response.user);
+      
+      // Update auth store immediately with user data from response
+      if (response.user) {
+        setUser({
+          id: response.user.id,
+          email: response.user.email,
+          username: response.user.username || undefined,
+          totalGems: response.user.totalGems || 50,
+          currentLevel: response.user.currentLevel || 1,
+        });
+      }
+      
+      // Invalidate queries to trigger refetch of user data
+      queryClient.invalidateQueries({ queryKey: ["user", "me"] });
+      queryClient.invalidateQueries({ queryKey: ["game", "session"] });
+      
+      // Redirect to game page
+      router.push("/game");
     } catch (error: any) {
       let message =
         error instanceof ApiClientError
@@ -217,17 +247,53 @@ export default function LoginPage() {
                   minLength={8}
                 />
               </div>
-              {mode === "signup" && (
-                <div className="mt-2">
-                  <p className="text-xs text-white/60 font-inter mb-1">
-                    Password must contain:
+              {mode === "signup" && formData.password && (
+                <div className="mt-2 space-y-1">
+                  <p className="text-xs text-white/60 font-inter mb-2">
+                    Password requirements:
                   </p>
-                  <ul className="text-xs text-white/50 font-inter space-y-0.5 ml-4 list-disc">
-                    <li>At least 8 characters</li>
-                    <li>One uppercase letter (A-Z)</li>
-                    <li>One lowercase letter (a-z)</li>
-                    <li>One number (0-9)</li>
-                  </ul>
+                  <div className="space-y-1.5">
+                    <div className={`flex items-center gap-2 text-xs font-inter transition-colors ${
+                      passwordRequirements.minLength ? 'text-green-400' : 'text-white/50'
+                    }`}>
+                      {passwordRequirements.minLength ? (
+                        <Check size={14} className="text-green-400" />
+                      ) : (
+                        <X size={14} className="text-white/30" />
+                      )}
+                      <span>At least 8 characters</span>
+                    </div>
+                    <div className={`flex items-center gap-2 text-xs font-inter transition-colors ${
+                      passwordRequirements.hasUppercase ? 'text-green-400' : 'text-white/50'
+                    }`}>
+                      {passwordRequirements.hasUppercase ? (
+                        <Check size={14} className="text-green-400" />
+                      ) : (
+                        <X size={14} className="text-white/30" />
+                      )}
+                      <span>One uppercase letter (A-Z)</span>
+                    </div>
+                    <div className={`flex items-center gap-2 text-xs font-inter transition-colors ${
+                      passwordRequirements.hasLowercase ? 'text-green-400' : 'text-white/50'
+                    }`}>
+                      {passwordRequirements.hasLowercase ? (
+                        <Check size={14} className="text-green-400" />
+                      ) : (
+                        <X size={14} className="text-white/30" />
+                      )}
+                      <span>One lowercase letter (a-z)</span>
+                    </div>
+                    <div className={`flex items-center gap-2 text-xs font-inter transition-colors ${
+                      passwordRequirements.hasNumber ? 'text-green-400' : 'text-white/50'
+                    }`}>
+                      {passwordRequirements.hasNumber ? (
+                        <Check size={14} className="text-green-400" />
+                      ) : (
+                        <X size={14} className="text-white/30" />
+                      )}
+                      <span>One number (0-9)</span>
+                    </div>
+                  </div>
                 </div>
               )}
               {passwordErrors.length > 0 && (

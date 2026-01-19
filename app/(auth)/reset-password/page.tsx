@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/app/components/atoms";
 import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Lock, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { Lock, Loader2, CheckCircle, AlertCircle, Check, X } from "lucide-react";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -18,6 +18,14 @@ export default function ResetPasswordPage() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState("");
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+  
+  // Password requirement checks
+  const passwordRequirements = {
+    minLength: password.length >= 8,
+    hasUppercase: /[A-Z]/.test(password),
+    hasLowercase: /[a-z]/.test(password),
+    hasNumber: /[0-9]/.test(password),
+  };
 
   useEffect(() => {
     if (!token) {
@@ -165,17 +173,55 @@ export default function ResetPasswordPage() {
                     minLength={8}
                   />
                 </div>
-                <div className="mt-2">
-                  <p className="text-xs text-white/60 font-inter mb-1">
-                    Password must contain:
-                  </p>
-                  <ul className="text-xs text-white/50 font-inter space-y-0.5 ml-4 list-disc">
-                    <li>At least 8 characters</li>
-                    <li>One uppercase letter (A-Z)</li>
-                    <li>One lowercase letter (a-z)</li>
-                    <li>One number (0-9)</li>
-                  </ul>
-                </div>
+                {password && (
+                  <div className="mt-2 space-y-1">
+                    <p className="text-xs text-white/60 font-inter mb-2">
+                      Password requirements:
+                    </p>
+                    <div className="space-y-1.5">
+                      <div className={`flex items-center gap-2 text-xs font-inter transition-colors ${
+                        passwordRequirements.minLength ? 'text-green-400' : 'text-white/50'
+                      }`}>
+                        {passwordRequirements.minLength ? (
+                          <Check size={14} className="text-green-400" />
+                        ) : (
+                          <X size={14} className="text-white/30" />
+                        )}
+                        <span>At least 8 characters</span>
+                      </div>
+                      <div className={`flex items-center gap-2 text-xs font-inter transition-colors ${
+                        passwordRequirements.hasUppercase ? 'text-green-400' : 'text-white/50'
+                      }`}>
+                        {passwordRequirements.hasUppercase ? (
+                          <Check size={14} className="text-green-400" />
+                        ) : (
+                          <X size={14} className="text-white/30" />
+                        )}
+                        <span>One uppercase letter (A-Z)</span>
+                      </div>
+                      <div className={`flex items-center gap-2 text-xs font-inter transition-colors ${
+                        passwordRequirements.hasLowercase ? 'text-green-400' : 'text-white/50'
+                      }`}>
+                        {passwordRequirements.hasLowercase ? (
+                          <Check size={14} className="text-green-400" />
+                        ) : (
+                          <X size={14} className="text-white/30" />
+                        )}
+                        <span>One lowercase letter (a-z)</span>
+                      </div>
+                      <div className={`flex items-center gap-2 text-xs font-inter transition-colors ${
+                        passwordRequirements.hasNumber ? 'text-green-400' : 'text-white/50'
+                      }`}>
+                        {passwordRequirements.hasNumber ? (
+                          <Check size={14} className="text-green-400" />
+                        ) : (
+                          <X size={14} className="text-white/30" />
+                        )}
+                        <span>One number (0-9)</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 {passwordErrors.length > 0 && (
                   <div className="mt-2 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
                     <p className="text-sm font-semibold text-red-400 mb-1 font-inter">

@@ -35,7 +35,9 @@ export const authApi = {
       user: {
         id: string;
         email: string;
-        username: string;
+        username?: string;
+        totalGems?: number;
+        currentLevel?: number;
       };
     }>("/api/auth/signup", data),
 
