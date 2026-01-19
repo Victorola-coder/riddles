@@ -13,6 +13,7 @@ const GitHubButton = ({ size = 'md' }: GitHubButtonProps) => {
   const [stars, setStars] = useState<number | null>(null);
 
   useEffect(() => {
+    // Fetch stars after initial render (non-blocking)
     const fetchStars = async () => {
       try {
         const res = await fetch(
@@ -26,7 +27,9 @@ const GitHubButton = ({ size = 'md' }: GitHubButtonProps) => {
         // Silently fail
       }
     };
-    fetchStars();
+    // Delay fetch to not block initial render
+    const timeout = setTimeout(fetchStars, 100);
+    return () => clearTimeout(timeout);
   }, []);
 
   const formatStars = (count: number) => {

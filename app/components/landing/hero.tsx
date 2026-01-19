@@ -10,18 +10,18 @@ export const Hero = () => {
 
       <div className="flex flex-col gap-8 max-w-4xl mx-auto px-6 relative z-10 w-full items-center">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0 }}
           className="flex flex-col gap-6 items-center mt-20"
         >
           {/* Badge */}
           <motion.a
             href="https://github.com/Victorola-coder/riddles"
             target="_blank"
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 1, scale: 1 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
+            transition={{ duration: 0 }}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--bg-card)] border border-[var(--border-default)] text-sm text-[var(--text-secondary)] backdrop-blur-sm hover:bg-[var(--bg-card-hover)] transition-colors"
           >
             <Sparkles className="w-4 h-4 text-[var(--accent-primary)]" />
@@ -30,9 +30,9 @@ export const Hero = () => {
 
           {/* Main Title */}
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 1, y: 0 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
+            transition={{ duration: 0 }}
             className="text-5xl md:text-7xl font-bold text-center tracking-tight leading-[1.1]"
           >
             <span className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] bg-clip-text text-transparent">
@@ -104,21 +104,21 @@ export const Hero = () => {
             </span>
           </motion.h1>
 
-          {/* Tagline */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
+                 {/* Tagline */}
+                 <motion.p
+                   initial={{ opacity: 1, y: 0 }}
+                   animate={{ opacity: 1, y: 0 }}
+                   transition={{ duration: 0 }}
             className="text-2xl md:text-3xl font-semibold text-center text-[var(--text-primary)] max-w-2xl"
           >
             Riddles, not jokes
           </motion.p>
 
-          {/* Subtitle */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.6 }}
+                 {/* Subtitle */}
+                 <motion.p
+                   initial={{ opacity: 1, y: 0 }}
+                   animate={{ opacity: 1, y: 0 }}
+                   transition={{ duration: 0 }}
             className="text-xl md:text-2xl text-center text-[var(--text-secondary)] max-w-2xl leading-relaxed"
           >
             Riddle Quest is a gamified platform where you solve riddles,
@@ -127,11 +127,11 @@ export const Hero = () => {
           </motion.p>
         </motion.div>
 
-        {/* CTA Buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7, duration: 0.6 }}
+               {/* CTA Buttons */}
+               <motion.div
+                 initial={{ opacity: 1, y: 0 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 transition={{ duration: 0 }}
           className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center"
         >
           <Link
@@ -158,11 +158,11 @@ export const Hero = () => {
           </a>
         </motion.div>
 
-        {/* Feature highlights */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.9, duration: 0.6 }}
+               {/* Feature highlights */}
+               <motion.div
+                 initial={{ opacity: 1, y: 0 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 transition={{ duration: 0 }}
           className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 mb-8 w-full max-w-4xl"
         >
           {[
@@ -193,11 +193,11 @@ export const Hero = () => {
           ].map((feature, index) => {
             const Icon = feature.icon;
             return (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ delay: 1 + index * 0.15, duration: 0.5 }}
+                     <motion.div
+                       key={index}
+                       initial={{ opacity: 1, y: 0, scale: 1 }}
+                       animate={{ opacity: 1, y: 0, scale: 1 }}
+                       transition={{ duration: 0 }}
                 whileHover={{ y: -8, scale: 1.02 }}
                 className="group relative"
               >
