@@ -26,6 +26,7 @@ export default function ProfilePage() {
   const currentLevel = user?.currentLevel || 1;
 
   const [isLoading, setIsLoading] = useState(false);
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     username: user?.username || "",
     password: "",
@@ -48,7 +49,21 @@ export default function ProfilePage() {
         error instanceof ApiClientError
           ? error.message
           : "Failed to update profile";
-      toast.error(message);
+      
+      // If password validation failed, show requirements
+      if (message.includes("Password") || message.includes("password")) {
+        const requirements = [
+          "At least 8 characters long",
+          "At least one uppercase letter (A-Z)",
+          "At least one lowercase letter (a-z)",
+          "At least one number (0-9)",
+        ];
+        setPasswordErrors(requirements);
+        toast.error(`Password requirements:\n${requirements.join("\n")}`);
+      } else {
+        setPasswordErrors([]);
+        toast.error(message);
+      }
     },
   });
 
@@ -179,11 +194,40 @@ export default function ProfilePage() {
               <Input
                 type="password"
                 value={formData.password}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  setFormData({ ...formData, password: e.target.value });
+                  // Clear errors when user starts typing
+                  if (passwordErrors.length > 0) {
+                    setPasswordErrors([]);
+                  }
+                }}
                 placeholder="Leave blank to keep current"
               />
+              {formData.password && (
+                <div className="mt-2">
+                  <p className="text-xs text-muted-foreground mb-1">
+                    Password must contain:
+                  </p>
+                  <ul className="text-xs text-muted-foreground/70 space-y-0.5 ml-4 list-disc">
+                    <li>At least 8 characters</li>
+                    <li>One uppercase letter (A-Z)</li>
+                    <li>One lowercase letter (a-z)</li>
+                    <li>One number (0-9)</li>
+                  </ul>
+                </div>
+              )}
+              {passwordErrors.length > 0 && (
+                <div className="mt-2 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+                  <p className="text-sm font-semibold text-red-400 mb-1">
+                    Password requirements not met:
+                  </p>
+                  <ul className="text-xs text-red-300 space-y-0.5 ml-4 list-disc">
+                    {passwordErrors.map((error, index) => (
+                      <li key={index}>{error}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-muted-foreground">

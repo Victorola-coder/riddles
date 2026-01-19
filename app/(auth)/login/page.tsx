@@ -18,6 +18,7 @@ export default function LoginPage() {
     password: "",
     username: "",
   });
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,10 +46,25 @@ export default function LoginPage() {
         router.push("/game");
       }
     } catch (error: any) {
-      const message =
+      let message =
         error instanceof ApiClientError
           ? error.message
           : "Authentication failed";
+      
+      // If password validation failed, show requirements
+      if (message.includes("Password") || message.includes("password")) {
+        const requirements = [
+          "At least 8 characters long",
+          "At least one uppercase letter (A-Z)",
+          "At least one lowercase letter (a-z)",
+          "At least one number (0-9)",
+        ];
+        message = `Password requirements:\n${requirements.join("\n")}`;
+        setPasswordErrors(requirements);
+      } else {
+        setPasswordErrors([]);
+      }
+      
       toast.error(message);
     } finally {
       setIsLoading(false);
@@ -188,15 +204,44 @@ export default function LoginPage() {
                 <input
                   type="password"
                   value={formData.password}
-                  onChange={(e) =>
-                    setFormData({ ...formData, password: e.target.value })
-                  }
+                  onChange={(e) => {
+                    setFormData({ ...formData, password: e.target.value });
+                    // Clear errors when user starts typing
+                    if (passwordErrors.length > 0) {
+                      setPasswordErrors([]);
+                    }
+                  }}
                   className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:border-purple transition-colors"
                   placeholder="••••••••"
                   required
-                  minLength={6}
+                  minLength={8}
                 />
               </div>
+              {mode === "signup" && (
+                <div className="mt-2">
+                  <p className="text-xs text-white/60 font-inter mb-1">
+                    Password must contain:
+                  </p>
+                  <ul className="text-xs text-white/50 font-inter space-y-0.5 ml-4 list-disc">
+                    <li>At least 8 characters</li>
+                    <li>One uppercase letter (A-Z)</li>
+                    <li>One lowercase letter (a-z)</li>
+                    <li>One number (0-9)</li>
+                  </ul>
+                </div>
+              )}
+              {passwordErrors.length > 0 && (
+                <div className="mt-2 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+                  <p className="text-sm font-semibold text-red-400 mb-1 font-inter">
+                    Password requirements not met:
+                  </p>
+                  <ul className="text-xs text-red-300 font-inter space-y-0.5 ml-4 list-disc">
+                    {passwordErrors.map((error, index) => (
+                      <li key={index}>{error}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
 
             <Button
