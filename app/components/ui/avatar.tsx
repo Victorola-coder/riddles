@@ -1,7 +1,8 @@
 "use client";
 
 import { clsx } from "clsx";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { getAvatarUrl } from "@/lib/utils/avatar";
 
 const sizeStyles = {
   xs: "w-6 h-6 text-xs",
@@ -39,6 +40,9 @@ export function Avatar({
 }: AvatarProps) {
   const [imageError, setImageError] = useState(false);
 
+  const generatedSrc = useMemo(() => getAvatarUrl(alt || fallback || "riddle-quest"), [alt, fallback]);
+  const finalSrc = src || generatedSrc;
+
   // Generate initials from alt text
   const getInitials = (name: string) => {
     return name
@@ -49,7 +53,7 @@ export function Avatar({
       .slice(0, 2);
   };
 
-  const showFallback = !src || imageError;
+  const showFallback = imageError;
   const initials = fallback || getInitials(alt);
 
   return (
@@ -67,7 +71,7 @@ export function Avatar({
           <span>{initials}</span>
         ) : (
           <img
-            src={src}
+            src={finalSrc}
             alt={alt}
             onError={() => setImageError(true)}
             className="w-full h-full object-cover"

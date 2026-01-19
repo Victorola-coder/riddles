@@ -75,7 +75,7 @@ export default function LoginPage() {
   };
 
   const handleGuestMode = () => {
-    toast.info("Playing as guest - progress saved locally only");
+    toast.info("Playing as guest");
     router.push("/game");
   };
 
