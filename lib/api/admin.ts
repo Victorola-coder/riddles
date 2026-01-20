@@ -87,6 +87,51 @@ export const adminApi = {
     }),
 
   /**
+   * Get a single user by ID with detailed information
+   */
+  getUser: (id: string) =>
+    api.get<{
+      user: AdminUser & {
+        recentAttempts?: any[];
+        session?: any;
+      };
+    }>(`/api/admin/users/${id}`, {
+      requireAuth: true,
+    }),
+
+  /**
+   * Adjust user gems (add or deduct)
+   */
+  adjustGems: (id: string, data: { amount: number; reason: string }) =>
+    api.post<{
+      success: boolean;
+      user: { id: string; username?: string; email?: string; totalGems: number };
+      message: string;
+    }>(`/api/admin/users/${id}/gems`, data, {
+      requireAuth: true,
+    }),
+
+  /**
+   * Update user (reset progress, etc.)
+   */
+  updateUser: (id: string, data: { action: string; [key: string]: any }) =>
+    api.patch<{
+      success: boolean;
+      user: AdminUser;
+      message: string;
+    }>(`/api/admin/users/${id}`, data, {
+      requireAuth: true,
+    }),
+
+  /**
+   * Delete a user account
+   */
+  deleteUser: (id: string) =>
+    api.delete<{ success: boolean; message: string }>(`/api/admin/users/${id}`, {
+      requireAuth: true,
+    }),
+
+  /**
    * Authenticate admin
    */
   authenticate: (accessCode: string) =>

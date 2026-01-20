@@ -117,3 +117,20 @@ export async function logHintUsed(
     riddleId,
   });
 }
+
+// Generic admin action logger
+export async function logAdminAction(
+  type: string,
+  description: string,
+  metadata?: Record<string, unknown>,
+  adminId?: string
+): Promise<void> {
+  await logActivity({
+    type,
+    category: 'admin',
+    title: type.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+    description,
+    metadata,
+    adminId,
+  });
+}

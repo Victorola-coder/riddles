@@ -5,6 +5,8 @@ import { Search, Users, Gem, TrendingUp } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Loader } from "@/app/components/global";
 import { Skeleton } from "@/app/components/ui";
+import { GemModal } from "@/app/components/organisms/admin/gem-modal";
+import { UserActionsMenu } from "@/app/components/organisms/admin/user-actions-menu";
 
 const PAGE_SIZE = 12;
 
@@ -12,6 +14,7 @@ export default function UsersPage() {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [gemModalUser, setGemModalUser] = useState<AdminUser | null>(null);
 
   const {
     data: paginatedUsers,
@@ -100,6 +103,9 @@ export default function UsersPage() {
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">
                     Last Played
                   </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#FFFFFF1A]">
@@ -167,6 +173,9 @@ export default function UsersPage() {
                     <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">
                       Last Played
                     </th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#FFFFFF1A]">
@@ -209,6 +218,12 @@ export default function UsersPage() {
                           ? new Date(user.lastPlayedDate).toLocaleDateString()
                           : "Never"}
                       </td>
+                      <td className="px-6 py-4">
+                        <UserActionsMenu
+                          user={user}
+                          onOpenGemModal={() => setGemModalUser(user)}
+                        />
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -248,6 +263,15 @@ export default function UsersPage() {
           </>
         )}
       </div>
+
+      {/* Gem Modal */}
+      {gemModalUser && (
+        <GemModal
+          isOpen={!!gemModalUser}
+          onClose={() => setGemModalUser(null)}
+          user={gemModalUser}
+        />
+      )}
     </div>
   );
 }

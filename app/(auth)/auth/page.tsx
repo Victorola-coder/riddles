@@ -81,8 +81,8 @@ export default function LoginPage() {
           ? error.message
           : "Authentication failed";
 
-      // If password validation failed, show requirements
-      if (message.includes("Password") || message.includes("password")) {
+      // Only show password requirements for signup mode validation errors
+      if (mode === "signup" && (message.includes("Password") || message.includes("password"))) {
         const requirements = [
           "At least 8 characters long",
           "At least one uppercase letter (A-Z)",

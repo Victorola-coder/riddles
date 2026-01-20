@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
 import { CheckCircle2, XCircle, Loader2, Trophy } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { RiddleCard, AnswerInput, HintPanel } from "@/app/components/organisms";
@@ -678,7 +678,7 @@ export default function GamePage() {
   const hint1Used = currentRiddle ? hasUsedHint(currentRiddle.id, 1) : false;
   const hint2Used = currentRiddle ? hasUsedHint(currentRiddle.id, 2) : false;
 
-  // Handle timer expiration - deduct gems and reveal answer
+  // Handle timer expiration - deduct gems, reveal answer, and auto-advance
   const hasTimedOut = useRef(false);
   useEffect(() => {
     if (
@@ -718,13 +718,13 @@ export default function GamePage() {
             <p className="text-lg font-bold text-white mb-1">⏰ Time's Up!</p>
             <p className="text-base text-white/90 leading-relaxed">
               {gemsToDeduct > 0
-                ? `You lost ${gemsToDeduct} gems as a penalty. The answer has been automatically revealed.`
-                : "The answer has been automatically revealed. Better luck next time!"}
+                ? `You lost ${gemsToDeduct} gems as a penalty. Moving to next question...`
+                : "Moving to next question..."}
             </p>
           </div>
         </div>,
         {
-          duration: 8000, // Longer duration so user can read it
+          duration: 5000, // Show for 5 seconds before auto-advancing
           className: "!bg-red-950/95 !border-red-500/50 !text-white",
           style: {
             fontSize: "16px",
@@ -736,6 +736,29 @@ export default function GamePage() {
 
       // Play timeout sound
       soundManager.play("error");
+
+      // Auto-advance to next question after 5 seconds
+      setTimeout(async () => {
+        const nextRiddle = getNextRiddleInProgression(
+          solvedRiddles || [],
+          [...(skippedRiddles || []), currentRiddle.id]
+        );
+
+        if (nextRiddle) {
+          await updateSessionMutation.mutateAsync({
+            userId,
+            skippedRiddles: [...(skippedRiddles || []), currentRiddle.id],
+            currentRiddleId: nextRiddle.id,
+          });
+        } else {
+          // No more riddles
+          await updateSessionMutation.mutateAsync({
+            userId,
+            skippedRiddles: [...(skippedRiddles || []), currentRiddle.id],
+            currentRiddleId: undefined,
+          });
+        }
+      }, 5000);
     }
 
     // Reset timeout flag when riddle changes
@@ -752,7 +775,11 @@ export default function GamePage() {
     userId,
     spendGems,
     updateSessionMutation,
+    solvedRiddles,
+    skippedRiddles,
+    getNextRiddleInProgression,
   ]);
+
 
   // Calculate progress per difficulty tier - optimized with Set for O(1) lookups
   const progressByDifficulty = useMemo(() => {
@@ -872,98 +899,6 @@ export default function GamePage() {
   return (
     <div className="w-full max-w-4xl mx-auto flex flex-col gap-8">
       {/* Progress Indicator */}
-      {currentRiddle && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="glass-card p-4"
-        >
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-[var(--text-secondary)] font-inter">
-                Progress
-              </span>
-              <span className="text-white font-semibold">
-                {solvedRiddles.length} / {allRiddlesData.length} Solved
-              </span>
-            </div>
-            <div className="flex gap-2">
-              {/* Easy Progress */}
-              <div className="flex-1">
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-green-400">Easy</span>
-                  <span className="text-[var(--text-muted)]">
-                    {progressByDifficulty.easy.solved}/
-                    {progressByDifficulty.easy.total}
-                  </span>
-                </div>
-                <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                  <motion.div
-                    className="h-full bg-green-400"
-                    initial={{ width: 0 }}
-                    animate={{
-                      width: `${
-                        (progressByDifficulty.easy.solved /
-                          progressByDifficulty.easy.total) *
-                        100
-                      }%`,
-                    }}
-                    transition={{ duration: 0.5 }}
-                  />
-                </div>
-              </div>
-              {/* Medium Progress */}
-              <div className="flex-1">
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-yellow-400">Medium</span>
-                  <span className="text-[var(--text-muted)]">
-                    {progressByDifficulty.medium.solved}/
-                    {progressByDifficulty.medium.total}
-                  </span>
-                </div>
-                <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                  <motion.div
-                    className="h-full bg-yellow-400"
-                    initial={{ width: 0 }}
-                    animate={{
-                      width: `${
-                        (progressByDifficulty.medium.solved /
-                          progressByDifficulty.medium.total) *
-                        100
-                      }%`,
-                    }}
-                    transition={{ duration: 0.5 }}
-                  />
-                </div>
-              </div>
-              {/* Hard Progress */}
-              <div className="flex-1">
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-red-400">Hard</span>
-                  <span className="text-[var(--text-muted)]">
-                    {progressByDifficulty.hard.solved}/
-                    {progressByDifficulty.hard.total}
-                  </span>
-                </div>
-                <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                  <motion.div
-                    className="h-full bg-red-400"
-                    initial={{ width: 0 }}
-                    animate={{
-                      width: `${
-                        (progressByDifficulty.hard.solved /
-                          progressByDifficulty.hard.total) *
-                        100
-                      }%`,
-                    }}
-                    transition={{ duration: 0.5 }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      )}
 
       {/* Riddle Card */}
       <AnimatePresence mode="wait">
@@ -1010,7 +945,7 @@ export default function GamePage() {
       <AnswerInput
         onSubmit={handleSubmit}
         showError={showError}
-        disabled={!!revealedHints.answer || isSubmitting}
+        disabled={isSubmitting}
       />
 
       {/* Hint Panel */}
@@ -1022,7 +957,7 @@ export default function GamePage() {
         hint1Used={hint1Used}
         hint2Used={hint2Used}
         userGems={userGems}
-        disabled={!!revealedHints.answer || isSubmitting}
+        disabled={isSubmitting}
       />
     </div>
   );

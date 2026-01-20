@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useEffect } from "react";
+import { useAuthStore } from "@/lib/store/auth";
 import { GameHeader } from "../components/organisms";
 import { useGameStore } from "@/lib/store/game-store";
-import { useAuthStore } from "@/lib/store/auth";
 import { useGameSession } from "@/lib/hooks/use-game";
 
 export default function GameLayout({
@@ -13,7 +12,7 @@ export default function GameLayout({
 }) {
   const { user } = useAuthStore();
   const { userGems, currentLevel, solvedRiddles } = useGameStore();
-  
+
   // Load game session when user is authenticated
   const { isLoading: isLoadingSession } = useGameSession(user?.id);
 

@@ -34,10 +34,13 @@ export default function ForgotPasswordPage() {
           toast.info("Check console for reset link (dev mode)");
         }
       } else {
-        toast.error(data.error || "Failed to send reset link");
+        // Show the specific error message from backend
+        const errorMessage = data.error || "Failed to send reset link";
+        toast.error(errorMessage);
       }
-    } catch (error) {
-      toast.error("Something went wrong");
+    } catch (error: any) {
+      console.error("Forgot password error:", error);
+      toast.error(error.message || "Something went wrong");
     } finally {
       setIsLoading(false);
     }
