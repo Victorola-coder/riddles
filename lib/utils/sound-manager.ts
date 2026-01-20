@@ -54,12 +54,12 @@ class SoundManager {
     const sound = this.sounds.get(type);
     if (!sound) return;
 
-    // Clone the audio to allow overlapping sounds
-    const clone = sound.cloneNode() as HTMLAudioElement;
-    clone.volume = this.volume;
-    clone.play().catch(() => {
+      // Clone the audio to allow overlapping sounds
+      const clone = sound.cloneNode() as HTMLAudioElement;
+      clone.volume = this.volume;
+      clone.play().catch(() => {
       // Silently fail if audio playback is blocked (autoplay restrictions)
-    });
+      });
   }
 
   /**

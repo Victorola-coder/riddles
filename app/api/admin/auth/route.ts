@@ -1,8 +1,8 @@
-import { signAuthToken } from '@/lib/auth-token';
-import { NextRequest, NextResponse } from 'next/server';
+import { signAuthToken } from "@/lib/auth-token";
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
-const ADMIN_CODE = process.env.ADMIN_ACCESS_CODE || '1234';
-const ADMIN_USER_ID = 'admin'; // Special admin user ID
+const ADMIN_USER_ID = "admin"; // Special admin user ID
 
 /**
  * Admin authentication endpoint
@@ -17,26 +17,32 @@ export async function POST(req: NextRequest) {
 
     if (!accessCode) {
       return NextResponse.json(
-        { error: 'Access code is required' },
+        { error: "Access code is required" },
         { status: 400 }
       );
     }
 
-    if (accessCode !== ADMIN_CODE) {
+    // Find admin in database by code
+    // Note: Run `npx prisma generate` after schema changes to update types
+    const admin = await (prisma.admin as any).findUnique({
+      where: { code: accessCode },
+    });
+
+    if (!admin) {
       return NextResponse.json(
-        { error: 'Invalid access code' },
+        { error: "Invalid access code" },
         { status: 401 }
       );
     }
 
     // Generate a long-lived admin token (30 days)
-    const token = signAuthToken(ADMIN_USER_ID, '30d');
+    const token = signAuthToken(ADMIN_USER_ID, "30d");
 
     return NextResponse.json({ token, success: true }, { status: 200 });
   } catch (error) {
-    console.error('Admin auth error:', error);
+    console.error("Admin auth error:", error);
     return NextResponse.json(
-      { error: 'Authentication failed' },
+      { error: "Authentication failed" },
       { status: 500 }
     );
   }

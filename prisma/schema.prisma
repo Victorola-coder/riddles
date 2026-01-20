@@ -8,7 +8,8 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  // directUrl is optional - only needed for connection pooling with Prisma Migrate
+  // directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -137,4 +138,13 @@ model GameConfig {
   description String?
   updatedAt   DateTime @updatedAt
   updatedBy   String?  // Admin ID
+}
+
+model Admin {
+  id          String   @id @default(cuid())
+  code        String   @unique // Access code
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([code])
 }

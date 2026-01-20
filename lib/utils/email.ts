@@ -83,11 +83,11 @@ If you did not request this, you can safely ignore this email.`;
   if (!transport) {
     // Dev-friendly fallback: log to console so you can still test flows.
     if (process.env.NODE_ENV === 'development') {
-      console.log('[DEV] Password reset email payload:', {
-        to: options.to,
-        subject,
-        text,
-      });
+    console.log('[DEV] Password reset email payload:', {
+      to: options.to,
+      subject,
+      text,
+    });
     return;
   }
 
