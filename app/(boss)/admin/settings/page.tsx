@@ -2,12 +2,16 @@
 
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Settings, Save } from "lucide-react";
 import { Button, Input, Skeleton } from "@/app/components/ui";
 import { adminApi, ApiClientError } from "@/lib/api";
 import { GAME_CONFIG } from "@/lib/constants/game-config";
+import { getAdminToken } from "@/lib/admin-auth";
 
 export default function SettingsPage() {
+  const router = useRouter();
+
   interface Config {
     gemRewards: {
       easy: number;
@@ -44,6 +48,15 @@ export default function SettingsPage() {
   // Load settings on mount
   useEffect(() => {
     const loadSettings = async () => {
+      // Check if admin token exists
+      const adminToken = getAdminToken();
+      if (!adminToken) {
+        toast.error("Please log in to access settings");
+        router.push("/admin");
+        setIsLoading(false);
+        return;
+      }
+
       try {
         const response = await adminApi.getSettings();
         if (response.settings) {
@@ -65,6 +78,12 @@ export default function SettingsPage() {
         }
       } catch (error) {
         console.error("Failed to load settings:", error);
+        if (error instanceof ApiClientError && error.status === 401) {
+          toast.error("Session expired. Please log in again.");
+          router.push("/admin");
+        } else {
+          toast.error("Failed to load settings");
+        }
         // Use defaults if loading fails
       } finally {
         setIsLoading(false);
@@ -72,19 +91,32 @@ export default function SettingsPage() {
     };
 
     loadSettings();
-  }, []);
+  }, [router]);
 
   const handleSave = async () => {
+    // Check if admin token exists
+    const adminToken = getAdminToken();
+    if (!adminToken) {
+      toast.error("Please log in to save settings");
+      router.push("/admin");
+      return;
+    }
+
     setIsSaving(true);
     try {
       const response = await adminApi.updateSettings(config);
       toast.success(response.message || "Settings saved successfully");
     } catch (error) {
-      const message =
-        error instanceof ApiClientError
-          ? error.message
-          : "Failed to save settings";
-      toast.error(message);
+      if (error instanceof ApiClientError && error.status === 401) {
+        toast.error("Session expired. Please log in again.");
+        router.push("/admin");
+      } else {
+        const message =
+          error instanceof ApiClientError
+            ? error.message
+            : "Failed to save settings";
+        toast.error(message);
+      }
     } finally {
       setIsSaving(false);
     }

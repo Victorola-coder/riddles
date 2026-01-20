@@ -19,7 +19,7 @@ import { useEffect, useState } from "react";
 import Modal from "@/app/components/ui/modal";
 import Input from "@/app/components/ui/input";
 import Button from "@/app/components/ui/button";
-import { Skeleton } from "@/app/components/ui";
+import { Skeleton, AlertDialog } from "@/app/components/ui";
 import { useQueryClient } from "@tanstack/react-query";
 
 const PAGE_SIZE = 12;
@@ -35,6 +35,8 @@ export default function RiddlesPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingRiddle, setEditingRiddle] = useState<AdminRiddle | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [riddleToDelete, setRiddleToDelete] = useState<string | null>(null);
 
   const {
     data: paginatedRiddles,
@@ -162,8 +164,14 @@ export default function RiddlesPage() {
   };
 
   const handleDelete = (riddleId: string) => {
-    if (confirm("Are you sure you want to delete this riddle?")) {
-      deleteRiddle.mutate(riddleId);
+    setRiddleToDelete(riddleId);
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (riddleToDelete) {
+      deleteRiddle.mutate(riddleToDelete);
+      setRiddleToDelete(null);
     }
   };
 
@@ -719,6 +727,22 @@ export default function RiddlesPage() {
           </div>
         </form>
       </Modal>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog
+        open={deleteConfirmOpen}
+        onClose={() => {
+          setDeleteConfirmOpen(false);
+          setRiddleToDelete(null);
+        }}
+        title="Delete Riddle"
+        description="Are you sure you want to delete this riddle? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={confirmDelete}
+        variant="error"
+        loading={deleteRiddle.isPending}
+      />
     </div>
   );
 }

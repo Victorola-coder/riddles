@@ -10,21 +10,12 @@ import { logActivity } from '@/lib/activity-logger';
 export async function GET(req: NextRequest) {
   try {
     // Verify admin authentication
-    const authHeader = req.headers.get('authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+    const auth = req.headers.get("authorization") || "";
+    const token = auth.replace(/^Bearer\s+/i, "");
+    const adminId = verifyAuthToken(token);
 
-    const token = authHeader.substring(7);
-    const decoded = verifyAuthToken(token);
-    if (!decoded || (decoded.type !== 'admin' && decoded.userId !== 'admin')) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+    if (!adminId || adminId !== "admin") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Get all game config settings
@@ -70,21 +61,12 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     // Verify admin authentication
-    const authHeader = req.headers.get('authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+    const auth = req.headers.get("authorization") || "";
+    const token = auth.replace(/^Bearer\s+/i, "");
+    const adminId = verifyAuthToken(token);
 
-    const token = authHeader.substring(7);
-    const decoded = verifyAuthToken(token);
-    if (!decoded || (decoded.type !== 'admin' && decoded.userId !== 'admin')) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+    if (!adminId || adminId !== "admin") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await req.json();
@@ -104,39 +86,39 @@ export async function POST(req: NextRequest) {
         where: { key: 'gemRewards' },
         update: {
           value: JSON.stringify(gemRewards),
-          updatedBy: decoded.userId,
+          updatedBy: adminId,
         },
         create: {
           key: 'gemRewards',
           value: JSON.stringify(gemRewards),
           description: 'Gem rewards for solving riddles by difficulty',
-          updatedBy: decoded.userId,
+          updatedBy: adminId,
         },
       }),
       prisma.gameConfig.upsert({
         where: { key: 'gemCosts' },
         update: {
           value: JSON.stringify(gemCosts),
-          updatedBy: decoded.userId,
+          updatedBy: adminId,
         },
         create: {
           key: 'gemCosts',
           value: JSON.stringify(gemCosts),
           description: 'Gem costs for hints and skip actions',
-          updatedBy: decoded.userId,
+          updatedBy: adminId,
         },
       }),
       prisma.gameConfig.upsert({
         where: { key: 'initialGems' },
         update: {
           value: JSON.stringify(initialGems),
-          updatedBy: decoded.userId,
+          updatedBy: adminId,
         },
         create: {
           key: 'initialGems',
           value: JSON.stringify(initialGems),
           description: 'Starting gem count for new users',
-          updatedBy: decoded.userId,
+          updatedBy: adminId,
         },
       }),
     ];
@@ -149,7 +131,7 @@ export async function POST(req: NextRequest) {
       category: 'admin',
       title: 'Game Settings Updated',
       description: `Admin updated game configuration settings`,
-      adminId: decoded.userId,
+      adminId: adminId,
       metadata: {
         gemRewards,
         gemCosts,

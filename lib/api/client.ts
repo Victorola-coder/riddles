@@ -154,6 +154,13 @@ export async function apiClient<T = unknown>(
       (requestHeaders as Record<string, string>)[
         "Authorization"
       ] = `Bearer ${token}`;
+    } else if (requireAuth && endpoint !== "/api/auth/logout") {
+      // If auth is required but no token found, throw error
+      throw new ApiClientError(
+        "Authentication required. Please log in.",
+        401,
+        "AUTH_REQUIRED"
+      );
     }
   }
 

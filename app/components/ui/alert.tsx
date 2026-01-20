@@ -118,7 +118,7 @@ export function AlertDialog({
               role="alertdialog"
               aria-labelledby="alert-dialog-title"
               aria-describedby="alert-dialog-description"
-              className="bg-[#1A1A1A] border border-[#FFFFFF20] rounded-lg p-6 max-w-md w-full shadow-xl"
+              className="bg-[#161616] border border-[#FFFFFF1A] rounded-lg p-6 max-w-md w-full shadow-xl"
             >
               <div className="flex gap-3 mb-4">
                 <div className={clsx("flex-shrink-0", variantStyles[variant].split(" ")[2])}>
@@ -144,7 +144,7 @@ export function AlertDialog({
                 <button
                   onClick={onClose}
                   disabled={loading}
-                  className="px-4 py-2 rounded-lg bg-[#283142] text-white hover:bg-[#3A4558] transition-colors disabled:opacity-50"
+                  className="px-4 py-2 rounded-lg bg-[#161616] text-white hover:bg-[#222] border border-[#FFFFFF1A] transition-colors disabled:opacity-50 font-medium"
                 >
                   {cancelText}
                 </button>
@@ -156,11 +156,11 @@ export function AlertDialog({
                     }}
                     disabled={loading}
                     className={clsx(
-                      "px-4 py-2 rounded-lg text-white transition-colors disabled:opacity-50",
-                      variant === "error" && "bg-red-500 hover:bg-red-600",
-                      variant === "warning" && "bg-yellow-500 hover:bg-yellow-600",
-                      variant === "success" && "bg-green-500 hover:bg-green-600",
-                      variant === "info" && "bg-blue-500 hover:bg-blue-600"
+                      "px-4 py-2 rounded-lg text-white transition-colors disabled:opacity-50 font-medium",
+                      variant === "error" && "bg-red-600 hover:bg-red-700",
+                      variant === "warning" && "bg-yellow-600 hover:bg-yellow-700",
+                      variant === "success" && "bg-green-600 hover:bg-green-700",
+                      variant === "info" && "bg-gradient-to-r from-[#8b5cf6] to-[#fbbf24] hover:opacity-90"
                     )}
                   >
                     {loading ? "Loading..." : confirmText}

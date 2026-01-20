@@ -1,13 +1,23 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getActivityLogsPaginated } from '@/lib/services';
+import { NextRequest, NextResponse } from "next/server";
+import { getActivityLogsPaginated } from "@/lib/services";
+import { verifyAuthToken } from "@/lib/auth-token";
 
 export async function GET(req: NextRequest) {
   try {
+    // Verify admin authentication
+    const auth = req.headers.get("authorization") || "";
+    const token = auth.replace(/^Bearer\s+/i, "");
+    const adminId = verifyAuthToken(token);
+
+    if (!adminId || typeof adminId !== "string" || adminId !== "admin") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { searchParams } = new URL(req.url);
-    const pageParam = Number(searchParams.get('page'));
-    const pageSizeParam = Number(searchParams.get('pageSize'));
-    const type = searchParams.get('type') as 'admin' | 'user' | null;
-    const activityType = searchParams.get('activityType') || undefined;
+    const pageParam = Number(searchParams.get("page"));
+    const pageSizeParam = Number(searchParams.get("pageSize"));
+    const type = searchParams.get("type") as "admin" | "user" | null;
+    const activityType = searchParams.get("activityType") || undefined;
 
     const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
     const pageSize =
@@ -33,9 +43,9 @@ export async function GET(req: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('Failed to fetch activity logs:', error);
+    console.error("Failed to fetch activity logs:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch activity logs' },
+      { error: "Failed to fetch activity logs" },
       { status: 500 }
     );
   }
