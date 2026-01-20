@@ -60,48 +60,48 @@ export default function ActivityPage() {
       <div className="mb-6 space-y-4">
         {/* Category Filters */}
         <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => {
-              setTypeFilter("");
+        <button
+          onClick={() => {
+            setTypeFilter("");
               setActivityTypeFilter("");
-              setPage(1);
-            }}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            setPage(1);
+          }}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               typeFilter === "" && activityTypeFilter === ""
-                ? "bg-[#8b5cf6] text-white"
-                : "bg-[#161616] text-white hover:bg-[#222] border border-[#FFFFFF1A]"
-            }`}
-          >
-            All
-          </button>
-          <button
-            onClick={() => {
-              setTypeFilter("admin");
+              ? "bg-[#8b5cf6] text-white"
+              : "bg-[#161616] text-white hover:bg-[#222] border border-[#FFFFFF1A]"
+          }`}
+        >
+          All
+        </button>
+        <button
+          onClick={() => {
+            setTypeFilter("admin");
               setActivityTypeFilter("");
-              setPage(1);
-            }}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            setPage(1);
+          }}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               typeFilter === "admin" && activityTypeFilter === ""
-                ? "bg-[#8b5cf6] text-white"
-                : "bg-[#161616] text-white hover:bg-[#222] border border-[#FFFFFF1A]"
-            }`}
-          >
-            Admin
-          </button>
-          <button
-            onClick={() => {
-              setTypeFilter("user");
+              ? "bg-[#8b5cf6] text-white"
+              : "bg-[#161616] text-white hover:bg-[#222] border border-[#FFFFFF1A]"
+          }`}
+        >
+          Admin
+        </button>
+        <button
+          onClick={() => {
+            setTypeFilter("user");
               setActivityTypeFilter("");
-              setPage(1);
-            }}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            setPage(1);
+          }}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               typeFilter === "user" && activityTypeFilter === ""
-                ? "bg-[#8b5cf6] text-white"
-                : "bg-[#161616] text-white hover:bg-[#222] border border-[#FFFFFF1A]"
-            }`}
-          >
-            User
-          </button>
+              ? "bg-[#8b5cf6] text-white"
+              : "bg-[#161616] text-white hover:bg-[#222] border border-[#FFFFFF1A]"
+          }`}
+        >
+          User
+        </button>
         </div>
 
         {/* Activity Type Filters */}

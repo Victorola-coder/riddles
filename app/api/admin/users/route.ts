@@ -5,12 +5,21 @@ import { verifyAuthToken } from '@/lib/auth-token';
 export async function GET(req: NextRequest) {
   try {
     // Verify admin authentication
-    const auth = req.headers.get("authorization") || "";
-    const token = auth.replace(/^Bearer\s+/i, "");
-    const adminId = verifyAuthToken(token);
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
 
-    if (!adminId || adminId !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const token = authHeader.substring(7);
+    const decoded = verifyAuthToken(token);
+    if (!decoded || (decoded.type !== 'admin' && decoded.userId !== 'admin')) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
     }
 
     const { searchParams } = new URL(req.url);

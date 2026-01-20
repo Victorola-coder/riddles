@@ -4,22 +4,12 @@ import {
   logRiddleUpdated,
   logRiddleDeleted,
 } from '@/lib/activity-logger';
-import { verifyAuthToken } from '@/lib/auth-token';
 
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Verify admin authentication
-    const auth = req.headers.get("authorization") || "";
-    const token = auth.replace(/^Bearer\s+/i, "");
-    const adminId = verifyAuthToken(token);
-
-    if (!adminId || adminId !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const { id } = await params;
     const body = await req.json();
 
@@ -70,15 +60,6 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Verify admin authentication
-    const auth = req.headers.get("authorization") || "";
-    const token = auth.replace(/^Bearer\s+/i, "");
-    const adminId = verifyAuthToken(token);
-
-    if (!adminId || adminId !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const { id } = await params;
 
     const riddle = await prisma.riddle.findUnique({ where: { id } });

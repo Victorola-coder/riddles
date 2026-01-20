@@ -115,24 +115,24 @@ export default function DashboardPage() {
           ))
         ) : (
           statCards.map((card, index) => {
-            const Icon = card.icon;
-            return (
-              <Link
-                key={index}
-                href={card.link}
-                className="bg-[#161616] rounded-lg p-6 border border-[#FFFFFF1A] hover:border-[#8b5cf6] transition-colors"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div
-                    className={`${card.color} w-12 h-12 rounded-lg flex items-center justify-center`}
-                  >
-                    <Icon className="w-6 h-6 text-white" />
-                  </div>
+          const Icon = card.icon;
+          return (
+            <Link
+              key={index}
+              href={card.link}
+              className="bg-[#161616] rounded-lg p-6 border border-[#FFFFFF1A] hover:border-[#8b5cf6] transition-colors"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div
+                  className={`${card.color} w-12 h-12 rounded-lg flex items-center justify-center`}
+                >
+                  <Icon className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-gray-400 text-sm mb-2">{card.title}</h3>
-                <p className="text-3xl font-bold text-white">{card.value}</p>
-              </Link>
-            );
+              </div>
+              <h3 className="text-gray-400 text-sm mb-2">{card.title}</h3>
+              <p className="text-3xl font-bold text-white">{card.value}</p>
+            </Link>
+          );
           })
         )}
       </div>

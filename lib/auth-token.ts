@@ -13,15 +13,11 @@ export function signAuthToken(userId: string, expiresIn: string = '7d'): string 
 
 /**
  * Verify an authentication token
- * Returns the userId if valid, null otherwise
  */
-export function verifyAuthToken(token: string): string | null {
+export function verifyAuthToken(token: string): { userId: string; type?: string } | null {
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; type?: string };
-    if (!decoded || !decoded.userId) {
-      return null;
-    }
-    return decoded.userId as string;
+    return decoded;
   } catch (error) {
     return null;
   }
