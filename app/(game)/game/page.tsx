@@ -1,26 +1,42 @@
 "use client";
 
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
-import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
-import { useGameStore } from "@/lib/store/game-store";
-import { useUserStore } from "@/lib/store/user-store";
+import { CheckCircle2, XCircle, Loader2, Trophy } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { soundManager } from "@/lib/utils/sound-manager";
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { RiddleCard, AnswerInput, HintPanel } from "@/app/components/organisms";
 import Skeleton from "@/app/components/ui/skeleton";
+import { useGameStore } from "@/lib/store/game-store";
+import { useUserStore } from "@/lib/store/user-store";
 import { useCurrentUser } from "@/lib/hooks/use-auth";
-import { getGuestId } from "@/lib/utils/guest-session";
 import {
   useGameSession,
   useSolveRiddle,
   useGetHint,
   useUpdateGameSession,
 } from "@/lib/hooks/use-game";
-import { riddlesApi, type Riddle as ApiRiddle } from "@/lib/api/riddles";
-import { useQuery } from "@tanstack/react-query";
+import { riddlesApi } from "@/lib/api/riddles";
+import { soundManager } from "@/lib/utils/sound-manager";
+import { getGuestId } from "@/lib/utils/guest-session";
+import { GAME_CONFIG } from "@/lib/constants/game-config";
 import type { Riddle } from "@/types/riddle";
+
+// Constants
+const RIDDLE_LIMIT = 100;
+const CACHE_TIME = 30 * 60 * 1000; // 30 minutes
+const CONFETTI_COLORS: string[] = ["#8b5cf6", "#fbbf24", "#10b981"];
+const SUCCESS_TOAST_DURATION = 3000;
+const ERROR_TOAST_DURATION = 2000;
+
+// Type for hint result
+type HintResult = {
+  hint: string;
+  gemsSpent: number;
+  remainingGems: number;
+};
 
 export default function GamePage() {
   // Get user ID (authenticated or guest)
@@ -41,19 +57,65 @@ export default function GamePage() {
     userId || undefined
   );
 
-  // Fetch all riddles from backend
-  const { data: riddlesData, isLoading: riddlesLoading } = useQuery({
-    queryKey: ["riddles", "all"],
-    queryFn: async () => {
-      const response = await riddlesApi.getRiddles({ limit: 100 });
+  // Shared query options for riddles (extracted to avoid recreation)
+  const riddleQueryOptions = useMemo(
+    () => ({
+      staleTime: Infinity,
+      gcTime: CACHE_TIME,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+    }),
+    []
+  );
+
+  // Shared query function factory
+  const createRiddleQueryFn = useCallback(
+    (difficulty: "easy" | "medium" | "hard") => async () => {
+      const response = await riddlesApi.getRiddles({
+        difficulty,
+        limit: RIDDLE_LIMIT,
+      });
       return response.riddles;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    []
+  );
+
+  // Prefetch riddles by difficulty in parallel for optimal performance
+  const { data: easyRiddles = [], isLoading: easyLoading } = useQuery({
+    queryKey: ["riddles", "easy"],
+    queryFn: createRiddleQueryFn("easy"),
+    ...riddleQueryOptions,
   });
 
-  // Game store state
-  // Game store state
+  const { data: mediumRiddles = [], isLoading: mediumLoading } = useQuery({
+    queryKey: ["riddles", "medium"],
+    queryFn: createRiddleQueryFn("medium"),
+    ...riddleQueryOptions,
+  });
+
+  const { data: hardRiddles = [], isLoading: hardLoading } = useQuery({
+    queryKey: ["riddles", "hard"],
+    queryFn: createRiddleQueryFn("hard"),
+    ...riddleQueryOptions,
+  });
+
+  // Organize riddles by difficulty for ordered progression
+  const riddlesByDifficulty = useMemo(() => {
+    return {
+      easy: easyRiddles,
+      medium: mediumRiddles,
+      hard: hardRiddles,
+    };
+  }, [easyRiddles, mediumRiddles, hardRiddles]);
+
+  // Combine all riddles for the map (for quick lookup)
+  const allRiddlesData = useMemo(() => {
+    return [...easyRiddles, ...mediumRiddles, ...hardRiddles];
+  }, [easyRiddles, mediumRiddles, hardRiddles]);
+
+  const riddlesLoading = easyLoading || mediumLoading || hardLoading;
+
+  // Game store state - individual selectors for optimal performance
   const currentRiddleId = useGameStore((state) => state.currentRiddleId);
   const solvedRiddles = useGameStore((state) => state.solvedRiddles);
   const skippedRiddles = useGameStore((state) => state.skippedRiddles);
@@ -62,10 +124,16 @@ export default function GamePage() {
   const tickTimer = useGameStore((state) => state.tickTimer);
   const isTimerActive = useGameStore((state) => state.isTimerActive);
 
-  // User store state
-  const incrementTotalSolved = useUserStore((state) => state.incrementTotalSolved);
-  const incrementNoHintSolves = useUserStore((state) => state.incrementNoHintSolves);
-  const incrementPerfectStreak = useUserStore((state) => state.incrementPerfectStreak);
+  // User store actions - individual selectors (actions are stable references)
+  const incrementTotalSolved = useUserStore(
+    (state) => state.incrementTotalSolved
+  );
+  const incrementNoHintSolves = useUserStore(
+    (state) => state.incrementNoHintSolves
+  );
+  const incrementPerfectStreak = useUserStore(
+    (state) => state.incrementPerfectStreak
+  );
   const resetPerfectStreak = useUserStore((state) => state.resetPerfectStreak);
   const updateFastestTime = useUserStore((state) => state.updateFastestTime);
   const addGemsEarned = useUserStore((state) => state.addGemsEarned);
@@ -75,6 +143,7 @@ export default function GamePage() {
   const solveMutation = useSolveRiddle();
   const hintMutation = useGetHint();
   const updateSessionMutation = useUpdateGameSession();
+  const queryClient = useQueryClient();
 
   // Local state
   const [showError, setShowError] = useState(false);
@@ -87,13 +156,12 @@ export default function GamePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const startTimeRef = useRef<number>(Date.now());
 
-  // Convert API riddle to app riddle format
+  // Convert API riddle to app riddle format - optimized map for O(1) lookup
   const riddlesMap = useMemo(() => {
-    if (!riddlesData) return new Map<string, Riddle>();
+    if (!allRiddlesData.length) return new Map<string, Riddle>();
 
     const map = new Map<string, Riddle>();
-    riddlesData.forEach((apiRiddle) => {
-      // API doesn't return answer, so we'll need to handle validation server-side
+    allRiddlesData.forEach((apiRiddle) => {
       map.set(apiRiddle.id, {
         id: apiRiddle.id,
         question: apiRiddle.question,
@@ -106,37 +174,101 @@ export default function GamePage() {
       });
     });
     return map;
-  }, [riddlesData]);
+  }, [allRiddlesData]);
+
+  // Helper function to get next riddle in progression order (Easy → Medium → Hard)
+  const getNextRiddleInProgression = useCallback(
+    (solvedIds: string[], skippedIds: string[]) => {
+      const solvedSet = new Set(solvedIds);
+      const skippedSet = new Set(skippedIds);
+
+      // Check Easy riddles first
+      for (const riddle of riddlesByDifficulty.easy) {
+        if (!solvedSet.has(riddle.id) && !skippedSet.has(riddle.id)) {
+          return riddle;
+        }
+      }
+
+      // Then Medium riddles
+      for (const riddle of riddlesByDifficulty.medium) {
+        if (!solvedSet.has(riddle.id) && !skippedSet.has(riddle.id)) {
+          return riddle;
+        }
+      }
+
+      // Finally Hard riddles
+      for (const riddle of riddlesByDifficulty.hard) {
+        if (!solvedSet.has(riddle.id) && !skippedSet.has(riddle.id)) {
+          return riddle;
+        }
+      }
+
+      return null; // All riddles completed
+    },
+    [riddlesByDifficulty]
+  );
 
   // Get current riddle
   const currentRiddle = currentRiddleId
     ? riddlesMap.get(currentRiddleId)
     : null;
 
+  // Prefetch next riddles while user is playing for instant transitions
+  useEffect(() => {
+    if (currentRiddle && allRiddlesData.length > 0) {
+      // Prefetch next riddle in background for instant loading
+      const nextRiddle = getNextRiddleInProgression(
+        solvedRiddles || [],
+        skippedRiddles || []
+      );
+
+      if (nextRiddle) {
+        // Prefetch the next riddle's data (already in cache, but ensure it's fresh)
+        queryClient.prefetchQuery({
+          queryKey: ["riddles", nextRiddle.difficulty],
+          queryFn: async () => {
+            const response = await riddlesApi.getRiddles({
+              difficulty: nextRiddle.difficulty,
+              limit: 100,
+            });
+            return response.riddles;
+          },
+          staleTime: Infinity,
+        });
+      }
+    }
+  }, [
+    currentRiddle,
+    solvedRiddles,
+    skippedRiddles,
+    getNextRiddleInProgression,
+    queryClient,
+    allRiddlesData.length,
+  ]);
+
   // Track if we've initialized the session to prevent infinite loops
   const hasInitialized = useRef(false);
 
-  // Initialize session and get next riddle if needed
+  // Initialize session and get next riddle in progression order
   useEffect(() => {
     if (
       !userId ||
       hasInitialized.current ||
       sessionLoading ||
       !sessionData?.session ||
-      !riddlesData
+      riddlesLoading ||
+      !allRiddlesData.length
     ) {
       return;
     }
 
     const session = sessionData.session;
 
-    // If no current riddle, get the first unsolved one
-    if (!session.currentRiddleId && riddlesData.length > 0) {
-      const solvedSet = new Set(session.solvedRiddles || []);
-      const skippedSet = new Set(session.skippedRiddles || []);
-
-      const nextRiddle = riddlesData.find(
-        (r) => !solvedSet.has(r.id) && !skippedSet.has(r.id)
+    // If no current riddle, get the first unsolved one in progression order (Easy → Medium → Hard)
+    if (!session.currentRiddleId) {
+      const nextRiddle = getNextRiddleInProgression(
+        session.solvedRiddles || [],
+        session.skippedRiddles || []
       );
 
       if (nextRiddle) {
@@ -151,18 +283,42 @@ export default function GamePage() {
       // Mark as initialized if we already have a riddle
       hasInitialized.current = true;
     }
-  }, [sessionLoading, sessionData, riddlesData, userId]);
+  }, [
+    sessionLoading,
+    sessionData,
+    riddlesLoading,
+    allRiddlesData.length,
+    userId,
+    getNextRiddleInProgression,
+  ]);
 
   // Reset hints and timer when riddle changes
   useEffect(() => {
-    if (currentRiddleId) {
+    if (currentRiddleId && currentRiddle) {
       setRevealedHints({});
       setShowError(false);
       setWrongAttempts(0);
       startTimeRef.current = Date.now();
       updateStreak();
+
+      // Initialize timer based on difficulty
+      const timerDuration = GAME_CONFIG.TIMER[currentRiddle.difficulty];
+      if (timerDuration > 0) {
+        useGameStore.setState({
+          timeLeft: timerDuration,
+          totalTime: timerDuration,
+          isTimerActive: true,
+        });
+      } else {
+        // Easy riddles have infinite time (0 = no timer)
+        useGameStore.setState({
+          timeLeft: 0,
+          totalTime: 0,
+          isTimerActive: false,
+        });
+      }
     }
-  }, [currentRiddleId, updateStreak]);
+  }, [currentRiddleId, currentRiddle, updateStreak]);
 
   // Timer Tick Loop
   useEffect(() => {
@@ -212,7 +368,7 @@ export default function GamePage() {
   }
 
   // No riddles available
-  if (!riddlesData || riddlesData.length === 0) {
+  if (!allRiddlesData || allRiddlesData.length === 0) {
     return (
       <div className="text-center">
         <h1 className="text-4xl font-cinzel text-white mb-4">
@@ -225,12 +381,15 @@ export default function GamePage() {
     );
   }
 
-  // No current riddle (all solved)
+  // No current riddle (all solved or loading next)
   if (!currentRiddle) {
-    const solvedSet = new Set(solvedRiddles || []);
-    const allSolved = riddlesData.every((r) => solvedSet.has(r.id));
+    const nextRiddle = getNextRiddleInProgression(
+      solvedRiddles || [],
+      skippedRiddles || []
+    );
 
-    if (allSolved) {
+    if (!nextRiddle) {
+      // All riddles completed
       return (
         <div className="text-center">
           <h1 className="text-4xl font-cinzel text-white mb-4">
@@ -243,15 +402,8 @@ export default function GamePage() {
       );
     }
 
-    // Find next unsolved riddle
-    const solvedSet2 = new Set(solvedRiddles || []);
-    const skippedSet = new Set(skippedRiddles || []);
-    const nextRiddle = riddlesData.find(
-      (r) => !solvedSet2.has(r.id) && !skippedSet.has(r.id)
-    );
-
-    if (nextRiddle) {
-      // Set next riddle
+    // Set next riddle in progression order
+    if (userId && !hasInitialized.current) {
       updateSessionMutation.mutate({
         userId,
         currentRiddleId: nextRiddle.id,
@@ -265,199 +417,239 @@ export default function GamePage() {
     );
   }
 
-  const handleSubmit = async (answer: string) => {
-    if (isSubmitting || !userId) return;
+  // Memoize hint check to avoid repeated calls
+  const usedNoHints = useMemo(() => {
+    if (!currentRiddle) return false;
+    return (
+      !hasUsedHint(currentRiddle.id, 1) &&
+      !hasUsedHint(currentRiddle.id, 2) &&
+      !hasUsedHint(currentRiddle.id, 3)
+    );
+  }, [currentRiddle, hasUsedHint]);
 
-    setIsSubmitting(true);
+  const handleSubmit = useCallback(
+    async (answer: string) => {
+      if (isSubmitting || !userId || !currentRiddle) return;
 
-    try {
-      const solveTime = (Date.now() - startTimeRef.current) / 1000;
-      const usedNoHints =
-        !hasUsedHint(currentRiddle.id, 1) &&
-        !hasUsedHint(currentRiddle.id, 2) &&
-        !hasUsedHint(currentRiddle.id, 3);
+      setIsSubmitting(true);
 
-      // Submit to backend
-      const result = await solveMutation.mutateAsync({
-        userId,
-        riddleId: currentRiddle.id,
-        answer,
-      });
+      try {
+        const solveTime = (Date.now() - startTimeRef.current) / 1000;
 
-      if (result.correct) {
-        // Correct answer!
-        const gemsEarned = result.gemsEarned || 0;
-
-        // Play success sounds
-        soundManager.play("success");
-        soundManager.play("gem");
-
-        // Track achievements
-        incrementTotalSolved();
-        addGemsEarned(gemsEarned);
-        updateFastestTime(solveTime);
-
-        if (usedNoHints) {
-          incrementNoHintSolves();
-        }
-
-        if (wrongAttempts === 0) {
-          incrementPerfectStreak();
-        } else {
-          resetPerfectStreak();
-        }
-
-        // Confetti animation
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 },
-          colors: ["#8b5cf6", "#fbbf24", "#10b981"],
+        // Submit to backend
+        const result = await solveMutation.mutateAsync({
+          userId,
+          riddleId: currentRiddle.id,
+          answer,
         });
 
-        toast.success(
-          <div className="flex items-center gap-2 flex-nowrap">
-            <CheckCircle2 className="text-green-400" />
-            <div>
-              <p className="font-semibold">Correct! +{gemsEarned} gems</p>
-              <p className="text-sm text-[var(--text-muted)]">Well done!</p>
-            </div>
-          </div>,
-          { duration: 3000 }
-        );
+        if (result.correct) {
+          // Correct answer!
+          const gemsEarned = result.gemsEarned || 0;
 
-        // Get next riddle
-        const solvedSet = new Set([...solvedRiddles, currentRiddle.id]);
-        const skippedSet = new Set(skippedRiddles || []);
-        const nextRiddle = riddlesData.find(
-          (r) => !solvedSet.has(r.id) && !skippedSet.has(r.id)
-        );
+          // Update store optimistically for instant UI feedback
+          useGameStore.setState((state) => ({
+            solvedRiddles: [...state.solvedRiddles, currentRiddle.id],
+            userGems: state.userGems + gemsEarned,
+            isTimerActive: false, // Stop timer on solve
+          }));
 
-        // Update session with next riddle
-        if (nextRiddle) {
-          await updateSessionMutation.mutateAsync({
-            userId,
-            currentRiddleId: nextRiddle.id,
-            solvedRiddles: [...solvedRiddles, currentRiddle.id],
-            userGems: userGems + gemsEarned,
+          // Play success sounds
+          soundManager.play("success");
+          soundManager.play("gem");
+
+          // Track achievements
+          incrementTotalSolved();
+          addGemsEarned(gemsEarned);
+          updateFastestTime(solveTime);
+
+          if (usedNoHints) {
+            incrementNoHintSolves();
+          }
+
+          if (wrongAttempts === 0) {
+            incrementPerfectStreak();
+          } else {
+            resetPerfectStreak();
+          }
+
+          // Confetti animation
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: CONFETTI_COLORS,
           });
+
+          toast.success(
+            <div className="flex items-center gap-2 flex-nowrap">
+              <CheckCircle2 className="text-green-400" />
+              <div>
+                <p className="font-semibold">Correct! +{gemsEarned} gems</p>
+                <p className="text-sm text-[var(--text-muted)]">Well done!</p>
+              </div>
+            </div>,
+            { duration: SUCCESS_TOAST_DURATION }
+          );
+
+          // Get next riddle in progression order (Easy → Medium → Hard)
+          const nextRiddle = getNextRiddleInProgression(
+            [...solvedRiddles, currentRiddle.id],
+            skippedRiddles || []
+          );
+
+          // Check if user unlocked a new difficulty tier
+          const currentDifficulty = currentRiddle.difficulty;
+          const nextDifficulty = nextRiddle?.difficulty;
+          const unlockedNewTier =
+            nextRiddle &&
+            nextDifficulty &&
+            currentDifficulty !== nextDifficulty;
+
+          // Celebrate difficulty unlock!
+          if (unlockedNewTier && nextDifficulty) {
+            setTimeout(() => {
+              confetti({
+                particleCount: 200,
+                spread: 100,
+                origin: { y: 0.5 },
+                colors: CONFETTI_COLORS,
+              });
+              toast.success(
+                <div className="flex items-center gap-2">
+                  <Trophy className="text-gold" size={20} />
+                  <div>
+                    <p className="font-semibold">
+                      🎉 Unlocked {nextDifficulty.toUpperCase()} Difficulty!
+                    </p>
+                    <p className="text-sm text-[var(--text-muted)]">
+                      Ready for a bigger challenge?
+                    </p>
+                  </div>
+                </div>,
+                { duration: 4000 }
+              );
+              soundManager.play("achievement");
+            }, 500);
+          }
+
+          // Update session with next riddle
+          if (nextRiddle) {
+            await updateSessionMutation.mutateAsync({
+              userId,
+              currentRiddleId: nextRiddle.id,
+              solvedRiddles: [...solvedRiddles, currentRiddle.id],
+              userGems: userGems + gemsEarned,
+            });
+          } else {
+            // All riddles solved
+            await updateSessionMutation.mutateAsync({
+              userId,
+              solvedRiddles: [...solvedRiddles, currentRiddle.id],
+              userGems: userGems + gemsEarned,
+              currentRiddleId: undefined,
+            });
+          }
+
+          // Session update will trigger re-render with next riddle
         } else {
-          // All riddles solved
-          await updateSessionMutation.mutateAsync({
-            userId,
-            solvedRiddles: [...solvedRiddles, currentRiddle.id],
-            userGems: userGems + gemsEarned,
-            currentRiddleId: undefined,
-          });
+          // Wrong answer
+          setWrongAttempts((prev) => prev + 1);
+          setShowError(true);
+          setTimeout(() => setShowError(false), 500);
+
+          // Play error sound
+          soundManager.play("error");
+
+          toast.error(
+            <div className="flex items-center gap-2">
+              <XCircle className="text-red-400" />
+              <span>Not quite! Try again.</span>
+            </div>,
+            { duration: ERROR_TOAST_DURATION }
+          );
         }
-
-        // Session update will trigger re-render with next riddle
-      } else {
-        // Wrong answer
-        setWrongAttempts((prev) => prev + 1);
-        setShowError(true);
-        setTimeout(() => setShowError(false), 500);
-
-        // Play error sound
-        soundManager.play("error");
-
-        toast.error(
-          <div className="flex items-center gap-2">
-            <XCircle className="text-red-400" />
-            <span>Not quite! Try again.</span>
-          </div>,
-          { duration: 2000 }
-        );
+      } catch (error) {
+        console.error("Failed to submit answer:", error);
+        toast.error("Failed to submit answer. Please try again.");
+      } finally {
+        setIsSubmitting(false);
       }
-    } catch (error) {
-      console.error("Failed to submit answer:", error);
-      toast.error("Failed to submit answer. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    },
+    [
+      isSubmitting,
+      userId,
+      currentRiddle,
+      solveMutation,
+      usedNoHints,
+      wrongAttempts,
+      solvedRiddles,
+      skippedRiddles,
+      userGems,
+      getNextRiddleInProgression,
+      updateSessionMutation,
+      incrementTotalSolved,
+      addGemsEarned,
+      updateFastestTime,
+      incrementNoHintSolves,
+      incrementPerfectStreak,
+      resetPerfectStreak,
+    ]
+  );
 
-  const handleHint1 = async () => {
-    if (!userId || isSubmitting) return;
+  // Optimized hint handler factory
+  const createHintHandler = useCallback(
+    (hintLevel: 1 | 2 | 3, hintKey: "hint1" | "hint2" | "answer") =>
+      async () => {
+        if (!userId || isSubmitting || !currentRiddle) return;
 
-    try {
-      const result = await hintMutation.mutateAsync({
-        userId,
-        riddleId: currentRiddle.id,
-        hintLevel: 1,
-      });
+        try {
+          const result = await hintMutation.mutateAsync({
+            userId,
+            riddleId: currentRiddle.id,
+            hintLevel,
+          });
 
-      const hint = (
-        result as unknown as {
-          hint: string;
-          gemsSpent: number;
-          remainingGems: number;
+          const hint = (result as unknown as HintResult).hint;
+          setRevealedHints((prev) => ({ ...prev, [hintKey]: hint }));
+          soundManager.play("hint");
+
+          if (hintLevel === 1) {
+            toast.info(`Hint: First letter is "${hint}"`);
+          } else if (hintLevel === 2) {
+            toast.info(`Hint: ${hint}`);
+          } else {
+            toast.warning(`Answer: ${hint}`, { duration: 5000 });
+          }
+        } catch (error) {
+          console.error(`Failed to get hint ${hintLevel}:`, error);
         }
-      ).hint;
-      setRevealedHints((prev) => ({ ...prev, hint1: hint }));
-      soundManager.play("hint");
-      toast.info(`Hint: First letter is "${hint}"`);
-    } catch (error) {
-      console.error("Failed to get hint:", error);
-    }
-  };
+      },
+    [userId, isSubmitting, currentRiddle, hintMutation]
+  );
 
-  const handleHint2 = async () => {
-    if (!userId || isSubmitting) return;
+  const handleHint1 = useMemo(
+    () => createHintHandler(1, "hint1"),
+    [createHintHandler]
+  );
+  const handleHint2 = useMemo(
+    () => createHintHandler(2, "hint2"),
+    [createHintHandler]
+  );
+  const handleReveal = useMemo(
+    () => createHintHandler(3, "answer"),
+    [createHintHandler]
+  );
 
-    try {
-      const result = await hintMutation.mutateAsync({
-        userId,
-        riddleId: currentRiddle.id,
-        hintLevel: 2,
-      });
-
-      const hint = (
-        result as unknown as {
-          hint: string;
-          gemsSpent: number;
-          remainingGems: number;
-        }
-      ).hint;
-      setRevealedHints((prev) => ({ ...prev, hint2: hint }));
-      soundManager.play("hint");
-      toast.info(`Hint: ${hint}`);
-    } catch (error) {
-      console.error("Failed to get hint:", error);
-    }
-  };
-
-  const handleReveal = async () => {
-    if (!userId || isSubmitting) return;
+  const handleSkip = useCallback(async () => {
+    if (!userId || isSubmitting || !currentRiddle) return;
 
     try {
-      const result = await hintMutation.mutateAsync({
-        userId,
-        riddleId: currentRiddle.id,
-        hintLevel: 3,
-      });
-
-      const hint = (
-        result as unknown as {
-          hint: string;
-          gemsSpent: number;
-          remainingGems: number;
-        }
-      ).hint;
-      setRevealedHints((prev) => ({ ...prev, answer: hint }));
-      soundManager.play("hint");
-      toast.warning(`Answer: ${hint}`, { duration: 5000 });
-    } catch (error) {
-      console.error("Failed to reveal answer:", error);
-    }
-  };
-
-  const handleSkip = async () => {
-    if (!userId || isSubmitting) return;
-
-    try {
-      const skippedSet = new Set([...skippedRiddles, currentRiddle.id]);
-      const nextRiddle = riddlesData.find((r) => !skippedSet.has(r.id));
+      // Get next riddle in progression order after skipping
+      const nextRiddle = getNextRiddleInProgression(solvedRiddles || [], [
+        ...skippedRiddles,
+        currentRiddle.id,
+      ]);
 
       await updateSessionMutation.mutateAsync({
         userId,
@@ -466,18 +658,148 @@ export default function GamePage() {
       });
 
       toast.info("Riddle skipped");
-      // Session update will trigger re-render with next riddle
     } catch (error) {
       console.error("Failed to skip riddle:", error);
       toast.error("Failed to skip riddle");
     }
-  };
+  }, [
+    userId,
+    isSubmitting,
+    currentRiddle,
+    solvedRiddles,
+    skippedRiddles,
+    getNextRiddleInProgression,
+    updateSessionMutation,
+  ]);
 
   const hint1Used = hasUsedHint(currentRiddle.id, 1);
   const hint2Used = hasUsedHint(currentRiddle.id, 2);
 
+  // Calculate progress per difficulty tier - optimized with Set for O(1) lookups
+  const progressByDifficulty = useMemo(() => {
+    const solvedSet = new Set(solvedRiddles || []);
+
+    // Count solved riddles efficiently - single pass
+    const countSolved = (riddles: typeof easyRiddles) => {
+      let count = 0;
+      for (const riddle of riddles) {
+        if (solvedSet.has(riddle.id)) count++;
+      }
+      return count;
+    };
+
+    return {
+      easy: {
+        solved: countSolved(riddlesByDifficulty.easy),
+        total: riddlesByDifficulty.easy.length,
+      },
+      medium: {
+        solved: countSolved(riddlesByDifficulty.medium),
+        total: riddlesByDifficulty.medium.length,
+      },
+      hard: {
+        solved: countSolved(riddlesByDifficulty.hard),
+        total: riddlesByDifficulty.hard.length,
+      },
+    };
+  }, [solvedRiddles, riddlesByDifficulty]);
+
   return (
     <div className="w-full max-w-4xl mx-auto flex flex-col gap-8">
+      {/* Progress Indicator */}
+      {currentRiddle && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass-card p-4"
+        >
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-[var(--text-secondary)] font-inter">
+                Progress
+              </span>
+              <span className="text-white font-semibold">
+                {solvedRiddles.length} / {allRiddlesData.length} Solved
+              </span>
+            </div>
+            <div className="flex gap-2">
+              {/* Easy Progress */}
+              <div className="flex-1">
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="text-green-400">Easy</span>
+                  <span className="text-[var(--text-muted)]">
+                    {progressByDifficulty.easy.solved}/
+                    {progressByDifficulty.easy.total}
+                  </span>
+                </div>
+                <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                  <motion.div
+                    className="h-full bg-green-400"
+                    initial={{ width: 0 }}
+                    animate={{
+                      width: `${
+                        (progressByDifficulty.easy.solved /
+                          progressByDifficulty.easy.total) *
+                        100
+                      }%`,
+                    }}
+                    transition={{ duration: 0.5 }}
+                  />
+                </div>
+              </div>
+              {/* Medium Progress */}
+              <div className="flex-1">
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="text-yellow-400">Medium</span>
+                  <span className="text-[var(--text-muted)]">
+                    {progressByDifficulty.medium.solved}/
+                    {progressByDifficulty.medium.total}
+                  </span>
+                </div>
+                <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                  <motion.div
+                    className="h-full bg-yellow-400"
+                    initial={{ width: 0 }}
+                    animate={{
+                      width: `${
+                        (progressByDifficulty.medium.solved /
+                          progressByDifficulty.medium.total) *
+                        100
+                      }%`,
+                    }}
+                    transition={{ duration: 0.5 }}
+                  />
+                </div>
+              </div>
+              {/* Hard Progress */}
+              <div className="flex-1">
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="text-red-400">Hard</span>
+                  <span className="text-[var(--text-muted)]">
+                    {progressByDifficulty.hard.solved}/
+                    {progressByDifficulty.hard.total}
+                  </span>
+                </div>
+                <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                  <motion.div
+                    className="h-full bg-red-400"
+                    initial={{ width: 0 }}
+                    animate={{
+                      width: `${
+                        (progressByDifficulty.hard.solved /
+                          progressByDifficulty.hard.total) *
+                        100
+                      }%`,
+                    }}
+                    transition={{ duration: 0.5 }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Riddle Card */}
       <AnimatePresence mode="wait">
         <RiddleCard key={currentRiddle.id} riddle={currentRiddle} />

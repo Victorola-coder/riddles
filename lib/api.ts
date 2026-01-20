@@ -102,7 +102,7 @@ export const gameApi = {
     client.get<{ session: any; state: any }>(
       `/game/session${userId ? `?userId=${userId}` : ""}`
     ),
-  updateSession: (data: any) => client.post("/game/session", data), // Changed from PATCH to POST to match route
+  updateSession: (data: any) => client.post("/game/session", data),
   solveRiddle: (data: any) =>
     client.post<{ correct: boolean; gemsEarned: number }>("/game/solve", data),
   getHint: (data: any) =>

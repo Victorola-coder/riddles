@@ -7,9 +7,11 @@ import { gameApi, ApiClientError } from "@/lib/api";
 import { useGameStore } from "@/lib/store/game-store";
 import { useUserStore } from "@/lib/store/user-store";
 
-// Cache duration: 5 minutes
-const CACHE_TIME = 5 * 60 * 1000;
-const STALE_TIME = 5 * 60 * 1000;
+// Cache configuration constants
+const CACHE_TIME = 5 * 60 * 1000; // 5 minutes
+const STALE_TIME = 5 * 60 * 1000; // 5 minutes
+const ATTEMPTS_STALE_TIME = 2 * 60 * 1000; // 2 minutes
+const ATTEMPTS_CACHE_TIME = 5 * 60 * 1000; // 5 minutes
 
 /**
  * Get or create game session
@@ -35,6 +37,7 @@ export function useGameSession(userId?: string) {
     gcTime: CACHE_TIME,
     refetchOnWindowFocus: false,
     refetchOnMount: true,
+    refetchOnReconnect: false,
     retry: 1,
   });
 
@@ -221,9 +224,11 @@ export function useAttempts(userId: string, options?: { riddleId?: string; limit
       }
     },
     enabled: !!userId,
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 5 * 60 * 1000,
+    staleTime: ATTEMPTS_STALE_TIME,
+    gcTime: ATTEMPTS_CACHE_TIME,
     refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
     retry: 1,
   });
 }

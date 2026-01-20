@@ -67,11 +67,12 @@ function buildQueryString(
 ): string {
   const searchParams = new URLSearchParams();
 
-  Object.entries(params).forEach(([key, value]) => {
+  // Optimized: single pass with early return
+  for (const [key, value] of Object.entries(params)) {
     if (value !== null && value !== undefined && value !== "") {
       searchParams.append(key, String(value));
     }
-  });
+  }
 
   const queryString = searchParams.toString();
   return queryString ? `?${queryString}` : "";

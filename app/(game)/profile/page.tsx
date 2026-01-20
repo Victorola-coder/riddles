@@ -24,7 +24,6 @@ import { authApi, ApiClientError } from "@/lib/api";
 import { useUserStore } from "@/lib/store/user-store";
 import { Avatar, Button } from "@/app/components/ui";
 import { cardEntranceVariants, fadeVariants } from "@/lib/constants/animations";
-
 import Skeleton from "@/app/components/ui/skeleton";
 
 export default function ProfilePage() {

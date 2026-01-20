@@ -101,14 +101,14 @@ export const useUserStore = create<UserStore>()(
 
       checkAchievements: () => {
         const state = get();
-        const unlockedIds = state.achievements;
+        const unlockedIdsSet = new Set(state.achievements);
         const newProgress: Record<string, number> = { ...state.achievementProgress };
         const newUnlockedIds: string[] = [];
         let gemsToAdd = 0;
 
         ACHIEVEMENTS.forEach((achievement) => {
-          // Skip if already unlocked or just unlocked
-          if (unlockedIds.includes(achievement.id) || newUnlockedIds.includes(achievement.id)) return;
+          // Skip if already unlocked or just unlocked (O(1) lookup)
+          if (unlockedIdsSet.has(achievement.id) || newUnlockedIds.includes(achievement.id)) return;
 
           let currentProgress = 0;
           let shouldUnlock = false;
@@ -179,8 +179,11 @@ export const useUserStore = create<UserStore>()(
           }
         });
 
-        // SINGLE batch update if needed
-        const hasProgressChanges = JSON.stringify(newProgress) !== JSON.stringify(state.achievementProgress);
+        // SINGLE batch update if needed - optimized comparison
+        const hasProgressChanges = Object.keys(newProgress).some(
+          (key) => newProgress[key] !== state.achievementProgress[key]
+        ) || Object.keys(state.achievementProgress).length !== Object.keys(newProgress).length;
+        
         if (newUnlockedIds.length > 0 || hasProgressChanges) {
            set((state) => ({
              achievementProgress: newProgress,

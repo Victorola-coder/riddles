@@ -5,6 +5,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { authApi, ApiClientError } from "@/lib/api";
 import { getAuthToken, setAuthToken, removeAuthToken } from "@/lib/client-auth";
 
+// Cache configuration constants
+const USER_CACHE_TIME = 5 * 60 * 1000; // 5 minutes
+const USER_STALE_TIME = 5 * 60 * 1000; // 5 minutes
+
 export { getAuthToken, setAuthToken };
 
 export function clearAuthToken() {
@@ -51,8 +55,11 @@ export function useCurrentUser() {
     },
     enabled: !!getAuthToken(),
     retry: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: false, // Don't refetch on tab switch
+    staleTime: USER_STALE_TIME,
+    gcTime: USER_CACHE_TIME,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
   });
 }
 

@@ -2,8 +2,6 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { GameState, HintLevel } from '@/types/game';
 import { GAME_CONFIG } from '@/lib/constants/game-config';
-import { getNextRiddle, RIDDLES } from '@/lib/constants/riddles';
-import { gameApi } from '@/lib/api';
 
 interface GameStore extends GameState {
   // Timer State
@@ -15,13 +13,11 @@ interface GameStore extends GameState {
   solveRiddle: (riddleId: string, gemsEarned: number) => void;
   skipRiddle: (riddleId: string) => void;
   useHint: (riddleId: string, hintLevel: HintLevel) => void;
-  nextRiddle: () => void;
   resetGame: () => void;
   spendGems: (amount: number) => boolean;
   earnGems: (amount: number) => void;
   hasEnoughGems: (amount: number) => boolean;
   hasUsedHint: (riddleId: string, hintLevel: HintLevel) => boolean;
-  syncWithServer: () => Promise<void>;
   
   // Timer Actions
   tickTimer: () => void;
@@ -29,7 +25,7 @@ interface GameStore extends GameState {
 }
 
 const initialState: GameState = {
-  currentRiddleId: RIDDLES[0]?.id || null,
+  currentRiddleId: null,
   solvedRiddles: [],
   skippedRiddles: [],
   userGems: GAME_CONFIG.INITIAL_GEMS,
@@ -54,31 +50,12 @@ export const useGameStore = create<GameStore>()(
       totalTime: 0,
       isTimerActive: false,
 
-      solveRiddle: async (riddleId, gemsEarned) => {
+      solveRiddle: (riddleId, gemsEarned) => {
         set((state) => ({
           solvedRiddles: [...state.solvedRiddles, riddleId],
           userGems: state.userGems + gemsEarned,
           isTimerActive: false, // Stop timer on solve
         }));
-
-        try {
-          const usedHints = get().hintsUsed[riddleId]?.length > 0;
-          await gameApi.submitAttempt({
-            riddleId,
-            solved: true,
-            usedHint: usedHints,
-          });
-        } catch (error) {
-          console.error('Failed to submit attempt:', error);
-        }
-      },
-      
-      syncWithServer: async () => {
-        try {
-          const response = await gameApi.syncSession();
-        } catch (error) {
-           console.error('Failed to sync game session:', error);
-        }
       },
 
       skipRiddle: (riddleId) => {
@@ -108,24 +85,6 @@ export const useGameStore = create<GameStore>()(
         }
       },
 
-      nextRiddle: () => {
-        const currentId = get().currentRiddleId;
-        const solvedIds = get().solvedRiddles;
-        const nextRiddle = getNextRiddle(currentId, solvedIds);
-        
-        // Calculate Timer
-        let duration = 0;
-        if (nextRiddle) {
-           duration = getLevelDuration(get().currentLevel, nextRiddle.difficulty);
-        }
-
-        set({
-          currentRiddleId: nextRiddle?.id || null,
-          timeLeft: duration,
-          totalTime: duration,
-          isTimerActive: duration > 0,
-        });
-      },
 
       tickTimer: () => {
         const { timeLeft, isTimerActive } = get();
