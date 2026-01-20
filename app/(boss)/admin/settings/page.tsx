@@ -3,7 +3,7 @@
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { Settings, Save } from "lucide-react";
-import { Button, Input } from "@/app/components/ui";
+import { Button, Input, Skeleton } from "@/app/components/ui";
 import { adminApi, ApiClientError } from "@/lib/api";
 import { GAME_CONFIG } from "@/lib/constants/game-config";
 
@@ -101,8 +101,41 @@ export default function SettingsPage() {
             Configure game economy and progression settings
           </p>
         </div>
-        <div className="flex items-center justify-center py-12">
-          <p className="text-gray-400">Loading settings...</p>
+        <div className="space-y-6">
+          {/* Gem Rewards Skeleton */}
+          <div className="bg-[#161616] rounded-lg p-6 border border-[#FFFFFF1A]">
+            <Skeleton className="h-6 w-32 mb-4" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div key={index}>
+                  <Skeleton className="h-4 w-24 mb-1" />
+                  <Skeleton className="h-10 w-full rounded-lg" />
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Gem Costs Skeleton */}
+          <div className="bg-[#161616] rounded-lg p-6 border border-[#FFFFFF1A]">
+            <Skeleton className="h-6 w-32 mb-4" />
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div key={index}>
+                  <Skeleton className="h-4 w-16 mb-1" />
+                  <Skeleton className="h-10 w-full rounded-lg" />
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Initial Gems Skeleton */}
+          <div className="bg-[#161616] rounded-lg p-6 border border-[#FFFFFF1A]">
+            <Skeleton className="h-6 w-32 mb-4" />
+            <Skeleton className="h-4 w-24 mb-1" />
+            <Skeleton className="h-10 w-64 rounded-lg" />
+          </div>
+          {/* Save Button Skeleton */}
+          <div className="flex justify-end">
+            <Skeleton className="h-10 w-32 rounded-lg" />
+          </div>
         </div>
       </div>
     );

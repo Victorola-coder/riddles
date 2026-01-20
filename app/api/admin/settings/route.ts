@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
 
     const token = authHeader.substring(7);
     const decoded = verifyAuthToken(token);
-    if (!decoded || decoded.type !== 'admin') {
+    if (!decoded || (decoded.type !== 'admin' && decoded.userId !== 'admin')) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
 
     const token = authHeader.substring(7);
     const decoded = verifyAuthToken(token);
-    if (!decoded || decoded.type !== 'admin') {
+    if (!decoded || (decoded.type !== 'admin' && decoded.userId !== 'admin')) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }

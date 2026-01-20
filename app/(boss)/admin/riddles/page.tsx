@@ -19,6 +19,7 @@ import { useEffect, useState } from "react";
 import Modal from "@/app/components/ui/modal";
 import Input from "@/app/components/ui/input";
 import Button from "@/app/components/ui/button";
+import { Skeleton } from "@/app/components/ui";
 import { useQueryClient } from "@tanstack/react-query";
 
 const PAGE_SIZE = 12;
@@ -249,7 +250,59 @@ export default function RiddlesPage() {
 
       {/* Riddles Table */}
       <div className="bg-[#161616] rounded-lg border border-[#FFFFFF1A] overflow-hidden">
-        {riddles.length === 0 ? (
+        {loading || !paginatedRiddles ? (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-[#0B0B0B] border-b border-[#FFFFFF1A]">
+                <tr>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                    Question
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                    Difficulty
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                    Category
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                    Status
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#FFFFFF1A]">
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <tr key={index} className="hover:bg-[#1A1A1A]">
+                    <td className="px-6 py-4">
+                      <div className="max-w-md">
+                        <Skeleton className="h-5 w-full mb-2" />
+                        <Skeleton className="h-3 w-3/4" />
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <Skeleton className="h-6 w-16 rounded-full" />
+                    </td>
+                    <td className="px-6 py-4">
+                      <Skeleton className="h-4 w-20" />
+                    </td>
+                    <td className="px-6 py-4">
+                      <Skeleton className="h-6 w-16 rounded-full" />
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <Skeleton className="h-8 w-8 rounded-lg" />
+                        <Skeleton className="h-8 w-8 rounded-lg" />
+                        <Skeleton className="h-8 w-8 rounded-lg" />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : riddles.length === 0 ? (
           <div className="py-16 px-6 text-center">
             <HelpCircle className="w-16 h-16 mx-auto mb-4 text-gray-600" />
             <p className="text-lg font-medium text-white mb-2">

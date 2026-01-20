@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useAdminStats, useAdminActivity } from "@/lib/hooks/use-admin";
+import { Skeleton } from "@/app/components/ui";
 
 export default function DashboardPage() {
   const {
@@ -100,26 +101,40 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
-        {statCards.map((card, index) => {
-          const Icon = card.icon;
-          return (
-            <Link
+        {loading ? (
+          // Skeleton loaders for stat cards
+          Array.from({ length: 5 }).map((_, index) => (
+            <div
               key={index}
-              href={card.link}
-              className="bg-[#161616] rounded-lg p-6 border border-[#FFFFFF1A] hover:border-[#8b5cf6] transition-colors"
+              className="bg-[#161616] rounded-lg p-6 border border-[#FFFFFF1A]"
             >
-              <div className="flex items-center justify-between mb-4">
-                <div
-                  className={`${card.color} w-12 h-12 rounded-lg flex items-center justify-center`}
-                >
-                  <Icon className="w-6 h-6 text-white" />
+              <Skeleton className="w-12 h-12 rounded-lg mb-4" />
+              <Skeleton className="h-4 w-24 mb-2" />
+              <Skeleton className="h-8 w-16" />
+            </div>
+          ))
+        ) : (
+          statCards.map((card, index) => {
+            const Icon = card.icon;
+            return (
+              <Link
+                key={index}
+                href={card.link}
+                className="bg-[#161616] rounded-lg p-6 border border-[#FFFFFF1A] hover:border-[#8b5cf6] transition-colors"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div
+                    className={`${card.color} w-12 h-12 rounded-lg flex items-center justify-center`}
+                  >
+                    <Icon className="w-6 h-6 text-white" />
+                  </div>
                 </div>
-              </div>
-              <h3 className="text-gray-400 text-sm mb-2">{card.title}</h3>
-              <p className="text-3xl font-bold text-white">{card.value}</p>
-            </Link>
-          );
-        })}
+                <h3 className="text-gray-400 text-sm mb-2">{card.title}</h3>
+                <p className="text-3xl font-bold text-white">{card.value}</p>
+              </Link>
+            );
+          })
+        )}
       </div>
 
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -152,8 +167,17 @@ export default function DashboardPage() {
             </Link>
           </div>
           {activitiesLoading ? (
-            <div className="text-gray-400 text-sm space-y-2">
-              <p>Loading activities...</p>
+            <div className="space-y-3">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="p-3 rounded-lg bg-[#1a1a1a] border border-[#FFFFFF0A]"
+                >
+                  <Skeleton className="h-4 w-3/4 mb-2" />
+                  <Skeleton className="h-3 w-full mb-1" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
+              ))}
             </div>
           ) : activities.length === 0 ? (
             <div className="text-gray-400 text-sm space-y-2">

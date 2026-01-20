@@ -1,8 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUsersPaginated } from '@/lib/services';
+import { verifyAuthToken } from '@/lib/auth-token';
 
 export async function GET(req: NextRequest) {
   try {
+    // Verify admin authentication
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const token = authHeader.substring(7);
+    const decoded = verifyAuthToken(token);
+    if (!decoded || (decoded.type !== 'admin' && decoded.userId !== 'admin')) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(req.url);
     const pageParam = Number(searchParams.get('page'));
     const pageSizeParam = Number(searchParams.get('pageSize'));

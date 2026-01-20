@@ -1,16 +1,17 @@
-'use client';
+"use client";
 
-import { useAdminUsers } from '@/lib/hooks/use-admin';
-import { Search, Users, Gem, TrendingUp } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { Loader } from '@/app/components/global';
+import { useAdminUsers } from "@/lib/hooks/use-admin";
+import { Search, Users, Gem, TrendingUp } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Loader } from "@/app/components/global";
+import { Skeleton } from "@/app/components/ui";
 
 const PAGE_SIZE = 12;
 
 export default function UsersPage() {
   const [page, setPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
   const {
     data: paginatedUsers,
@@ -40,12 +41,14 @@ export default function UsersPage() {
       <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-[#8b5cf6] to-[#fbbf24] bg-clip-text text-transparent">
-            Users {totalUsers > 0 ? `(${totalUsers})` : ''}
+            Users {totalUsers > 0 ? `(${totalUsers})` : ""}
           </h1>
           <p className="text-gray-400">
             View and manage user accounts
             {isFetching && !loading && (
-              <span className="ml-2 text-xs text-gray-500">(refreshing...)</span>
+              <span className="ml-2 text-xs text-gray-500">
+                (refreshing...)
+              </span>
             )}
           </p>
         </div>
@@ -74,14 +77,70 @@ export default function UsersPage() {
 
       {/* Users Table */}
       <div className="bg-[#161616] rounded-lg border border-[#FFFFFF1A] overflow-hidden">
-        {users.length === 0 ? (
+        {loading ? (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-[#0B0B0B] border-b border-[#FFFFFF1A]">
+                <tr>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                    User
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                    Gems
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                    Solved
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                    Streak
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                    Level
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                    Last Played
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#FFFFFF1A]">
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <tr key={index} className="hover:bg-[#1A1A1A]">
+                    <td className="px-6 py-4">
+                      <div>
+                        <Skeleton className="h-5 w-32 mb-1" />
+                        <Skeleton className="h-3 w-40" />
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <Skeleton className="h-4 w-12" />
+                    </td>
+                    <td className="px-6 py-4">
+                      <Skeleton className="h-4 w-8" />
+                    </td>
+                    <td className="px-6 py-4">
+                      <Skeleton className="h-6 w-20 rounded-full" />
+                    </td>
+                    <td className="px-6 py-4">
+                      <Skeleton className="h-4 w-16" />
+                    </td>
+                    <td className="px-6 py-4">
+                      <Skeleton className="h-4 w-24" />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : users.length === 0 ? (
           <div className="py-16 px-6 text-center">
             <Users className="w-16 h-16 mx-auto mb-4 text-gray-600" />
-            <p className="text-lg font-medium text-white mb-2">No users found</p>
+            <p className="text-lg font-medium text-white mb-2">
+              No users found
+            </p>
             <p className="text-sm text-gray-400 max-w-md mx-auto">
               {searchQuery
                 ? `No users match your search for "${debouncedSearch}".`
-                : 'Users will appear here once they start playing.'}
+                : "Users will appear here once they start playing."}
             </p>
           </div>
         ) : (
@@ -116,10 +175,12 @@ export default function UsersPage() {
                       <td className="px-6 py-4">
                         <div>
                           <p className="font-medium text-white">
-                            {user.username || user.email || 'Anonymous'}
+                            {user.username || user.email || "Anonymous"}
                           </p>
                           {user.email && (
-                            <p className="text-gray-400 text-xs">{user.email}</p>
+                            <p className="text-gray-400 text-xs">
+                              {user.email}
+                            </p>
                           )}
                         </div>
                       </td>
@@ -146,7 +207,7 @@ export default function UsersPage() {
                       <td className="px-6 py-4 text-gray-300">
                         {user.lastPlayedDate
                           ? new Date(user.lastPlayedDate).toLocaleDateString()
-                          : 'Never'}
+                          : "Never"}
                       </td>
                     </tr>
                   ))}
@@ -158,7 +219,8 @@ export default function UsersPage() {
             {totalUsers > 0 && (
               <div className="mt-4 p-4 border-t border-[#FFFFFF1A] flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <p className="text-sm text-gray-400">
-                  Showing {((page - 1) * PAGE_SIZE) + 1}–{Math.min(page * PAGE_SIZE, totalUsers)} of {totalUsers} users
+                  Showing {(page - 1) * PAGE_SIZE + 1}–
+                  {Math.min(page * PAGE_SIZE, totalUsers)} of {totalUsers} users
                 </p>
                 <div className="flex items-center gap-2">
                   <button
@@ -172,7 +234,9 @@ export default function UsersPage() {
                     Page {page} of {totalPages}
                   </span>
                   <button
-                    onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+                    onClick={() =>
+                      setPage((prev) => Math.min(totalPages, prev + 1))
+                    }
                     disabled={page >= totalPages || isFetching}
                     className="px-3 py-1.5 rounded-lg border border-[#FFFFFF1A] text-sm disabled:opacity-50 hover:bg-[#1f1f1f]"
                   >

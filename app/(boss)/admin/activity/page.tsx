@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Activity } from "lucide-react";
 import { useAdminActivity } from "@/lib/hooks/use-admin";
+import { Skeleton } from "@/app/components/ui";
 
 const PAGE_SIZE = 20;
 
@@ -56,51 +57,171 @@ export default function ActivityPage() {
       </div>
 
       {/* Filters */}
-      <div className="mb-6 flex gap-2">
-        <button
-          onClick={() => {
-            setTypeFilter("");
-            setPage(1);
-          }}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            typeFilter === ""
-              ? "bg-[#8b5cf6] text-white"
-              : "bg-[#161616] text-white hover:bg-[#222] border border-[#FFFFFF1A]"
-          }`}
-        >
-          All
-        </button>
-        <button
-          onClick={() => {
-            setTypeFilter("admin");
-            setPage(1);
-          }}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            typeFilter === "admin"
-              ? "bg-[#8b5cf6] text-white"
-              : "bg-[#161616] text-white hover:bg-[#222] border border-[#FFFFFF1A]"
-          }`}
-        >
-          Admin
-        </button>
-        <button
-          onClick={() => {
-            setTypeFilter("user");
-            setPage(1);
-          }}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            typeFilter === "user"
-              ? "bg-[#8b5cf6] text-white"
-              : "bg-[#161616] text-white hover:bg-[#222] border border-[#FFFFFF1A]"
-          }`}
-        >
-          User
-        </button>
+      <div className="mb-6 space-y-4">
+        {/* Category Filters */}
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => {
+              setTypeFilter("");
+              setActivityTypeFilter("");
+              setPage(1);
+            }}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              typeFilter === "" && activityTypeFilter === ""
+                ? "bg-[#8b5cf6] text-white"
+                : "bg-[#161616] text-white hover:bg-[#222] border border-[#FFFFFF1A]"
+            }`}
+          >
+            All
+          </button>
+          <button
+            onClick={() => {
+              setTypeFilter("admin");
+              setActivityTypeFilter("");
+              setPage(1);
+            }}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              typeFilter === "admin" && activityTypeFilter === ""
+                ? "bg-[#8b5cf6] text-white"
+                : "bg-[#161616] text-white hover:bg-[#222] border border-[#FFFFFF1A]"
+            }`}
+          >
+            Admin
+          </button>
+          <button
+            onClick={() => {
+              setTypeFilter("user");
+              setActivityTypeFilter("");
+              setPage(1);
+            }}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              typeFilter === "user" && activityTypeFilter === ""
+                ? "bg-[#8b5cf6] text-white"
+                : "bg-[#161616] text-white hover:bg-[#222] border border-[#FFFFFF1A]"
+            }`}
+          >
+            User
+          </button>
+        </div>
+
+        {/* Activity Type Filters */}
+        <div className="flex flex-wrap gap-2">
+          <span className="text-sm text-gray-400 self-center mr-2">Type:</span>
+          <button
+            onClick={() => {
+              setActivityTypeFilter("");
+              setPage(1);
+            }}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              activityTypeFilter === ""
+                ? "bg-[#8b5cf6] text-white"
+                : "bg-[#161616] text-white hover:bg-[#222] border border-[#FFFFFF1A]"
+            }`}
+          >
+            All Types
+          </button>
+          <button
+            onClick={() => {
+              setActivityTypeFilter("riddle_created");
+              setPage(1);
+            }}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              activityTypeFilter === "riddle_created"
+                ? "bg-[#8b5cf6] text-white"
+                : "bg-[#161616] text-white hover:bg-[#222] border border-[#FFFFFF1A]"
+            }`}
+          >
+            Riddle Created
+          </button>
+          <button
+            onClick={() => {
+              setActivityTypeFilter("riddle_updated");
+              setPage(1);
+            }}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              activityTypeFilter === "riddle_updated"
+                ? "bg-[#8b5cf6] text-white"
+                : "bg-[#161616] text-white hover:bg-[#222] border border-[#FFFFFF1A]"
+            }`}
+          >
+            Riddle Updated
+          </button>
+          <button
+            onClick={() => {
+              setActivityTypeFilter("riddle_deleted");
+              setPage(1);
+            }}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              activityTypeFilter === "riddle_deleted"
+                ? "bg-[#8b5cf6] text-white"
+                : "bg-[#161616] text-white hover:bg-[#222] border border-[#FFFFFF1A]"
+            }`}
+          >
+            Riddle Deleted
+          </button>
+          <button
+            onClick={() => {
+              setActivityTypeFilter("riddle_solved");
+              setPage(1);
+            }}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              activityTypeFilter === "riddle_solved"
+                ? "bg-[#8b5cf6] text-white"
+                : "bg-[#161616] text-white hover:bg-[#222] border border-[#FFFFFF1A]"
+            }`}
+          >
+            Riddle Solved
+          </button>
+          <button
+            onClick={() => {
+              setActivityTypeFilter("hint_used");
+              setPage(1);
+            }}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              activityTypeFilter === "hint_used"
+                ? "bg-[#8b5cf6] text-white"
+                : "bg-[#161616] text-white hover:bg-[#222] border border-[#FFFFFF1A]"
+            }`}
+          >
+            Hint Used
+          </button>
+          <button
+            onClick={() => {
+              setActivityTypeFilter("settings_updated");
+              setPage(1);
+            }}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              activityTypeFilter === "settings_updated"
+                ? "bg-[#8b5cf6] text-white"
+                : "bg-[#161616] text-white hover:bg-[#222] border border-[#FFFFFF1A]"
+            }`}
+          >
+            Settings Updated
+          </button>
+        </div>
       </div>
 
       {/* Activity List */}
       <div className="bg-[#161616] rounded-lg border border-[#FFFFFF1A] overflow-hidden">
-        {activities.length === 0 ? (
+        {isLoading ? (
+          <div className="divide-y divide-[#FFFFFF1A]">
+            {Array.from({ length: 10 }).map((_, index) => (
+              <div key={index} className="p-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Skeleton className="w-5 h-5 rounded" />
+                      <Skeleton className="h-5 w-48" />
+                      <Skeleton className="h-5 w-20 rounded-full" />
+                    </div>
+                    <Skeleton className="h-4 w-3/4 ml-8 mb-2" />
+                    <Skeleton className="h-3 w-24 ml-8" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : activities.length === 0 ? (
           <div className="py-16 px-6 text-center">
             <Activity className="w-16 h-16 mx-auto mb-4 text-gray-600" />
             <p className="text-lg font-medium text-white mb-2">
@@ -120,7 +241,7 @@ export default function ActivityPage() {
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
+                      <div className="flex items-center gap-3 mb-2 flex-wrap">
                         <Activity className="w-5 h-5 text-[#8b5cf6]" />
                         <h3 className="text-white font-medium">
                           {activity.title}
@@ -135,6 +256,9 @@ export default function ActivityPage() {
                           }`}
                         >
                           {activity.category}
+                        </span>
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-[#8b5cf6]/20 text-[#8b5cf6] border border-[#8b5cf6]/30">
+                          {activity.type.replace(/_/g, " ")}
                         </span>
                       </div>
                       <p className="text-gray-400 text-sm ml-8">
