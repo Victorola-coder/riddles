@@ -123,6 +123,8 @@ export default function GamePage() {
   const hasUsedHint = useGameStore((state) => state.hasUsedHint);
   const tickTimer = useGameStore((state) => state.tickTimer);
   const isTimerActive = useGameStore((state) => state.isTimerActive);
+  const timeLeft = useGameStore((state) => state.timeLeft);
+  const spendGems = useGameStore((state) => state.spendGems);
 
   // User store actions - individual selectors (actions are stable references)
   const incrementTotalSolved = useUserStore(
@@ -250,6 +252,7 @@ export default function GamePage() {
   const hasInitialized = useRef(false);
 
   // Initialize session and get next riddle in progression order
+  // ALWAYS ensure it starts with Easy difficulty
   useEffect(() => {
     if (
       !userId ||
@@ -263,23 +266,83 @@ export default function GamePage() {
     }
 
     const session = sessionData.session;
+    const totalEasyRiddles = riddlesByDifficulty.easy.length;
+    const easySolvedCount = (session.solvedRiddles || []).filter(
+      (id: string) => {
+        const riddle = riddlesMap.get(id);
+        return riddle?.difficulty === "easy";
+      }
+    ).length;
 
-    // If no current riddle, get the first unsolved one in progression order (Easy → Medium → Hard)
-    if (!session.currentRiddleId) {
+    // Check if user has completed all Easy riddles
+    const hasCompletedEasy = easySolvedCount >= totalEasyRiddles;
+
+    // Get current riddle if it exists
+    const currentRiddleFromSession = session.currentRiddleId
+      ? riddlesMap.get(session.currentRiddleId)
+      : null;
+
+    // If no current riddle OR current riddle is not Easy and user hasn't completed Easy yet
+    if (
+      !session.currentRiddleId ||
+      (currentRiddleFromSession &&
+        currentRiddleFromSession.difficulty !== "easy" &&
+        !hasCompletedEasy)
+    ) {
+      // Always start with Easy if not all Easy riddles are completed
       const nextRiddle = getNextRiddleInProgression(
         session.solvedRiddles || [],
         session.skippedRiddles || []
       );
 
       if (nextRiddle) {
+        // Ensure it's Easy if user hasn't completed Easy yet
+        if (!hasCompletedEasy && nextRiddle.difficulty !== "easy") {
+          // Force first Easy riddle
+          const firstEasyRiddle = riddlesByDifficulty.easy.find(
+            (r) =>
+              !(session.solvedRiddles || []).includes(r.id) &&
+              !(session.skippedRiddles || []).includes(r.id)
+          );
+
+          if (firstEasyRiddle) {
+            hasInitialized.current = true;
+            updateSessionMutation.mutate({
+              userId,
+              currentRiddleId: firstEasyRiddle.id,
+            });
+            return;
+          }
+        }
+
         hasInitialized.current = true;
-        // Update session with first riddle
         updateSessionMutation.mutate({
           userId,
           currentRiddleId: nextRiddle.id,
         });
       }
     } else if (session.currentRiddleId) {
+      // Validate current riddle is appropriate for progression
+      if (
+        currentRiddleFromSession &&
+        !hasCompletedEasy &&
+        currentRiddleFromSession.difficulty !== "easy"
+      ) {
+        // Force back to Easy if somehow got a non-Easy riddle
+        const firstEasyRiddle = riddlesByDifficulty.easy.find(
+          (r) =>
+            !(session.solvedRiddles || []).includes(r.id) &&
+            !(session.skippedRiddles || []).includes(r.id)
+        );
+
+        if (firstEasyRiddle) {
+          updateSessionMutation.mutate({
+            userId,
+            currentRiddleId: firstEasyRiddle.id,
+          });
+        }
+      }
+
       // Mark as initialized if we already have a riddle
       hasInitialized.current = true;
     }
@@ -290,6 +353,8 @@ export default function GamePage() {
     allRiddlesData.length,
     userId,
     getNextRiddleInProgression,
+    riddlesByDifficulty,
+    riddlesMap,
   ]);
 
   // Track processed riddle to prevent infinite loops
@@ -297,9 +362,13 @@ export default function GamePage() {
 
   // Reset hints and timer when riddle changes
   useEffect(() => {
-    if (currentRiddleId && currentRiddle && processedRiddleId.current !== currentRiddleId) {
+    if (
+      currentRiddleId &&
+      currentRiddle &&
+      processedRiddleId.current !== currentRiddleId
+    ) {
       processedRiddleId.current = currentRiddleId;
-      
+
       setRevealedHints({});
       setShowError(false);
       setWrongAttempts(0);
@@ -335,92 +404,6 @@ export default function GamePage() {
     }
     return () => clearInterval(interval);
   }, [isTimerActive, tickTimer]);
-
-  // Loading state - wait for userId to be set
-  if (!userId || sessionLoading || riddlesLoading) {
-    return (
-      <div className="w-full max-w-4xl mx-auto flex flex-col gap-8">
-        {/* Riddle Card Skeleton */}
-        <div className="glass-card p-6 md:p-8 space-y-6">
-          <div className="flex justify-between items-center">
-            <Skeleton className="h-6 w-24 rounded-full" />
-            <div className="flex gap-2">
-              <Skeleton className="h-6 w-20 rounded-full" />
-              <Skeleton className="h-6 w-20 rounded-full" />
-            </div>
-          </div>
-          <Skeleton className="h-32 w-full rounded-xl" />
-          <div className="flex justify-between items-center pt-4">
-            <Skeleton className="h-8 w-32" />
-            <Skeleton className="h-10 w-10 rounded-full" />
-          </div>
-        </div>
-
-        {/* Input Skeleton */}
-        <div className="glass-card p-2 flex items-center gap-2">
-          <Skeleton className="h-14 flex-1 rounded-xl" />
-          <Skeleton className="h-14 w-14 rounded-xl" />
-        </div>
-
-        {/* Hint Panel Skeleton */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
-            <Skeleton key={i} className="h-16 rounded-xl" />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  // No riddles available
-  if (!allRiddlesData || allRiddlesData.length === 0) {
-    return (
-      <div className="text-center">
-        <h1 className="text-4xl font-cinzel text-white mb-4">
-          No Riddles Available
-        </h1>
-        <p className="text-xl text-[var(--text-secondary)] font-inter">
-          Please check back later!
-        </p>
-      </div>
-    );
-  }
-
-  // No current riddle (all solved or loading next)
-  if (!currentRiddle) {
-    const nextRiddle = getNextRiddleInProgression(
-      solvedRiddles || [],
-      skippedRiddles || []
-    );
-
-    if (!nextRiddle) {
-      // All riddles completed
-      return (
-        <div className="text-center">
-          <h1 className="text-4xl font-cinzel text-white mb-4">
-            🎉 Congratulations!
-          </h1>
-          <p className="text-xl text-[var(--text-secondary)] font-inter">
-            You've completed all available riddles!
-          </p>
-        </div>
-      );
-    }
-
-    // Set next riddle in progression order
-    if (userId && !hasInitialized.current) {
-      updateSessionMutation.mutate({
-        userId,
-        currentRiddleId: nextRiddle.id,
-      });
-    }
-
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-purple" />
-      </div>
-    );
-  }
 
   // Memoize hint check to avoid repeated calls
   const usedNoHints = useMemo(() => {
@@ -677,8 +660,76 @@ export default function GamePage() {
     updateSessionMutation,
   ]);
 
-  const hint1Used = hasUsedHint(currentRiddle.id, 1);
-  const hint2Used = hasUsedHint(currentRiddle.id, 2);
+  const hint1Used = currentRiddle ? hasUsedHint(currentRiddle.id, 1) : false;
+  const hint2Used = currentRiddle ? hasUsedHint(currentRiddle.id, 2) : false;
+
+  // Handle timer expiration - deduct gems and reveal answer
+  const hasTimedOut = useRef(false);
+  useEffect(() => {
+    if (
+      !isTimerActive &&
+      timeLeft === 0 &&
+      currentRiddle &&
+      !revealedHints.answer &&
+      !hasTimedOut.current &&
+      userId
+    ) {
+      hasTimedOut.current = true;
+
+      const timeoutPenalty =
+        (GAME_CONFIG.GEM_COSTS as Record<string, number>).timeout || 25;
+      const currentGems = useGameStore.getState().userGems;
+
+      // Deduct gems (ensure we don't go below 0)
+      const gemsToDeduct = Math.min(timeoutPenalty, currentGems);
+      if (gemsToDeduct > 0) {
+        spendGems(gemsToDeduct);
+
+        // Update backend session with gem loss
+        updateSessionMutation.mutate({
+          userId,
+          userGems: currentGems - gemsToDeduct,
+        });
+      }
+
+      // Time's up! Auto-reveal the answer
+      handleReveal();
+
+      // Show timeout notification with gem loss
+      toast.error(
+        <div className="flex items-center gap-2">
+          <XCircle className="text-red-400" />
+          <div>
+            <p className="font-semibold">Time's Up!</p>
+            <p className="text-sm text-[var(--text-muted)]">
+              {gemsToDeduct > 0
+                ? `-${gemsToDeduct} gems penalty. The answer has been revealed.`
+                : "The answer has been revealed. Better luck next time!"}
+            </p>
+          </div>
+        </div>,
+        { duration: 5000 }
+      );
+
+      // Play timeout sound
+      soundManager.play("error");
+    }
+
+    // Reset timeout flag when riddle changes
+    if (currentRiddleId) {
+      hasTimedOut.current = false;
+    }
+  }, [
+    isTimerActive,
+    timeLeft,
+    currentRiddle,
+    currentRiddleId,
+    revealedHints.answer,
+    handleReveal,
+    userId,
+    spendGems,
+    updateSessionMutation,
+  ]);
 
   // Calculate progress per difficulty tier - optimized with Set for O(1) lookups
   const progressByDifficulty = useMemo(() => {
@@ -708,6 +759,92 @@ export default function GamePage() {
       },
     };
   }, [solvedRiddles, riddlesByDifficulty]);
+
+  // Loading state - wait for userId to be set
+  if (!userId || sessionLoading || riddlesLoading) {
+    return (
+      <div className="w-full max-w-4xl mx-auto flex flex-col gap-8">
+        {/* Riddle Card Skeleton */}
+        <div className="glass-card p-6 md:p-8 space-y-6">
+          <div className="flex justify-between items-center">
+            <Skeleton className="h-6 w-24 rounded-full" />
+            <div className="flex gap-2">
+              <Skeleton className="h-6 w-20 rounded-full" />
+              <Skeleton className="h-6 w-20 rounded-full" />
+            </div>
+          </div>
+          <Skeleton className="h-32 w-full rounded-xl" />
+          <div className="flex justify-between items-center pt-4">
+            <Skeleton className="h-8 w-32" />
+            <Skeleton className="h-10 w-10 rounded-full" />
+          </div>
+        </div>
+
+        {/* Input Skeleton */}
+        <div className="glass-card p-2 flex items-center gap-2">
+          <Skeleton className="h-14 flex-1 rounded-xl" />
+          <Skeleton className="h-14 w-14 rounded-xl" />
+        </div>
+
+        {/* Hint Panel Skeleton */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-16 rounded-xl" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // No riddles available
+  if (!allRiddlesData || allRiddlesData.length === 0) {
+    return (
+      <div className="text-center">
+        <h1 className="text-4xl font-cinzel text-white mb-4">
+          No Riddles Available
+        </h1>
+        <p className="text-xl text-[var(--text-secondary)] font-inter">
+          Please check back later!
+        </p>
+      </div>
+    );
+  }
+
+  // No current riddle (all solved or loading next)
+  if (!currentRiddle) {
+    const nextRiddle = getNextRiddleInProgression(
+      solvedRiddles || [],
+      skippedRiddles || []
+    );
+
+    if (!nextRiddle) {
+      // All riddles completed
+      return (
+        <div className="text-center">
+          <h1 className="text-4xl font-cinzel text-white mb-4">
+            🎉 Congratulations!
+          </h1>
+          <p className="text-xl text-[var(--text-secondary)] font-inter">
+            You've completed all available riddles!
+          </p>
+        </div>
+      );
+    }
+
+    // Set next riddle in progression order
+    if (userId && !hasInitialized.current) {
+      updateSessionMutation.mutate({
+        userId,
+        currentRiddleId: nextRiddle.id,
+      });
+    }
+
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-purple" />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-4xl mx-auto flex flex-col gap-8">

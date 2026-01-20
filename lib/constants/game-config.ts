@@ -14,6 +14,7 @@ export const GAME_CONFIG = {
     hint2: 10, // Word length
     hint3: 50, // Full answer
     skip: 30,
+    timeout: 25, // Penalty for running out of time
   },
 
   // Bonus gems
