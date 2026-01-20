@@ -23,8 +23,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Find admin in database by code
-    // Note: Run `npx prisma generate` after schema changes to update types
-    const admin = await (prisma.admin as any).findUnique({
+    const admin = await prisma.admin.findUnique({
       where: { code: accessCode },
     });
 
