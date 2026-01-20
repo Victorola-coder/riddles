@@ -8,15 +8,29 @@ export class ApiClientError extends Error {
 class ApiClient {
   private baseUrl: string;
 
-  constructor(baseUrl: string) {
+  private tokenKey: string;
+  private storageType: 'local' | 'session';
+
+  constructor(baseUrl: string, tokenKey: string = "auth_token", storageType: 'local' | 'session' = 'local') {
     this.baseUrl = baseUrl;
+    this.tokenKey = tokenKey;
+    this.storageType = storageType;
   }
 
   private get headers() {
     const headers: HeadersInit = {
       "Content-Type": "application/json",
     };
-    const token = localStorage.getItem("auth_token");
+    
+    let token: string | null = null;
+    if (typeof window !== 'undefined') {
+        if (this.storageType === 'session') {
+            token = sessionStorage.getItem(this.tokenKey);
+        } else {
+            token = localStorage.getItem(this.tokenKey);
+        }
+    }
+
     if (token) {
       headers.Authorization = `Bearer ${token}`;
     }
@@ -81,7 +95,12 @@ class ApiClient {
 const API_URL = process.env.NEXT_PUBLIC_APP_URL
   ? `${process.env.NEXT_PUBLIC_APP_URL}/api`
   : "/api";
+
+// Client for user actions (localStorage, auth_token)
 const client = new ApiClient(API_URL);
+
+// Client for admin actions (sessionStorage, admin_token)
+const adminClient = new ApiClient(API_URL, "admin_token", "session");
 
 export const authApi = {
   getMe: () => client.get<{ user: any }>("/auth/me"),
@@ -122,13 +141,13 @@ export const gameApi = {
 };
 
 export const adminApi = {
-  getStats: () => client.get<{ stats: any }>("/admin/stats"),
+  getStats: () => adminClient.get<{ stats: any }>("/admin/stats"),
   getActivity: (params: any) => {
     const searchParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
       if (value) searchParams.append(key, String(value));
     });
-    return client.get<any>(`/admin/activity?${searchParams.toString()}`);
+    return adminClient.get<any>(`/admin/activity?${searchParams.toString()}`);
   },
   getUsers: (params: { page: number; pageSize: number; search?: string }) => {
     const searchParams = new URLSearchParams({
@@ -136,20 +155,20 @@ export const adminApi = {
       pageSize: String(params.pageSize),
     });
     if (params.search) searchParams.append("search", params.search);
-    return client.get<any>(`/admin/users?${searchParams.toString()}`);
+    return adminClient.get<any>(`/admin/users?${searchParams.toString()}`);
   },
-  getSettings: () => client.get<{ settings: any }>("/admin/settings"),
+  getSettings: () => adminClient.get<{ settings: any }>("/admin/settings"),
   updateSettings: (data: any) =>
-    client.patch<{ message: string; settings: any }>("/admin/settings", data),
+    adminClient.patch<{ message: string; settings: any }>("/admin/settings", data),
   getRiddles: (params: any) => {
     const searchParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
       if (value) searchParams.append(key, String(value));
     });
-    return client.get<any>(`/admin/riddles?${searchParams.toString()}`);
+    return adminClient.get<any>(`/admin/riddles?${searchParams.toString()}`);
   },
-  createRiddle: (data: any) => client.post("/admin/riddles", data),
+  createRiddle: (data: any) => adminClient.post("/admin/riddles", data),
   updateRiddle: (id: string, data: any) =>
-    client.patch(`/admin/riddles?id=${id}`, data),
-  deleteRiddle: (id: string) => client.delete(`/admin/riddles?id=${id}`),
+    adminClient.patch(`/admin/riddles?id=${id}`, data),
+  deleteRiddle: (id: string) => adminClient.delete(`/admin/riddles?id=${id}`),
 };
