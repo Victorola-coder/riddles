@@ -292,9 +292,14 @@ export default function GamePage() {
     getNextRiddleInProgression,
   ]);
 
+  // Track processed riddle to prevent infinite loops
+  const processedRiddleId = useRef<string | null>(null);
+
   // Reset hints and timer when riddle changes
   useEffect(() => {
-    if (currentRiddleId && currentRiddle) {
+    if (currentRiddleId && currentRiddle && processedRiddleId.current !== currentRiddleId) {
+      processedRiddleId.current = currentRiddleId;
+      
       setRevealedHints({});
       setShowError(false);
       setWrongAttempts(0);

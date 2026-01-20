@@ -57,7 +57,6 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
       // Sync other stores asynchronously (non-blocking)
       setTimeout(() => {
         useUserStore.getState().syncWithServer();
-        useGameStore.getState().syncWithServer();
       }, 0);
     } else {
       // No user data - clear auth

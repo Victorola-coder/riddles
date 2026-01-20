@@ -30,7 +30,9 @@ export default function ProfilePage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { user, setUser } = useAuthStore();
-  const { totalRiddlesSolved, currentStreak, totalGemsEarned } = useUserStore();
+  const totalRiddlesSolved = useUserStore((state) => state.totalRiddlesSolved);
+  const currentStreak = useUserStore((state) => state.currentStreak);
+  const totalGemsEarned = useUserStore((state) => state.totalGemsEarned);
   const currentLevel = user?.currentLevel || 1;
 
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);

@@ -24,7 +24,8 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
   level,
   solvedCount,
 }) => {
-  const { currentStreak, longestStreak } = useUserStore();
+  const currentStreak = useUserStore((state) => state.currentStreak);
+  const longestStreak = useUserStore((state) => state.longestStreak);
   const { user } = useAuthStore();
   const [isMounted, setIsMounted] = useState(false);
 
