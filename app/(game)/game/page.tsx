@@ -681,7 +681,11 @@ export default function GamePage() {
   // Handle timer expiration - deduct gems, reveal answer, and auto-advance
   const hasTimedOut = useRef(false);
   useEffect(() => {
+    // Check if this riddle even has a timer (easy mode has no timer)
+    const hasTimer = currentRiddle && GAME_CONFIG.TIMER[currentRiddle.difficulty] > 0;
+    
     if (
+      hasTimer && // Only trigger timeout if riddle has a timer
       !isTimerActive &&
       timeLeft === 0 &&
       currentRiddle &&
