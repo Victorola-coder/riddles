@@ -591,6 +591,20 @@ export default function GamePage() {
       async () => {
         if (!userId || isSubmitting || !currentRiddle) return;
 
+        // Check if user has enough gems before making API call
+        const costKey =
+          `hint${hintLevel}` as keyof typeof GAME_CONFIG.GEM_COSTS;
+        const cost = GAME_CONFIG.GEM_COSTS[costKey];
+
+        if (userGems < cost) {
+          // Only show error if not already shown (prevent duplicates)
+          toast.error("Not enough gems", {
+            duration: 3000,
+            id: `insufficient-gems-${hintLevel}`, // Use toast ID to prevent duplicates
+          });
+          return;
+        }
+
         try {
           const result = await hintMutation.mutateAsync({
             userId,
@@ -610,10 +624,11 @@ export default function GamePage() {
             toast.warning(`Answer: ${hint}`, { duration: 5000 });
           }
         } catch (error) {
+          // Error is already handled in useGetHint hook, just log here
           console.error(`Failed to get hint ${hintLevel}:`, error);
         }
       },
-    [userId, isSubmitting, currentRiddle, hintMutation]
+    [userId, isSubmitting, currentRiddle, hintMutation, userGems]
   );
 
   const handleHint1 = useMemo(
@@ -695,20 +710,28 @@ export default function GamePage() {
       // Time's up! Auto-reveal the answer
       handleReveal();
 
-      // Show timeout notification with gem loss
+      // Show timeout notification with gem loss - larger and more readable
       toast.error(
-        <div className="flex items-center gap-2">
-          <XCircle className="text-red-400" />
-          <div>
-            <p className="font-semibold">Time's Up!</p>
-            <p className="text-sm text-[var(--text-muted)]">
+        <div className="flex items-start gap-3 p-2">
+          <XCircle className="text-red-500 w-6 h-6 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-lg font-bold text-white mb-1">⏰ Time's Up!</p>
+            <p className="text-base text-white/90 leading-relaxed">
               {gemsToDeduct > 0
-                ? `-${gemsToDeduct} gems penalty. The answer has been revealed.`
-                : "The answer has been revealed. Better luck next time!"}
+                ? `You lost ${gemsToDeduct} gems as a penalty. The answer has been automatically revealed.`
+                : "The answer has been automatically revealed. Better luck next time!"}
             </p>
           </div>
         </div>,
-        { duration: 5000 }
+        {
+          duration: 8000, // Longer duration so user can read it
+          className: "!bg-red-950/95 !border-red-500/50 !text-white",
+          style: {
+            fontSize: "16px",
+            minWidth: "320px",
+            maxWidth: "500px",
+          },
+        }
       );
 
       // Play timeout sound

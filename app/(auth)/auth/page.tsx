@@ -394,35 +394,6 @@ export default function LoginPage() {
         </div>
 
         {/* Footer Links */}
-        <div className="text-center mt-6 space-y-2">
-          {mode === "login" ? (
-            <p className="text-sm text-white/60 font-inter">
-              Don't have an account?{" "}
-              <button
-                onClick={() => setMode("signup")}
-                className="text-purple hover:text-purple/80 transition-colors font-medium"
-              >
-                Sign up
-              </button>
-            </p>
-          ) : (
-            <p className="text-sm text-white/60 font-inter">
-              Already have an account?{" "}
-              <button
-                onClick={() => setMode("login")}
-                className="text-purple hover:text-purple/80 transition-colors font-medium"
-              >
-                Sign in
-              </button>
-            </p>
-          )}
-          {/* <Link
-            href="/"
-            className="block text-sm text-white/60 hover:text-white transition-colors font-inter"
-          >
-            ← Back to Home
-          </Link> */}
-        </div>
       </div>
     </div>
   );

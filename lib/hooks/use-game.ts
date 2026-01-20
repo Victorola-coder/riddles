@@ -1,7 +1,7 @@
 "use client";
 
 import { toast } from "sonner";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { gameApi, ApiClientError } from "@/lib/api";
 import { useGameStore } from "@/lib/store/game-store";
@@ -178,8 +178,13 @@ export function useGetHint() {
       // Invalidate session to get updated gems
       queryClient.invalidateQueries({ queryKey: ["game", "session"] });
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to get hint");
+    onError: (error: Error, variables) => {
+      // Use toast ID to prevent duplicate error messages
+      const toastId = `hint-error-${variables.riddleId}-${variables.hintLevel}`;
+      toast.error(error.message || "Failed to get hint", {
+        id: toastId, // This prevents duplicate toasts with the same ID
+        duration: 3000,
+      });
     },
   });
 }
