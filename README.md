@@ -185,6 +185,20 @@ bun dev
 - `npm run db:studio` - Open Prisma Studio (database GUI)
 - `npm run db:seed` - Seed database with initial data
 
+## 🔧 Troubleshooting
+
+### Bun SSL/TLS Errors
+
+If you encounter `ERR_SSL_SSLV3_ALERT_BAD_RECORD_MAC` errors when using Bun:
+
+1. **Restart the development server** - This often resolves temporary SSL issues
+2. **Update Bun** - Ensure you're using the latest version: `bun upgrade`
+3. **Check your network connection** - SSL errors can be caused by unstable network connections
+4. **Verify bunfig.toml** - The project includes a `bunfig.toml` configuration file that should help with SSL issues
+5. **Check system time** - Ensure your system clock is synchronized correctly
+
+The project includes improved error handling that will provide more specific guidance if SSL errors occur.
+
 ## 📁 Project Structure
 
 ```

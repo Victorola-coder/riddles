@@ -188,9 +188,26 @@ export async function apiClient<T = unknown>(
       throw error;
     }
 
+    // Detect Bun SSL errors and provide helpful error message
+    const errorMessage = error instanceof Error ? error.message : "Network request failed";
+    const isBunSslError = 
+      errorMessage.includes("ERR_SSL_SSLV3_ALERT_BAD_RECORD_MAC") ||
+      errorMessage.includes("sslv3 alert bad record mac") ||
+      (error instanceof Error && 
+       'code' in error && 
+       error.code === 'ERR_SSL_SSLV3_ALERT_BAD_RECORD_MAC');
+
+    if (isBunSslError) {
+      throw new ApiClientError(
+        "SSL/TLS connection error. This may be a Bun-specific issue. Try: 1) Restarting the dev server, 2) Checking your network connection, 3) Updating Bun to the latest version.",
+        undefined,
+        "SSL_ERROR"
+      );
+    }
+
     // Network or other errors
     throw new ApiClientError(
-      error instanceof Error ? error.message : "Network request failed",
+      errorMessage,
       undefined,
       "NETWORK_ERROR"
     );

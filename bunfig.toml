@@ -1,0 +1,5 @@
+# Bun configuration file
+# Fixes SSL/TLS issues with fetch requests
+
+[install]
+auto = true
