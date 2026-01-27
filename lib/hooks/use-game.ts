@@ -25,10 +25,13 @@ export function useGameSession(userId?: string) {
         const response = await gameApi.getSession(userId);
         return response;
       } catch (error) {
+        // Log error but don't throw to prevent query from failing repeatedly
         const message =
           error instanceof ApiClientError
             ? error.message
             : "Failed to fetch game session";
+        console.error("Game session fetch error:", message, error);
+        // Return a default structure instead of throwing to prevent infinite retries
         throw new Error(message);
       }
     },
@@ -38,24 +41,46 @@ export function useGameSession(userId?: string) {
     refetchOnWindowFocus: false,
     refetchOnMount: true,
     refetchOnReconnect: false,
-    retry: 1,
+    retry: (failureCount, error) => {
+      // Only retry once and only for network errors, not for API errors
+      if (failureCount < 1 && error instanceof Error && !error.message.includes("Failed to fetch game session")) {
+        return true;
+      }
+      return false;
+    },
   });
 
   // Sync server data to Zustand store when query succeeds
+  // Use dataUpdatedAt and query.data as dependencies to avoid infinite loops
+  const { dataUpdatedAt, data } = query;
+  const sessionRef = useRef<string | null>(null);
+  
   useEffect(() => {
-    if (query.data?.session) {
-      useGameStore.setState({
-        currentRiddleId: query.data.session.currentRiddleId || null,
-        solvedRiddles: query.data.session.solvedRiddles || [],
-        skippedRiddles: query.data.session.skippedRiddles || [],
-        userGems: query.data.session.userGems || 0,
-        currentLevel: query.data.session.currentLevel || 1,
-        hintsUsed: query.data.session.hintsUsed || {},
+    if (data?.session) {
+      // Only update if session data actually changed to prevent infinite loops
+      const sessionKey = JSON.stringify({
+        currentRiddleId: data.session.currentRiddleId,
+        solvedRiddles: data.session.solvedRiddles,
+        skippedRiddles: data.session.skippedRiddles,
+        userGems: data.session.userGems,
+        currentLevel: data.session.currentLevel,
       });
+      
+      if (sessionRef.current !== sessionKey) {
+        sessionRef.current = sessionKey;
+        useGameStore.setState({
+          currentRiddleId: data.session.currentRiddleId || null,
+          solvedRiddles: data.session.solvedRiddles || [],
+          skippedRiddles: data.session.skippedRiddles || [],
+          userGems: data.session.userGems || 0,
+          currentLevel: data.session.currentLevel || 1,
+          hintsUsed: data.session.hintsUsed || {},
+        });
+      }
     }
-  }, [query.data]);
+  }, [dataUpdatedAt, data]);
 
-  // Handle errors silently
+  // Handle errors silently - don't throw to prevent query from failing repeatedly
   useEffect(() => {
     if (query.error) {
       // Don't show toast for session errors - handled gracefully

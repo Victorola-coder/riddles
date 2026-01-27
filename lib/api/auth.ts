@@ -20,7 +20,11 @@ export const authApi: {
       currentLevel: number;
     };
   }>;
-  signup: (data: { email: string; password: string; username?: string }) => Promise<{
+  signup: (data: {
+    email: string;
+    password: string;
+    username?: string;
+  }) => Promise<{
     success: boolean;
     token: string;
     user: {
@@ -40,8 +44,13 @@ export const authApi: {
       currentLevel: number;
     };
   }>;
-  forgotPassword: (email: string) => Promise<{ success: boolean; message: string }>;
-  resetPassword: (data: { token: string; password: string }) => Promise<{ success: boolean; message: string }>;
+  forgotPassword: (
+    email: string,
+  ) => Promise<{ success: boolean; message: string }>;
+  resetPassword: (data: {
+    token: string;
+    password: string;
+  }) => Promise<{ success: boolean; message: string }>;
   logout: () => Promise<{ success: boolean; message: string }>;
   updateProfile: (data: {
     username?: string;
@@ -113,7 +122,7 @@ export const authApi: {
       "/api/auth/forgot-password",
       {
         email,
-      }
+      },
     ),
 
   /**
@@ -122,7 +131,7 @@ export const authApi: {
   resetPassword: (data: { token: string; password: string }) =>
     api.post<{ success: boolean; message: string }>(
       "/api/auth/reset-password",
-      data
+      data,
     ),
 
   /**
@@ -133,7 +142,7 @@ export const authApi: {
     api.post<{ success: boolean; message: string }>(
       "/api/auth/logout",
       {},
-      { requireAuth: false } // Allow logout even if token is invalid
+      { requireAuth: false }, // Allow logout even if token is invalid
     ),
 
   /**

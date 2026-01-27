@@ -250,20 +250,32 @@ export default function GamePage() {
 
   // Track if we've initialized the session to prevent infinite loops
   const hasInitialized = useRef(false);
+  const isInitializing = useRef(false);
+  const lastSessionKey = useRef<string | null>(null);
 
   // Initialize session and get next riddle in progression order
   // ALWAYS ensure it starts with Easy difficulty
   useEffect(() => {
+    // Create a stable key from session data to detect actual changes
+    const sessionKey = sessionData?.session
+      ? `${sessionData.session.currentRiddleId || 'none'}-${(sessionData.session.solvedRiddles || []).length}-${(sessionData.session.skippedRiddles || []).length}`
+      : null;
+
     if (
       !userId ||
       hasInitialized.current ||
+      isInitializing.current ||
       sessionLoading ||
       !sessionData?.session ||
       riddlesLoading ||
-      !allRiddlesData.length
+      !allRiddlesData.length ||
+      lastSessionKey.current === sessionKey // Prevent re-running on same data
     ) {
       return;
     }
+
+    // Mark that we're processing this session
+    lastSessionKey.current = sessionKey;
 
     const session = sessionData.session;
     const totalEasyRiddles = riddlesByDifficulty.easy.length;
@@ -307,19 +319,35 @@ export default function GamePage() {
 
           if (firstEasyRiddle) {
             hasInitialized.current = true;
-            updateSessionMutation.mutate({
-              userId,
-              currentRiddleId: firstEasyRiddle.id,
-            });
+            isInitializing.current = true;
+            updateSessionMutation.mutate(
+              {
+                userId,
+                currentRiddleId: firstEasyRiddle.id,
+              },
+              {
+                onSettled: () => {
+                  isInitializing.current = false;
+                },
+              }
+            );
             return;
           }
         }
 
         hasInitialized.current = true;
-        updateSessionMutation.mutate({
-          userId,
-          currentRiddleId: nextRiddle.id,
-        });
+        isInitializing.current = true;
+        updateSessionMutation.mutate(
+          {
+            userId,
+            currentRiddleId: nextRiddle.id,
+          },
+          {
+            onSettled: () => {
+              isInitializing.current = false;
+            },
+          }
+        );
       }
     } else if (session.currentRiddleId) {
       // Validate current riddle is appropriate for progression
@@ -336,10 +364,18 @@ export default function GamePage() {
         );
 
         if (firstEasyRiddle) {
-          updateSessionMutation.mutate({
-            userId,
-            currentRiddleId: firstEasyRiddle.id,
-          });
+          isInitializing.current = true;
+          updateSessionMutation.mutate(
+            {
+              userId,
+              currentRiddleId: firstEasyRiddle.id,
+            },
+            {
+              onSettled: () => {
+                isInitializing.current = false;
+              },
+            }
+          );
         }
       }
 
@@ -348,13 +384,16 @@ export default function GamePage() {
     }
   }, [
     sessionLoading,
-    sessionData,
+    sessionData?.session?.currentRiddleId,
+    sessionData?.session?.solvedRiddles?.length,
+    sessionData?.session?.skippedRiddles?.length,
     riddlesLoading,
     allRiddlesData.length,
     userId,
     getNextRiddleInProgression,
     riddlesByDifficulty,
     riddlesMap,
+    updateSessionMutation,
   ]);
 
   // Track processed riddle to prevent infinite loops
@@ -886,11 +925,20 @@ export default function GamePage() {
     }
 
     // Set next riddle in progression order
-    if (userId && !hasInitialized.current) {
-      updateSessionMutation.mutate({
-        userId,
-        currentRiddleId: nextRiddle.id,
-      });
+    if (userId && !hasInitialized.current && !isInitializing.current) {
+      isInitializing.current = true;
+      updateSessionMutation.mutate(
+        {
+          userId,
+          currentRiddleId: nextRiddle.id,
+        },
+        {
+          onSettled: () => {
+            isInitializing.current = false;
+            hasInitialized.current = true;
+          },
+        }
+      );
     }
 
     return (
