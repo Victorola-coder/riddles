@@ -183,5 +183,7 @@ export const adminApi = {
       
     deleteItem: (id: string) =>
       api.delete<{ success: boolean }>(`/api/admin/store/items/${id}`, { requireAuth: true }),
+      
+    seedItems: () => api.post<{ success: boolean; message: string }>("/api/admin/store/seed", {}, { requireAuth: true }),
   },
 };

@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Gamepad2, TrendingUp, Layers, User } from "lucide-react";
+import { Gamepad2, TrendingUp, Layers, User, ShoppingBag } from "lucide-react";
 import { motion } from "framer-motion";
 
 export const MobileNav = () => {
@@ -24,6 +24,11 @@ export const MobileNav = () => {
       label: "Levels",
       href: "/levels",
       icon: Layers,
+    },
+    {
+      label: "Shop",
+      href: "/shop",
+      icon: ShoppingBag,
     },
     {
       label: "Profile",

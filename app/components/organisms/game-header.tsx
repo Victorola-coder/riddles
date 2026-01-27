@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Avatar } from "../ui";
 import { useAuthStore } from "@/lib/store/auth";
-import { Trophy, Award, TrendingUp } from "lucide-react";
+import { Trophy, Award, TrendingUp, ShoppingBag } from "lucide-react";
 import { useUserStore } from "@/lib/store/user-store";
 import {
   GemCounter,
@@ -117,6 +117,21 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
         </span>
       </Link>
 
+      {/* Shop Link (Desktop Only) */}
+      <Link
+        href="/shop"
+        className="hidden md:flex items-center gap-1 px-3 py-1.5 rounded-lg bg-pink-500/10 hover:bg-pink-500/20 transition-colors cursor-pointer group ml-2"
+        title="Item Shop"
+      >
+        <ShoppingBag
+          className="text-pink-400 group-hover:scale-110 transition-transform"
+          size={18}
+        />
+        <span className="text-xs font-inter text-white/80 group-hover:text-white">
+          Shop
+        </span>
+      </Link>
+
       {/* Sound Toggle */}
       <div className="hidden md:flex items-center gap-2">
         <ThemeToggle size="md" />
@@ -129,14 +144,16 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
       {/* Profile Link (Desktop Only) */}
       {isMounted && (
         <Link
-          href={user ? "/profile" : "/auth"}
+          href="/profile"
           className="ml-2 cursor-pointer hover:opacity-80 transition-opacity hidden md:block"
-          title={user ? "My Profile" : "Login"}
+          title={user ? "My Profile" : "Guest Profile"}
         >
           <Avatar
-            alt={user?.username || user?.email || "Guest"}
-            size="md"
-            className="ring-2 ring-white/10"
+            alt={user?.username || "Guest"}
+            size="sm"
+            className={`ring-2 ${
+              user ? "ring-purple-500/50" : "ring-gray-500/50"
+            }`}
           />
         </Link>
       )}

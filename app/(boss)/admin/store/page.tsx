@@ -15,14 +15,17 @@ import {
   Pencil,
   Trash2,
   Image as ImageIcon,
+  Wand2,
 } from "lucide-react";
 
 export default function AdminStorePage() {
   const queryClient = useQueryClient();
+  // ... (useState hooks)
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<StoreItem | null>(null);
 
+  // ... (formData state)
   const [formData, setFormData] = useState<CreateStoreItemData>({
     name: "",
     description: "",
@@ -32,14 +35,25 @@ export default function AdminStorePage() {
     imageUrl: "",
   });
 
+  // ... (useQuery)
   const { data: items = [], isLoading } = useQuery({
     queryKey: ["admin", "store", "items"],
     queryFn: async () => {
       const res = await adminApi.store.getItems();
-      return res.data;
+      return res;
     },
   });
 
+  const seedMutation = useMutation({
+    mutationFn: () => adminApi.store.seedItems(),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "store", "items"] });
+      toast.success(data.message);
+    },
+    onError: () => toast.error("Failed to seed items"),
+  });
+
+  // ... (create/update/delete mutations)
   const createMutation = useMutation({
     mutationFn: (data: CreateStoreItemData) => adminApi.store.createItem(data),
     onSuccess: () => {
@@ -78,6 +92,7 @@ export default function AdminStorePage() {
     },
   });
 
+  // ... (handlers)
   const resetForm = () => {
     setFormData({
       name: "",
@@ -146,10 +161,21 @@ export default function AdminStorePage() {
             Manage avatars, badges, and items
           </p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add New Item
-        </Button>
+        <div className="flex gap-2">
+           <Button
+            onClick={() => seedMutation.mutate()}
+            disabled={seedMutation.isPending}
+            variant="ghost"
+            className="border border-purple-500/20 text-purple-300 hover:bg-purple-500/10"
+          >
+            <Wand2 className="w-4 h-4 mr-2" />
+            Seed Defaults
+          </Button>
+          <Button onClick={() => setIsModalOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add New Item
+          </Button>
+        </div>
       </div>
 
       {/* Search and Filter */}
