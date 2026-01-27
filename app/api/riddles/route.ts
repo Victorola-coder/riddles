@@ -13,6 +13,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
     const category = searchParams.get('category') || undefined;
+    const includeAnswers = searchParams.get('includeAnswers') === 'true'; // For game use - enables instant validation
 
     const where: any = {
       isActive: true, // Only return active riddles
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
         hint1: true,
         hint2: true,
         tags: true,
-        // Don't expose the answer to regular users
+        ...(includeAnswers && { answer: true }), // Include answers for game use (instant validation)
       },
     });
 
@@ -98,6 +99,9 @@ export async function GET(request: NextRequest) {
         hint1: r.hint1,
         hint2: r.hint2,
         tags: r.tags ? JSON.parse(r.tags as string) : [],
+        ...(includeAnswers && r.answer && { 
+          answer: JSON.parse(r.answer as string) // Parse answer array for client-side validation
+        }),
       })),
       meta: {
         total,

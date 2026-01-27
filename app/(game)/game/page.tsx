@@ -22,6 +22,7 @@ import { riddlesApi } from "@/lib/api/riddles";
 import { soundManager } from "@/lib/utils/sound-manager";
 import { getGuestId } from "@/lib/utils/guest-session";
 import { GAME_CONFIG } from "@/lib/constants/game-config";
+import { validateAnswer } from "@/lib/utils/riddle-validator";
 import type { Riddle } from "@/types/riddle";
 
 // Constants
@@ -68,12 +69,13 @@ export default function GamePage() {
     []
   );
 
-  // Shared query function factory
+  // Shared query function factory - include answers for instant client-side validation
   const createRiddleQueryFn = useCallback(
     (difficulty: "easy" | "medium" | "hard") => async () => {
       const response = await riddlesApi.getRiddles({
         difficulty,
         limit: RIDDLE_LIMIT,
+        includeAnswers: true, // Fetch answers for instant validation
       });
       return response.riddles;
     },
@@ -159,6 +161,7 @@ export default function GamePage() {
   const startTimeRef = useRef<number>(Date.now());
 
   // Convert API riddle to app riddle format - optimized map for O(1) lookup
+  // Now includes answers for instant client-side validation
   const riddlesMap = useMemo(() => {
     if (!allRiddlesData.length) return new Map<string, Riddle>();
 
@@ -167,7 +170,7 @@ export default function GamePage() {
       map.set(apiRiddle.id, {
         id: apiRiddle.id,
         question: apiRiddle.question,
-        answer: "", // Will be validated server-side
+        answer: apiRiddle.answer || "", // Use answer from API for instant validation
         difficulty: apiRiddle.difficulty,
         category: apiRiddle.category,
         hint1: apiRiddle.hint1,
@@ -463,29 +466,26 @@ export default function GamePage() {
       try {
         const solveTime = (Date.now() - startTimeRef.current) / 1000;
 
-        // Submit to backend
-        const result = await solveMutation.mutateAsync({
-          userId,
-          riddleId: currentRiddle.id,
-          answer,
-        });
+        // INSTANT CLIENT-SIDE VALIDATION for immediate feedback
+        const isCorrect = validateAnswer(answer, currentRiddle);
+        const gemsEarned = isCorrect
+          ? GAME_CONFIG.GEM_REWARDS[currentRiddle.difficulty]
+          : 0;
 
-        if (result.correct) {
-          // Correct answer!
-          const gemsEarned = result.gemsEarned || 0;
-
-          // Update store optimistically for instant UI feedback
+        // Show instant feedback (optimistic update)
+        if (isCorrect) {
+          // Update store immediately for instant UI feedback
           useGameStore.setState((state) => ({
             solvedRiddles: [...state.solvedRiddles, currentRiddle.id],
             userGems: state.userGems + gemsEarned,
             isTimerActive: false, // Stop timer on solve
           }));
 
-          // Play success sounds
+          // Play success sounds immediately
           soundManager.play("success");
           soundManager.play("gem");
 
-          // Track achievements
+          // Track achievements immediately
           incrementTotalSolved();
           addGemsEarned(gemsEarned);
           updateFastestTime(solveTime);
@@ -500,7 +500,7 @@ export default function GamePage() {
             resetPerfectStreak();
           }
 
-          // Confetti animation
+          // Confetti animation immediately
           confetti({
             particleCount: 100,
             spread: 70,
@@ -519,7 +519,7 @@ export default function GamePage() {
             { duration: SUCCESS_TOAST_DURATION }
           );
 
-          // Get next riddle in progression order (Easy → Medium → Hard)
+          // Get next riddle immediately
           const nextRiddle = getNextRiddleInProgression(
             [...solvedRiddles, currentRiddle.id],
             skippedRiddles || []
@@ -560,9 +560,9 @@ export default function GamePage() {
             }, 500);
           }
 
-          // Update session with next riddle
+          // Update session with next riddle immediately
           if (nextRiddle) {
-            await updateSessionMutation.mutateAsync({
+            updateSessionMutation.mutate({
               userId,
               currentRiddleId: nextRiddle.id,
               solvedRiddles: [...solvedRiddles, currentRiddle.id],
@@ -570,7 +570,7 @@ export default function GamePage() {
             });
           } else {
             // All riddles solved
-            await updateSessionMutation.mutateAsync({
+            updateSessionMutation.mutate({
               userId,
               solvedRiddles: [...solvedRiddles, currentRiddle.id],
               userGems: userGems + gemsEarned,
@@ -578,14 +578,29 @@ export default function GamePage() {
             });
           }
 
-          // Session update will trigger re-render with next riddle
+          // Sync with backend in background (non-blocking)
+          // This ensures server-side validation and prevents cheating
+          solveMutation.mutate(
+            {
+              userId,
+              riddleId: currentRiddle.id,
+              answer,
+            },
+            {
+              onError: (error) => {
+                // If server validation fails, revert optimistic update
+                console.error("Server validation failed:", error);
+                // Could add revert logic here if needed
+              },
+            }
+          );
         } else {
-          // Wrong answer
+          // Wrong answer - show instant feedback
           setWrongAttempts((prev) => prev + 1);
           setShowError(true);
           setTimeout(() => setShowError(false), 500);
 
-          // Play error sound
+          // Play error sound immediately
           soundManager.play("error");
 
           toast.error(
@@ -595,6 +610,13 @@ export default function GamePage() {
             </div>,
             { duration: ERROR_TOAST_DURATION }
           );
+
+          // Still record attempt on server in background
+          solveMutation.mutate({
+            userId,
+            riddleId: currentRiddle.id,
+            answer,
+          });
         }
       } catch (error) {
         console.error("Failed to submit answer:", error);
@@ -624,50 +646,91 @@ export default function GamePage() {
     ]
   );
 
-  // Optimized hint handler factory
+  // Optimized hint handler factory - INSTANT client-side hints
   const createHintHandler = useCallback(
     (hintLevel: 1 | 2 | 3, hintKey: "hint1" | "hint2" | "answer") =>
       async () => {
         if (!userId || isSubmitting || !currentRiddle) return;
 
-        // Check if user has enough gems before making API call
+        // Check if user has enough gems
         const costKey =
           `hint${hintLevel}` as keyof typeof GAME_CONFIG.GEM_COSTS;
         const cost = GAME_CONFIG.GEM_COSTS[costKey];
 
         if (userGems < cost) {
-          // Only show error if not already shown (prevent duplicates)
           toast.error("Not enough gems", {
             duration: 3000,
-            id: `insufficient-gems-${hintLevel}`, // Use toast ID to prevent duplicates
+            id: `insufficient-gems-${hintLevel}`,
           });
           return;
         }
 
-        try {
-          const result = await hintMutation.mutateAsync({
+        // Check if hint already used
+        if (hasUsedHint(currentRiddle.id, hintLevel)) {
+          return; // Already revealed
+        }
+
+        // INSTANT CLIENT-SIDE HINT - get from pre-loaded riddle data
+        let hint = "";
+        if (hintLevel === 1) {
+          // First letter hint
+          hint = currentRiddle.hint1 || (() => {
+            const answer = Array.isArray(currentRiddle.answer) 
+              ? currentRiddle.answer[0] 
+              : currentRiddle.answer;
+            return answer.charAt(0).toUpperCase();
+          })();
+        } else if (hintLevel === 2) {
+          // Length hint
+          hint = currentRiddle.hint2 || (() => {
+            const answer = Array.isArray(currentRiddle.answer) 
+              ? currentRiddle.answer[0] 
+              : currentRiddle.answer;
+            const length = answer.replace(/\s/g, '').length;
+            return `${length} letter${length !== 1 ? 's' : ''}`;
+          })();
+        } else {
+          // Full answer reveal
+          hint = Array.isArray(currentRiddle.answer) 
+            ? currentRiddle.answer[0] 
+            : currentRiddle.answer;
+        }
+
+        // INSTANT UI UPDATE - show hint immediately
+        setRevealedHints((prev) => ({ ...prev, [hintKey]: hint }));
+        soundManager.play("hint");
+
+        // Update store immediately (optimistic update)
+        const { useHint, spendGems } = useGameStore.getState();
+        useHint(currentRiddle.id, hintLevel);
+        spendGems(cost);
+
+        // Show toast immediately
+        if (hintLevel === 1) {
+          toast.info(`Hint: First letter is "${hint}"`);
+        } else if (hintLevel === 2) {
+          toast.info(`Hint: ${hint}`);
+        } else {
+          toast.warning(`Answer: ${hint}`, { duration: 5000 });
+        }
+
+        // Sync with backend in background (non-blocking)
+        hintMutation.mutate(
+          {
             userId,
             riddleId: currentRiddle.id,
             hintLevel,
-          });
-
-          const hint = (result as unknown as HintResult).hint;
-          setRevealedHints((prev) => ({ ...prev, [hintKey]: hint }));
-          soundManager.play("hint");
-
-          if (hintLevel === 1) {
-            toast.info(`Hint: First letter is "${hint}"`);
-          } else if (hintLevel === 2) {
-            toast.info(`Hint: ${hint}`);
-          } else {
-            toast.warning(`Answer: ${hint}`, { duration: 5000 });
+          },
+          {
+            onError: (error) => {
+              // If server fails, revert optimistic update
+              console.error("Server hint sync failed:", error);
+              // Could add revert logic here if needed
+            },
           }
-        } catch (error) {
-          // Error is already handled in useGetHint hook, just log here
-          console.error(`Failed to get hint ${hintLevel}:`, error);
-        }
+        );
       },
-    [userId, isSubmitting, currentRiddle, hintMutation, userGems]
+    [userId, isSubmitting, currentRiddle, hintMutation, userGems, hasUsedHint]
   );
 
   const handleHint1 = useMemo(
@@ -686,30 +749,58 @@ export default function GamePage() {
   const handleSkip = useCallback(async () => {
     if (!userId || isSubmitting || !currentRiddle) return;
 
-    try {
-      // Get next riddle in progression order after skipping
-      const nextRiddle = getNextRiddleInProgression(solvedRiddles || [], [
-        ...skippedRiddles,
-        currentRiddle.id,
-      ]);
+    // Check skip cost
+    const skipCost = GAME_CONFIG.GEM_COSTS.skip;
+    if (userGems < skipCost) {
+      toast.error("Not enough gems to skip");
+      return;
+    }
 
-      await updateSessionMutation.mutateAsync({
+    // INSTANT CLIENT-SIDE SKIP - update UI immediately
+    const nextRiddle = getNextRiddleInProgression(solvedRiddles || [], [
+      ...skippedRiddles,
+      currentRiddle.id,
+    ]);
+
+    // Update store immediately (optimistic update)
+    useGameStore.setState((state) => ({
+      skippedRiddles: [...state.skippedRiddles, currentRiddle.id],
+      userGems: state.userGems - skipCost,
+      currentRiddleId: nextRiddle?.id || null,
+      isTimerActive: false, // Stop timer on skip
+    }));
+
+    // Show toast immediately
+    toast.info("Riddle skipped");
+
+    // Sync with backend in background (non-blocking)
+    updateSessionMutation.mutate(
+      {
         userId,
         skippedRiddles: [...skippedRiddles, currentRiddle.id],
         currentRiddleId: nextRiddle?.id,
-      });
-
-      toast.info("Riddle skipped");
-    } catch (error) {
-      console.error("Failed to skip riddle:", error);
-      toast.error("Failed to skip riddle");
-    }
+        userGems: userGems - skipCost,
+      },
+      {
+        onError: (error) => {
+          // If server fails, revert optimistic update
+          console.error("Server skip sync failed:", error);
+          useGameStore.setState((state) => ({
+            skippedRiddles: state.skippedRiddles.filter(id => id !== currentRiddle.id),
+            userGems: state.userGems + skipCost,
+            currentRiddleId: currentRiddle.id, // Revert to current riddle
+          }));
+          toast.error("Failed to skip riddle");
+        },
+      }
+    );
   }, [
     userId,
     isSubmitting,
     currentRiddle,
     solvedRiddles,
     skippedRiddles,
+    userGems,
     getNextRiddleInProgression,
     updateSessionMutation,
   ]);

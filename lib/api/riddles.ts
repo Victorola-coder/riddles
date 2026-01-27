@@ -13,6 +13,7 @@ export interface Riddle {
   hint1?: string;
   hint2?: string;
   tags: string[];
+  answer?: string | string[]; // Included when includeAnswers=true for instant validation
 }
 
 export interface RiddlesResponse {
@@ -37,9 +38,13 @@ export const riddlesApi = {
     category?: string;
     limit?: number;
     offset?: number;
+    includeAnswers?: boolean; // For game use - enables instant client-side validation
   }) =>
     api.get<RiddlesResponse>('/api/riddles', {
-      params,
+      params: params ? {
+        ...params,
+        includeAnswers: params.includeAnswers ? 'true' : undefined,
+      } : undefined,
     }),
 
   /**
