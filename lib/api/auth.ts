@@ -41,7 +41,12 @@ export const authApi: {
       email: string;
       username: string;
       totalGems: number;
+      totalRiddlesSolved?: number;
+      currentStreak?: number;
+      longestStreak?: number;
       currentLevel: number;
+      lastPlayedDate?: string | Date | null;
+      achievements?: string[];
     };
   }>;
   forgotPassword: (
@@ -110,7 +115,12 @@ export const authApi: {
         email: string;
         username: string;
         totalGems: number;
+        totalRiddlesSolved?: number;
+        currentStreak?: number;
+        longestStreak?: number;
         currentLevel: number;
+        lastPlayedDate?: string | Date | null;
+        achievements?: string[];
       };
     }>("/api/auth/me", { requireAuth: true }),
 

@@ -52,7 +52,11 @@ export async function GET(request: NextRequest) {
         email: userData.email,
         username: userData.username,
         totalGems: userData.totalGems,
+        totalRiddlesSolved: userData.totalRiddlesSolved || 0,
+        currentStreak: userData.currentStreak || 0,
+        longestStreak: userData.longestStreak || 0,
         currentLevel: userData.currentLevel,
+        lastPlayedDate: userData.lastPlayedDate,
         achievements: userData.achievements.map((a) => a.achievementId),
       },
     });

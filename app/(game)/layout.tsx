@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuthStore } from "@/lib/store/auth";
-import { GameHeader } from "../components/organisms";
+import { GameHeader, MobileNav } from "../components/organisms";
 import { useGameStore } from "@/lib/store/game-store";
 import { useGameSession } from "@/lib/hooks/use-game";
 
@@ -32,9 +32,10 @@ export default function GameLayout({
         level={currentLevel}
         solvedCount={solvedRiddles.length}
       />
-      <main className="flex-1 flex items-center justify-center p-4">
+      <main className="flex-1 flex items-center justify-center p-4 pb-28 md:pb-4">
         {children}
       </main>
+      <MobileNav />
     </div>
   );
 }

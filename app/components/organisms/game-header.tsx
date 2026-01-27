@@ -56,14 +56,24 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
         </div>
       </Link>
 
-      {/* Streak Counter (Mobile Hidden) */}
-      <div className="hidden sm:block">
-        <StreakCounter
-          streak={currentStreak}
-          longestStreak={longestStreak}
-          size="md"
-          showLongest
-        />
+      {/* Streak Counter */}
+      <div className="flex items-center">
+        <div className="sm:hidden">
+          <StreakCounter
+            streak={currentStreak}
+            longestStreak={longestStreak}
+            size="sm"
+            showLongest={false}
+          />
+        </div>
+        <div className="hidden sm:block">
+          <StreakCounter
+            streak={currentStreak}
+            longestStreak={longestStreak}
+            size="md"
+            showLongest
+          />
+        </div>
       </div>
 
       {/* Solved Count (Desktop Only) */}
@@ -92,16 +102,17 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
       </Link>
 
       {/* Leaderboard Link (Mobile: Icon Only) */}
+      {/* Leaderboard Link (Desktop Only) */}
       <Link
         href="/leaderboard"
-        className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-purple/10 hover:bg-purple/20 transition-colors cursor-pointer group"
+        className="hidden md:flex items-center gap-1 px-3 py-1.5 rounded-lg bg-purple/10 hover:bg-purple/20 transition-colors cursor-pointer group"
         title="View Leaderboard"
       >
         <TrendingUp
           className="text-purple group-hover:scale-110 transition-transform"
           size={18}
         />
-        <span className="text-xs font-inter text-white/80 group-hover:text-white hidden sm:inline">
+        <span className="text-xs font-inter text-white/80 group-hover:text-white">
           Ranks
         </span>
       </Link>
@@ -115,11 +126,11 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
       {/* Gem Counter */}
       <GemCounter gems={gems} size="md" />
 
-      {/* Profile Link */}
+      {/* Profile Link (Desktop Only) */}
       {isMounted && (
         <Link
           href={user ? "/profile" : "/auth"}
-          className="ml-2 cursor-pointer hover:opacity-80 transition-opacity"
+          className="ml-2 cursor-pointer hover:opacity-80 transition-opacity hidden md:block"
           title={user ? "My Profile" : "Login"}
         >
           <Avatar
