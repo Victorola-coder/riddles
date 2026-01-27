@@ -30,7 +30,40 @@ model User {
   riddleAttempts    RiddleAttempt[]
   achievements      UserAchievement[]
   activityLogs      ActivityLog[]
+  inventory         UserInventory[]
 }
+
+// ... existing models ...
+
+model StoreItem {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  type        String   // 'AVATAR' | 'BADGE' | 'CONSUMABLE'
+  rarity      String   @default("COMMON") // 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY'
+  price       Int
+  imageUrl    String   // URL or lucide-icon-name
+  isActive    Boolean  @default(true)
+  metadata    String?  // JSON for extra properties
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  userInventories UserInventory[]
+}
+
+model UserInventory {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  itemId      String
+  item        StoreItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  isEquipped  Boolean   @default(false)
+  acquiredAt  DateTime  @default(now())
+  
+  @@unique([userId, itemId])
+  @@index([userId])
+}
+
 
 model Riddle {
   id          String           @id @default(cuid())

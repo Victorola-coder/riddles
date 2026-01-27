@@ -26,6 +26,7 @@ import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { authApi, ApiClientError } from "@/lib/api";
 import { useUserStore } from "@/lib/store/user-store";
 import { Avatar, Button } from "@/app/components/ui";
+import Modal from "@/app/components/ui/modal";
 import { cardEntranceVariants, fadeVariants } from "@/lib/constants/animations";
 import Skeleton from "@/app/components/ui/skeleton";
 
@@ -59,6 +60,8 @@ export default function ProfilePage() {
   const currentLevel = user?.currentLevel || 1;
 
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [formData, setFormData] = useState({
     username: user?.username || "",
     password: "",
@@ -146,16 +149,19 @@ export default function ProfilePage() {
   });
 
   const handleLogout = async () => {
+    setIsLoggingOut(true);
     try {
       await authApi.logout();
       toast.success("Logged out successfully");
     } catch (error) {
       console.error("Logout API call failed:", error);
-      toast.success("Logged out successfully");
+      // Continue with logout even if API fails
     } finally {
       removeAuthToken();
       setUser(null);
       queryClient.clear();
+      setIsLoggingOut(false);
+      setShowLogoutModal(false);
       router.push("/auth");
     }
   };
@@ -246,8 +252,9 @@ export default function ProfilePage() {
           </div>
           {/* Logout/Login button in banner */}
           <button
-            onClick={isGuest ? () => router.push("/auth") : handleLogout}
-            className="absolute top-4 right-4 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white/80 hover:text-white text-sm font-medium transition-all duration-200 border border-white/10"
+            onClick={isGuest ? () => router.push("/auth") : () => setShowLogoutModal(true)}
+            disabled={isLoggingOut}
+            className="absolute top-4 right-4 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white/80 hover:text-white text-sm font-medium transition-all duration-200 border border-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isGuest ? (
               <>
@@ -256,8 +263,12 @@ export default function ProfilePage() {
               </>
             ) : (
               <>
-                <LogOut className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Logout</span>
+                {isLoggingOut ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <LogOut className="w-3.5 h-3.5" />
+                )}
+                <span className="hidden sm:inline">{isLoggingOut ? "Logging out..." : "Logout"}</span>
               </>
             )}
           </button>
@@ -478,6 +489,38 @@ export default function ProfilePage() {
           </>
         )}
       </motion.div>
+
+      {/* Logout Confirmation Modal */}
+      <Modal
+        isOpen={showLogoutModal}
+        onClose={() => !isLoggingOut && setShowLogoutModal(false)}
+        title="Confirm Logout"
+        close={true}
+      >
+        <div className="space-y-4">
+          <p className="text-[var(--text-secondary)]">
+            Are you sure you want to logout? Your progress will be saved, but you'll need to sign in again to continue.
+          </p>
+          <div className="flex gap-3 justify-end pt-4">
+            <Button
+              variant="ghost"
+              onClick={() => setShowLogoutModal(false)}
+              disabled={isLoggingOut}
+              className="px-6"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              loading={isLoggingOut}
+              className="px-6 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white border-0"
+            >
+              Logout
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </motion.div>
   );
 }

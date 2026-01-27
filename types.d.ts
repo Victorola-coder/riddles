@@ -491,6 +491,29 @@ interface UpdateRiddleData {
   isActive?: boolean;
 }
 
+interface StoreItem {
+  id: string;
+  name: string;
+  description?: string;
+  type: string;
+  rarity: string;
+  price: number;
+  imageUrl: string;
+  isActive: boolean;
+  metadata?: any;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface CreateStoreItemData {
+  name: string;
+  description?: string;
+  type: string;
+  rarity: string;
+  price: number;
+  imageUrl: string;
+}
+
 interface NavGroup {
   label: string;
   icon: React.ComponentType<{ className?: string; size?: number }>;

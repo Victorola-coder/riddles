@@ -12,6 +12,8 @@ import {
   Activity,
   ChevronDown,
   ChevronRight,
+  ShoppingBag,
+  Tag,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -42,6 +44,11 @@ const navGroups: NavGroup[] = [
     label: "Users",
     icon: Users,
     items: [{ href: "/admin/users", label: "Users", icon: Users }],
+  },
+  {
+    label: "Commerce",
+    icon: ShoppingBag,
+    items: [{ href: "/admin/store", label: "Store Items", icon: Tag }],
   },
   {
     label: "Settings",

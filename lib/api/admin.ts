@@ -168,4 +168,20 @@ export const adminApi = {
         initialGems: number;
       };
     }>("/api/admin/settings", data, { requireAuth: true }),
+    
+  /**
+   * Store Management
+   */
+  store: {
+    getItems: () => api.get<any[]>("/api/admin/store/items", { requireAuth: true }),
+    
+    createItem: (data: any) => 
+      api.post<any>("/api/admin/store/items", data, { requireAuth: true }),
+      
+    updateItem: (id: string, data: any) =>
+      api.put<any>(`/api/admin/store/items/${id}`, data, { requireAuth: true }),
+      
+    deleteItem: (id: string) =>
+      api.delete<{ success: boolean }>(`/api/admin/store/items/${id}`, { requireAuth: true }),
+  },
 };

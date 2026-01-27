@@ -158,6 +158,7 @@ export default function GamePage() {
   }>({});
   const [wrongAttempts, setWrongAttempts] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingNextRiddle, setIsLoadingNextRiddle] = useState(false);
   const startTimeRef = useRef<number>(Date.now());
 
   // Convert API riddle to app riddle format - optimized map for O(1) lookup
@@ -411,6 +412,9 @@ export default function GamePage() {
     ) {
       processedRiddleId.current = currentRiddleId;
 
+      // Hide loader when new riddle is ready
+      setIsLoadingNextRiddle(false);
+
       setRevealedHints({});
       setShowError(false);
       setWrongAttempts(0);
@@ -560,22 +564,42 @@ export default function GamePage() {
             }, 500);
           }
 
+          // Show loader for next riddle transition
+          setIsLoadingNextRiddle(true);
+
           // Update session with next riddle immediately
           if (nextRiddle) {
-            updateSessionMutation.mutate({
-              userId,
-              currentRiddleId: nextRiddle.id,
-              solvedRiddles: [...solvedRiddles, currentRiddle.id],
-              userGems: userGems + gemsEarned,
-            });
+            updateSessionMutation.mutate(
+              {
+                userId,
+                currentRiddleId: nextRiddle.id,
+                solvedRiddles: [...solvedRiddles, currentRiddle.id],
+                userGems: userGems + gemsEarned,
+              },
+              {
+                onSettled: () => {
+                  // Hide loader after a brief delay for smooth transition
+                  setTimeout(() => {
+                    setIsLoadingNextRiddle(false);
+                  }, 500);
+                },
+              }
+            );
           } else {
             // All riddles solved
-            updateSessionMutation.mutate({
-              userId,
-              solvedRiddles: [...solvedRiddles, currentRiddle.id],
-              userGems: userGems + gemsEarned,
-              currentRiddleId: undefined,
-            });
+            updateSessionMutation.mutate(
+              {
+                userId,
+                solvedRiddles: [...solvedRiddles, currentRiddle.id],
+                userGems: userGems + gemsEarned,
+                currentRiddleId: undefined,
+              },
+              {
+                onSettled: () => {
+                  setIsLoadingNextRiddle(false);
+                },
+              }
+            );
           }
 
           // Sync with backend in background (non-blocking)
@@ -762,6 +786,9 @@ export default function GamePage() {
       currentRiddle.id,
     ]);
 
+    // Show loader for transition
+    setIsLoadingNextRiddle(true);
+
     // Update store immediately (optimistic update)
     useGameStore.setState((state) => ({
       skippedRiddles: [...state.skippedRiddles, currentRiddle.id],
@@ -782,6 +809,12 @@ export default function GamePage() {
         userGems: userGems - skipCost,
       },
       {
+        onSettled: () => {
+          // Hide loader after transition
+          setTimeout(() => {
+            setIsLoadingNextRiddle(false);
+          }, 500);
+        },
         onError: (error) => {
           // If server fails, revert optimistic update
           console.error("Server skip sync failed:", error);
@@ -791,6 +824,7 @@ export default function GamePage() {
             currentRiddleId: currentRiddle.id, // Revert to current riddle
           }));
           toast.error("Failed to skip riddle");
+          setIsLoadingNextRiddle(false);
         },
       }
     );
@@ -1041,7 +1075,33 @@ export default function GamePage() {
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto flex flex-col gap-8">
+    <div className="w-full max-w-4xl mx-auto flex flex-col gap-8 relative">
+      {/* Next Riddle Loader Overlay */}
+      <AnimatePresence>
+        {isLoadingNextRiddle && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-[var(--bg-primary)]/95 backdrop-blur-md z-50 flex flex-col items-center justify-center gap-4 rounded-2xl"
+          >
+            <Loader2 className="w-12 h-12 animate-spin text-[var(--accent-primary)]" />
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center space-y-2"
+            >
+              <p className="text-xl font-cinzel text-[var(--text-primary)]">
+                Loading Next Riddle...
+              </p>
+              <p className="text-sm text-[var(--text-secondary)] font-inter">
+                Get ready for the next challenge!
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Progress Indicator */}
 
       {/* Riddle Card */}
