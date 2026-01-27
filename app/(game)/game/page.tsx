@@ -858,6 +858,7 @@ export default function GamePage() {
           </div>
         </div>,
         {
+          id: 'timeout-toast', // Prevent duplicates with unique ID
           duration: 5000, // Show for 5 seconds before auto-advancing
           className: "!bg-red-950/95 !border-red-500/50 !text-white",
           style: {

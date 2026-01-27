@@ -45,13 +45,13 @@ export const RiddleCard: React.FC<RiddleCardProps> = ({ riddle, className }) => 
 
         {/* Riddle Question */}
         <div className="text-center">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-cinzel text-white leading-relaxed">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-cinzel text-[var(--text-primary)] leading-relaxed">
             {riddle.question}
           </h2>
         </div>
 
         {/* Decorative line */}
-        <div className="w-24 h-1 bg-gradient-to-r from-transparent via-purple to-transparent mx-auto" />
+        <div className="w-24 h-1 bg-gradient-to-r from-transparent via-[var(--accent-primary)] to-transparent mx-auto" />
       </div>
     </motion.div>
   );

@@ -8,13 +8,16 @@ import {
   Flame,
   Star,
   Check,
-  X,
   Camera,
   Loader2,
+  Gem,
+  Sparkles,
+  Crown,
+  Zap,
 } from "lucide-react";
 
 import { toast } from "sonner";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useAuthStore } from "@/lib/store/auth";
@@ -26,6 +29,23 @@ import { Avatar, Button } from "@/app/components/ui";
 import { cardEntranceVariants, fadeVariants } from "@/lib/constants/animations";
 import Skeleton from "@/app/components/ui/skeleton";
 
+const staggerContainer = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.08 },
+  },
+};
+
+const statCardVariant = {
+  hidden: { opacity: 0, y: 20, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { type: "spring", stiffness: 300, damping: 24 },
+  },
+};
+
 export default function ProfilePage() {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -33,6 +53,7 @@ export default function ProfilePage() {
   const totalRiddlesSolved = useUserStore((state) => state.totalRiddlesSolved);
   const currentStreak = useUserStore((state) => state.currentStreak);
   const totalGemsEarned = useUserStore((state) => state.totalGemsEarned);
+  const syncWithServer = useUserStore((state) => state.syncWithServer);
   const currentLevel = user?.currentLevel || 1;
 
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
@@ -42,7 +63,6 @@ export default function ProfilePage() {
     confirmPassword: "",
   });
 
-  // Password requirement checks
   const passwordRequirements = {
     minLength: formData.password.length >= 8,
     hasUppercase: /[A-Z]/.test(formData.password),
@@ -125,221 +145,290 @@ export default function ProfilePage() {
     const token = getAuthToken();
     if (!token || !user) {
       router.push("/auth");
+    } else {
+      syncWithServer();
     }
-  }, [user, router]);
+  }, [user, router, syncWithServer]);
 
   if (!user) {
     return (
-      <div className="container max-w-5xl mx-auto p-4 md:p-8 space-y-12 pb-32">
-        {/* Header Skeleton */}
-        <div className="glass-card p-8 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex flex-col md:flex-row items-center gap-6 w-full">
-            <Skeleton className="w-24 h-24 md:w-32 md:h-32 rounded-full" />
-            <div className="space-y-4 text-center md:text-left flex-1">
-              <Skeleton className="h-10 w-48 mx-auto md:mx-0" />
-              <Skeleton className="h-4 w-64 mx-auto md:mx-0" />
-              <Skeleton className="h-6 w-20 rounded-full mx-auto md:mx-0" />
-            </div>
+      <div className="container max-w-4xl mx-auto p-4 md:p-8 space-y-8 pb-32">
+        <div className="glass-card overflow-hidden">
+          <Skeleton className="h-32 w-full" />
+          <div className="p-6 flex flex-col items-center -mt-12 space-y-3">
+            <Skeleton className="w-20 h-20 rounded-full ring-4 ring-[var(--bg-card)]" />
+            <Skeleton className="h-7 w-40" />
+            <Skeleton className="h-4 w-56" />
           </div>
-          <Skeleton className="h-12 w-32" />
         </div>
-
-        {/* Stats Skeleton */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="glass-card p-6 flex flex-col items-center justify-center space-y-3">
-              <Skeleton className="w-8 h-8 rounded-full" />
-              <Skeleton className="h-8 w-16" />
-              <Skeleton className="h-3 w-24" />
+            <div key={i} className="glass-card p-5 flex flex-col items-center space-y-2">
+              <Skeleton className="w-10 h-10 rounded-xl" />
+              <Skeleton className="h-7 w-12" />
+              <Skeleton className="h-3 w-20" />
             </div>
           ))}
         </div>
-
-        {/* Settings Form Skeleton */}
-        <div className="glass-card p-8 md:p-10 space-y-8">
-           <Skeleton className="h-8 w-48" />
-           <div className="space-y-8 max-w-2xl">
-              <div className="space-y-3">
-                 <Skeleton className="h-4 w-24" />
-                 <Skeleton className="h-14 w-full rounded-xl" />
-              </div>
-              <div className="grid md:grid-cols-2 gap-6">
-                 <div className="space-y-3">
-                    <Skeleton className="h-4 w-32" />
-                    <Skeleton className="h-14 w-full rounded-xl" />
-                 </div>
-                 <div className="space-y-3">
-                    <Skeleton className="h-4 w-32" />
-                    <Skeleton className="h-14 w-full rounded-xl" />
-                 </div>
-              </div>
-           </div>
+        <div className="glass-card p-6 md:p-8 space-y-6">
+          <Skeleton className="h-7 w-40" />
+          <div className="space-y-4">
+            <Skeleton className="h-12 w-full rounded-xl" />
+            <div className="grid md:grid-cols-2 gap-4">
+              <Skeleton className="h-12 w-full rounded-xl" />
+              <Skeleton className="h-12 w-full rounded-xl" />
+            </div>
+          </div>
         </div>
       </div>
     );
   }
+
+  const stats = [
+    {
+      icon: Trophy,
+      label: "Riddles Solved",
+      value: totalRiddlesSolved,
+      color: "text-yellow-400",
+      bgGradient: "from-yellow-500/20 via-yellow-500/5 to-transparent",
+      iconBg: "bg-yellow-500/15",
+      borderColor: "border-yellow-500/20",
+    },
+    {
+      icon: Flame,
+      label: "Day Streak",
+      value: currentStreak,
+      color: "text-orange-500",
+      bgGradient: "from-orange-500/20 via-orange-500/5 to-transparent",
+      iconBg: "bg-orange-500/15",
+      borderColor: "border-orange-500/20",
+    },
+    {
+      icon: Gem,
+      label: "Total Gems",
+      value: totalGemsEarned,
+      color: "text-purple-400",
+      bgGradient: "from-purple-500/20 via-purple-500/5 to-transparent",
+      iconBg: "bg-purple-500/15",
+      borderColor: "border-purple-500/20",
+    },
+    {
+      icon: Zap,
+      label: "Current Level",
+      value: currentLevel,
+      color: "text-emerald-400",
+      bgGradient: "from-emerald-500/20 via-emerald-500/5 to-transparent",
+      iconBg: "bg-emerald-500/15",
+      borderColor: "border-emerald-500/20",
+    },
+  ];
 
   return (
     <motion.div
       initial="hidden"
       animate="visible"
       variants={fadeVariants}
-      className="container max-w-5xl mx-auto p-4 md:p-8 space-y-12 pb-32"
+      className="container max-w-4xl mx-auto p-4 md:p-8 space-y-6 pb-32"
     >
-      {/* Header Section */}
-      <motion.div 
+      {/* Profile Hero Card */}
+      <motion.div
         variants={cardEntranceVariants}
-        className="glass-card p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden group"
+        className="glass-card overflow-hidden relative"
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-        
-        <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
-          <div className="relative">
+        {/* Decorative banner */}
+        <div className="h-28 md:h-36 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-[var(--accent-primary)] via-purple-600 to-indigo-700" />
+          <div className="absolute inset-0 opacity-30">
+            <div className="absolute top-3 left-[10%] w-20 h-20 rounded-full bg-white/10 blur-2xl" />
+            <div className="absolute bottom-0 right-[15%] w-32 h-32 rounded-full bg-white/10 blur-3xl" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+              <Sparkles className="w-6 h-6 text-white/20" />
+            </div>
+          </div>
+          {/* Logout button in banner */}
+          <button
+            onClick={handleLogout}
+            className="absolute top-4 right-4 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white/80 hover:text-white text-sm font-medium transition-all duration-200 border border-white/10"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Logout</span>
+          </button>
+        </div>
+
+        {/* Avatar + Info */}
+        <div className="px-6 md:px-8 pb-6 flex flex-col items-center text-center -mt-12 relative">
+          <div className="relative mb-4">
             <Avatar
               alt={user.username || user.email || "Guest"}
               size="xl"
-              className="ring-4 ring-primary/20 w-24 h-24 md:w-32 md:h-32 shadow-xl"
+              className="ring-4 ring-[var(--bg-card)] w-24 h-24 shadow-xl"
             />
-            <div className="absolute bottom-0 right-0 bg-primary text-white p-2 rounded-full cursor-pointer hover:bg-primary-dark transition-colors shadow-lg">
-              <Camera size={16} />
-            </div>
+            <button className="absolute -bottom-1 -right-1 bg-[var(--accent-primary)] text-white p-1.5 rounded-full hover:bg-[var(--accent-primary-dark)] transition-colors shadow-lg shadow-purple-500/30">
+              <Camera size={14} />
+            </button>
           </div>
-          <div className="text-center md:text-left space-y-2">
-            <h1 className="text-4xl font-bold font-cinzel bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent drop-shadow-sm">
-              {user.username || "Adventurer"}
-            </h1>
-            <p className="text-[var(--text-secondary)] font-medium flex items-center justify-center md:justify-start gap-2">
-              <Shield size={16} className="text-primary" />
-              {user.email}
-            </p>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-bold text-primary tracking-wider uppercase">
-              Member
-            </div>
+
+          <h1 className="text-2xl md:text-3xl font-bold font-cinzel bg-gradient-to-r from-[var(--text-primary)] to-[var(--text-secondary)] bg-clip-text text-transparent">
+            {user.username || "Adventurer"}
+          </h1>
+          <p className="text-sm text-[var(--text-muted)] mt-1 flex items-center gap-1.5">
+            <Shield size={14} className="text-[var(--accent-primary)]" />
+            {user.email}
+          </p>
+
+          {/* Level badge */}
+          <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-[var(--accent-primary)]/15 to-purple-500/10 border border-[var(--accent-primary)]/25">
+            <Crown size={13} className="text-[var(--accent-secondary)]" />
+            <span className="text-xs font-bold text-[var(--accent-primary)] tracking-wider uppercase">
+              Level {currentLevel}
+            </span>
           </div>
         </div>
-
-        <Button
-          variant="danger"
-          onClick={handleLogout}
-          className="relative z-10 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 shadow-none hover:shadow-red-500/20"
-        >
-          <LogOut className="w-4 h-4 mr-2" />
-          Logout
-        </Button>
       </motion.div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-        {[
-          { icon: Trophy, label: "Riddles Solved", value: totalRiddlesSolved, color: "text-yellow-400", bg: "from-yellow-500/10", border: "border-yellow-500/20" },
-          { icon: Flame, label: "Day Streak", value: currentStreak, color: "text-orange-500", bg: "from-orange-500/10", border: "border-orange-500/20" },
-          { icon: Star, label: "Total Gems", value: totalGemsEarned, color: "text-purple-400", bg: "from-purple-500/10", border: "border-purple-500/20" },
-          { icon: UserIcon, label: "Current Level", value: currentLevel, color: "text-green-400", bg: "from-green-500/10", border: "border-green-500/20" }
-        ].map((stat, index) => (
+      <motion.div
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+        className="grid grid-cols-2 md:grid-cols-4 gap-3"
+      >
+        {stats.map((stat) => (
           <motion.div
             key={stat.label}
-            variants={cardEntranceVariants}
-            custom={index}
-            className={`glass-card p-6 flex flex-col items-center justify-center space-y-3 bg-gradient-to-b ${stat.bg} to-transparent ${stat.border} hover:scale-105 transition-transform duration-300`}
+            variants={statCardVariant}
+            whileHover={{ y: -4, transition: { duration: 0.2 } }}
+            className={`glass-card p-4 md:p-5 flex flex-col items-center justify-center space-y-2 bg-gradient-to-b ${stat.bgGradient} ${stat.borderColor} cursor-default`}
           >
-            <stat.icon className={`w-8 h-8 ${stat.color} drop-shadow-glow`} />
-            <span className="text-3xl font-bold font-cinzel text-[var(--text-primary)]">
+            <div className={`p-2.5 rounded-xl ${stat.iconBg}`}>
+              <stat.icon className={`w-5 h-5 ${stat.color}`} />
+            </div>
+            <span className="text-2xl md:text-3xl font-bold font-cinzel text-[var(--text-primary)]">
               {stat.value}
             </span>
-            <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+            <span className="text-[10px] md:text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
               {stat.label}
             </span>
           </motion.div>
         ))}
-      </div>
+      </motion.div>
 
-      {/* Settings Form */}
-      <motion.div 
+      {/* Account Settings */}
+      <motion.div
         variants={cardEntranceVariants}
-        className="glass-card p-8 md:p-10 space-y-8 relative overflow-hidden"
+        className="glass-card p-6 md:p-8 space-y-6"
       >
-        <div className="flex items-center gap-3 border-b border-[var(--border-default)] pb-6">
-          <Shield className="w-6 h-6 text-primary" />
-          <h2 className="text-2xl font-bold font-cinzel text-[var(--text-primary)]">Account Settings</h2>
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-[var(--accent-primary)]/10">
+            <Shield className="w-5 h-5 text-[var(--accent-primary)]" />
+          </div>
+          <h2 className="text-xl font-bold font-cinzel text-[var(--text-primary)]">
+            Account Settings
+          </h2>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8 max-w-2xl">
-          <div className="space-y-3">
-            <label className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide ml-1">
-              DisplayName
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-[var(--border-default)] to-transparent" />
+
+        <form onSubmit={handleSubmit} className="space-y-5 max-w-2xl">
+          {/* Display Name */}
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider ml-1">
+              Display Name
             </label>
-            <input
-              value={formData.username}
-              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-              placeholder="Your username"
-              className="w-full p-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all duration-300"
-            />
+            <div className="relative">
+              <UserIcon
+                size={16}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"
+              />
+              <input
+                value={formData.username}
+                onChange={(e) =>
+                  setFormData({ ...formData, username: e.target.value })
+                }
+                placeholder="Your username"
+                className="w-full pl-11 pr-4 py-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-primary)] focus:ring-1 focus:ring-[var(--accent-primary)]/50 transition-all duration-200 text-sm"
+              />
+            </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-3">
-              <label className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide ml-1">
+          {/* Password Fields */}
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider ml-1">
                 New Password
               </label>
-              <div className="relative">
-                <input
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => {
-                    setFormData({ ...formData, password: e.target.value });
-                    if (passwordErrors.length > 0) setPasswordErrors([]);
-                  }}
-                  placeholder="••••••••"
-                  className="w-full p-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all duration-300"
-                />
-              </div>
-              
-              {/* Password Requirements Popover styled inline */}
+              <input
+                type="password"
+                value={formData.password}
+                onChange={(e) => {
+                  setFormData({ ...formData, password: e.target.value });
+                  if (passwordErrors.length > 0) setPasswordErrors([]);
+                }}
+                placeholder="••••••••"
+                className="w-full px-4 py-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-primary)] focus:ring-1 focus:ring-[var(--accent-primary)]/50 transition-all duration-200 text-sm"
+              />
+
+              {/* Password Requirements */}
               {formData.password && (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
-                  className="bg-[var(--bg-secondary)]/50 p-4 rounded-lg border border-[var(--border-default)] space-y-2 mt-2"
+                  className="p-3 rounded-lg bg-[var(--bg-secondary)]/60 border border-[var(--border-default)] space-y-1.5"
                 >
-                  <p className="text-xs font-medium text-[var(--text-muted)] mb-2 uppercase tracking-wide">
-                    Security Strength
+                  <p className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-1.5">
+                    Requirements
                   </p>
-                  <div className="space-y-2">
-                    {Object.entries(passwordRequirements).map(([key, valid]) => (
-                      <div key={key} className={`flex items-center gap-2 text-xs font-medium transition-colors ${valid ? "text-green-400" : "text-[var(--text-muted)]"}`}>
-                        {valid ? <Check size={14} /> : <div className="w-3.5 h-3.5 rounded-full border border-current opacity-50" />}
-                        <span>
-                          {key === "minLength" && "8+ Characters"}
-                          {key === "hasUppercase" && "Uppercase Letter"}
-                          {key === "hasLowercase" && "Lowercase Letter"}
-                          {key === "hasNumber" && "Number"}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+                  {Object.entries(passwordRequirements).map(([key, valid]) => (
+                    <div
+                      key={key}
+                      className={`flex items-center gap-2 text-xs transition-colors duration-200 ${
+                        valid
+                          ? "text-emerald-400"
+                          : "text-[var(--text-muted)]"
+                      }`}
+                    >
+                      {valid ? (
+                        <Check size={12} />
+                      ) : (
+                        <div className="w-3 h-3 rounded-full border border-current opacity-40" />
+                      )}
+                      <span>
+                        {key === "minLength" && "8+ Characters"}
+                        {key === "hasUppercase" && "Uppercase Letter"}
+                        {key === "hasLowercase" && "Lowercase Letter"}
+                        {key === "hasNumber" && "Number"}
+                      </span>
+                    </div>
+                  ))}
                 </motion.div>
               )}
             </div>
 
-            <div className="space-y-3">
-              <label className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide ml-1">
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider ml-1">
                 Confirm Password
               </label>
               <input
                 type="password"
                 value={formData.confirmPassword}
-                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, confirmPassword: e.target.value })
+                }
                 placeholder="••••••••"
-                className="w-full p-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all duration-300"
+                className="w-full px-4 py-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-primary)] focus:ring-1 focus:ring-[var(--accent-primary)]/50 transition-all duration-200 text-sm"
               />
             </div>
           </div>
 
-          <div className="pt-6 border-t border-[var(--border-default)] flex justify-end">
+          {/* Submit */}
+          <div className="pt-4 flex justify-end">
             <Button
               type="submit"
-              disabled={updateProfile.isPending || (!formData.password && formData.username === user.username)}
-              className="bg-primary hover:bg-primary-dark text-white px-8 py-4 rounded-xl font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all"
+              disabled={
+                updateProfile.isPending ||
+                (!formData.password && formData.username === user.username)
+              }
+              className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-primary-dark)] text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 transition-all duration-200 disabled:opacity-40 disabled:shadow-none"
             >
               {updateProfile.isPending ? (
                 <>
