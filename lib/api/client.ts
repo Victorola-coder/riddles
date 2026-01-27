@@ -33,13 +33,10 @@ class ApiClientError extends Error {
 
 /**
  * Get the base URL for API requests
+ * Since API is in the same codebase, always use relative paths
  */
 function getBaseUrl(): string {
-  if (typeof window === "undefined") {
-    // Server-side: use absolute URL
-    return process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-  }
-  // Client-side: use relative URL
+  // Always use relative paths - works for both client and server-side
   return "";
 }
 

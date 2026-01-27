@@ -92,9 +92,8 @@ class ApiClient {
   }
 }
 
-const API_URL = process.env.NEXT_PUBLIC_APP_URL
-  ? `${process.env.NEXT_PUBLIC_APP_URL}/api`
-  : "/api";
+// Use relative paths since API is in the same codebase
+const API_URL = "/api";
 
 // Client for user actions (localStorage, auth_token)
 const client = new ApiClient(API_URL);

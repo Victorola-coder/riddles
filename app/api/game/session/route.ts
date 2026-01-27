@@ -1,5 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { withCors, handleCorsPreflight } from '@/lib/utils/cors';
+
+/**
+ * OPTIONS /api/game/session
+ * Handle CORS preflight requests
+ */
+export async function OPTIONS(request: NextRequest) {
+  const preflightResponse = handleCorsPreflight(request);
+  return preflightResponse || new NextResponse(null, { status: 204 });
+}
 
 /**
  * GET /api/game/session
@@ -49,20 +59,26 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    return NextResponse.json({
-      user,
-      session: {
-        ...session,
-        solvedRiddles: JSON.parse(session.solvedRiddles),
-        skippedRiddles: JSON.parse(session.skippedRiddles),
-        hintsUsed: session.hintsUsed ? JSON.parse(session.hintsUsed) : {},
-      },
-    });
+    return withCors(
+      NextResponse.json({
+        user,
+        session: {
+          ...session,
+          solvedRiddles: JSON.parse(session.solvedRiddles),
+          skippedRiddles: JSON.parse(session.skippedRiddles),
+          hintsUsed: session.hintsUsed ? JSON.parse(session.hintsUsed) : {},
+        },
+      }),
+      request
+    );
   } catch (error) {
     console.error('Error fetching session:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch session' },
-      { status: 500 }
+    return withCors(
+      NextResponse.json(
+        { error: 'Failed to fetch session' },
+        { status: 500 }
+      ),
+      request
     );
   }
 }
@@ -108,20 +124,26 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({
-      success: true,
-      session: {
-        ...session,
-        solvedRiddles: JSON.parse(session.solvedRiddles),
-        skippedRiddles: JSON.parse(session.skippedRiddles),
-        hintsUsed: session.hintsUsed ? JSON.parse(session.hintsUsed) : {},
-      },
-    });
+    return withCors(
+      NextResponse.json({
+        success: true,
+        session: {
+          ...session,
+          solvedRiddles: JSON.parse(session.solvedRiddles),
+          skippedRiddles: JSON.parse(session.skippedRiddles),
+          hintsUsed: session.hintsUsed ? JSON.parse(session.hintsUsed) : {},
+        },
+      }),
+      request
+    );
   } catch (error) {
     console.error('Error updating session:', error);
-    return NextResponse.json(
-      { error: 'Failed to update session' },
-      { status: 500 }
+    return withCors(
+      NextResponse.json(
+        { error: 'Failed to update session' },
+        { status: 500 }
+      ),
+      request
     );
   }
 }

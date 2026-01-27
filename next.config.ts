@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+const isDev = process.env.NODE_ENV === 'development';
+
 const nextConfig: NextConfig = {
   /* config options here */
   // Enable instant page transitions
@@ -44,7 +46,9 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com data:",
               "img-src 'self' data: blob: https: lh3.googleusercontent.com avatars.githubusercontent.com",
-              "connect-src 'self' https:",
+              isDev
+                ? "connect-src 'self' https: http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* wss://localhost:* wss://127.0.0.1:*"
+                : "connect-src 'self' https:",
               "frame-ancestors 'none'",
             ].join('; '),
           },
