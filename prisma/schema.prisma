@@ -9,7 +9,8 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
   // directUrl is optional - only needed for connection pooling with Prisma Migrate
-  directUrl = env("DIRECT_URL")
+  // Temporarily commented out - using DATABASE_URL for db push
+  // directUrl = env("DIRECT_URL")
 }
 
 model User {
