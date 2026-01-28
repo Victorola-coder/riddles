@@ -22,6 +22,7 @@ model User {
   longestStreak     Int            @default(0)
   lastPlayedDate    DateTime?
   currentLevel      Int            @default(1)
+  dailyChallengeStreak Int         @default(0) // Consecutive daily challenge completions
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
   
@@ -30,6 +31,7 @@ model User {
   achievements      UserAchievement[]
   activityLogs      ActivityLog[]
   inventory         UserInventory[]
+  dailyChallengeEntries DailyChallengeEntry[]
 }
 
 // ... existing models ...
@@ -80,6 +82,7 @@ model Riddle {
   
   attempts    RiddleAttempt[]
   activityLogs ActivityLog[]
+  dailyChallenges DailyChallenge[]
 
   @@index([difficulty])
 }
@@ -182,4 +185,35 @@ model Admin {
   updatedAt   DateTime @updatedAt
   
   @@index([code])
+}
+
+model DailyChallenge {
+  id          String   @id @default(cuid())
+  riddleId    String
+  riddle      Riddle   @relation(fields: [riddleId], references: [id], onDelete: Cascade)
+  date        DateTime @db.Date // Date-only field (YYYY-MM-DD)
+  bonusGems   Int      @default(0) // Bonus gems for completing
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  entries     DailyChallengeEntry[]
+  
+  @@unique([date])
+  @@index([date])
+}
+
+model DailyChallengeEntry {
+  id                String         @id @default(cuid())
+  dailyChallengeId  String
+  dailyChallenge    DailyChallenge @relation(fields: [dailyChallengeId], references: [id], onDelete: Cascade)
+  userId            String
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  solveTimeMs       Int?           // Time taken in milliseconds (null if incorrect)
+  isCorrect         Boolean        @default(false)
+  completedAt       DateTime       @default(now())
+  
+  @@unique([dailyChallengeId, userId])
+  @@index([dailyChallengeId])
+  @@index([userId])
+  @@index([completedAt])
 }

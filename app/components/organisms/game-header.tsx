@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Avatar } from "../ui";
 import { useAuthStore } from "@/lib/store/auth";
-import { Trophy, Award, TrendingUp, ShoppingBag } from "lucide-react";
+import { Trophy, Award, TrendingUp, ShoppingBag, Calendar } from "lucide-react";
 import { useUserStore } from "@/lib/store/user-store";
 import {
   GemCounter,
@@ -85,6 +85,21 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
           {solvedCount}
         </span>
       </div>
+
+      {/* Daily Challenge Link (Desktop Only) */}
+      <Link
+        href="/daily-challenge"
+        className="hidden md:flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[var(--accent-secondary)]/10 hover:bg-[var(--accent-secondary)]/20 transition-colors cursor-pointer group"
+        title="Daily Challenge"
+      >
+        <Calendar
+          className="text-[var(--accent-secondary)] group-hover:scale-110 transition-transform"
+          size={18}
+        />
+        <span className="text-xs font-inter text-white/80 group-hover:text-white">
+          Daily
+        </span>
+      </Link>
 
       {/* Achievements Link (Mobile Hidden) */}
       <Link

@@ -455,13 +455,17 @@ export default function GamePage() {
       startTimeRef.current = Date.now();
       updateStreak();
 
-      // Initialize timer based on difficulty (halve for HALF_TIMER modifier)
+      // Reset modifier when riddle changes (modifiers are per-riddle)
+      // Note: Modifiers reset per riddle, user selects new modifier for each riddle
+      useGameStore.setState({ activeModifier: null });
+
+      // Initialize timer based on difficulty
+      // Timer will be adjusted if user selects HALF_TIMER modifier later
       const baseDuration = GAME_CONFIG.TIMER[currentRiddle.difficulty];
-      const timerDuration = activeModifier === 'HALF_TIMER' ? Math.round(baseDuration / 2) : baseDuration;
-      if (timerDuration > 0) {
+      if (baseDuration > 0) {
         useGameStore.setState({
-          timeLeft: timerDuration,
-          totalTime: timerDuration,
+          timeLeft: baseDuration,
+          totalTime: baseDuration,
           isTimerActive: true,
         });
       } else {
@@ -474,6 +478,22 @@ export default function GamePage() {
       }
     }
   }, [currentRiddleId, currentRiddle, updateStreak]);
+
+  // Adjust timer when HALF_TIMER modifier is selected
+  useEffect(() => {
+    if (activeModifier === 'HALF_TIMER' && currentRiddle && totalTime > 0 && isTimerActive) {
+      const baseDuration = GAME_CONFIG.TIMER[currentRiddle.difficulty];
+      const halvedDuration = Math.round(baseDuration / 2);
+      // Only adjust if timer hasn't been halved yet (prevent re-halving)
+      if (totalTime === baseDuration) {
+        const remainingTime = Math.max(1, Math.round((timeLeft / baseDuration) * halvedDuration));
+        useGameStore.setState({
+          timeLeft: remainingTime,
+          totalTime: halvedDuration,
+        });
+      }
+    }
+  }, [activeModifier, currentRiddle, totalTime, timeLeft, isTimerActive]);
 
   // Timer Tick Loop
   useEffect(() => {
@@ -759,6 +779,7 @@ export default function GamePage() {
       incrementNoHintSolves,
       incrementPerfectStreak,
       resetPerfectStreak,
+      activeModifier,
     ]
   );
 
@@ -767,6 +788,15 @@ export default function GamePage() {
     (hintLevel: 1 | 2 | 3, hintKey: "hint1" | "hint2" | "answer") =>
       async () => {
         if (!userId || isSubmitting || !currentRiddle) return;
+
+        // Reject hints if NO_HINTS modifier is active
+        if (activeModifier === 'NO_HINTS') {
+          toast.error("Hints are disabled in No Hints mode", {
+            duration: 3000,
+            id: 'no-hints-modifier',
+          });
+          return;
+        }
 
         // Check if user has enough gems
         const costKey =
@@ -846,7 +876,7 @@ export default function GamePage() {
           }
         );
       },
-    [userId, isSubmitting, currentRiddle, hintMutation, userGems, hasUsedHint]
+    [userId, isSubmitting, currentRiddle, hintMutation, userGems, hasUsedHint, activeModifier]
   );
 
   const handleHint1 = useMemo(
@@ -1169,6 +1199,19 @@ export default function GamePage() {
 
       {/* Progress Indicator */}
 
+      {/* Modifier Selector */}
+      <ModifierSelector
+        activeModifier={activeModifier}
+        onSelect={(modifier) => {
+          useGameStore.setState({ activeModifier: modifier });
+          // Reset hints when modifier changes
+          if (modifier !== activeModifier) {
+            setRevealedHints({});
+          }
+        }}
+        disabled={isSubmitting}
+      />
+
       {/* Riddle Card */}
       <AnimatePresence mode="wait">
         <RiddleCard key={currentRiddle.id} riddle={currentRiddle} />
@@ -1217,17 +1260,19 @@ export default function GamePage() {
         disabled={isSubmitting}
       />
 
-      {/* Hint Panel */}
-      <HintPanel
-        onHint1={handleHint1}
-        onHint2={handleHint2}
-        onReveal={handleReveal}
-        onSkip={handleSkip}
-        hint1Used={hint1Used}
-        hint2Used={hint2Used}
-        userGems={userGems}
-        disabled={isSubmitting}
-      />
+      {/* Hint Panel - Hidden when NO_HINTS modifier is active */}
+      {activeModifier !== 'NO_HINTS' && (
+        <HintPanel
+          onHint1={handleHint1}
+          onHint2={handleHint2}
+          onReveal={handleReveal}
+          onSkip={handleSkip}
+          hint1Used={hint1Used}
+          hint2Used={hint2Used}
+          userGems={userGems}
+          disabled={isSubmitting}
+        />
+      )}
     </div>
   );
 }

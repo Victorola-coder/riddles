@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Gamepad2, TrendingUp, Layers, User, ShoppingBag } from "lucide-react";
+import { Gamepad2, TrendingUp, Layers, User, ShoppingBag, Trophy } from "lucide-react";
 import { motion } from "framer-motion";
 
 export const MobileNav = () => {
@@ -14,6 +14,11 @@ export const MobileNav = () => {
       label: "Play",
       href: "/game",
       icon: Gamepad2,
+    },
+    {
+      label: "Daily",
+      href: "/daily-challenge",
+      icon: Trophy,
     },
     {
       label: "Ranks",
