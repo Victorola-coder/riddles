@@ -37,7 +37,7 @@ import { riddlesApi } from "@/lib/api/riddles";
 import { soundManager } from "@/lib/utils/sound-manager";
 import { getGuestId } from "@/lib/utils/guest-session";
 import { GAME_CONFIG } from "@/lib/constants/game-config";
-import { validateAnswer } from "@/lib/utils/riddle-validator";
+import { validateAnswer, validateReverseAnswer } from "@/lib/utils/riddle-validator";
 import { ModifierSelector } from "@/app/components/organisms/game/ModifierSelector";
 import { getGemMultiplier, type ModifierKey } from "@/lib/constants/difficulty-modifiers";
 import type { Riddle } from "@/types/riddle";
@@ -585,7 +585,10 @@ export default function GamePage() {
         const solveTime = (Date.now() - startTimeRef.current) / 1000;
 
         // INSTANT CLIENT-SIDE VALIDATION for immediate feedback
-        const isCorrect = validateAnswer(answer, currentRiddle);
+        // Use reverse validation if REVERSE modifier is active
+        const isCorrect = activeModifier === 'REVERSE'
+          ? validateReverseAnswer(answer, currentRiddle)
+          : validateAnswer(answer, currentRiddle);
         const multiplier = getGemMultiplier(activeModifier);
         const gemsEarned = isCorrect
           ? Math.round(GAME_CONFIG.GEM_REWARDS[currentRiddle.difficulty] * multiplier)
@@ -1256,7 +1259,7 @@ export default function GamePage() {
       {/* Answer Input */}
       <AnswerInput
         onSubmit={handleSubmit}
-        showError={showError}
+        placeholder={activeModifier === 'REVERSE' ? "Type the riddle question..." : "Type your answer..."}
         disabled={isSubmitting}
       />
 
