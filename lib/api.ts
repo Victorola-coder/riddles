@@ -137,6 +137,23 @@ export const gameApi = {
     solved: boolean;
     usedHint: boolean;
   }) => client.post<{ success: boolean; stats: any }>("/game/attempt", data),
+
+  mysteryBox: {
+    list: () => client.get<{ boxes: any[] }>("/mystery-box"),
+    open: (data: { userId: string; boxId: string }) =>
+      client.post<{
+        success: boolean;
+        userId: string;
+        box: any;
+        reward: any;
+        gemsSpent: number;
+        gemsGained: number;
+        newGems: number;
+        opening: any;
+      }>("/mystery-box/open", data),
+    history: (userId: string) =>
+      client.get<{ openings: any[] }>(`/mystery-box/history?userId=${encodeURIComponent(userId)}`),
+  },
 };
 
 export const adminApi = {
@@ -185,5 +202,20 @@ export const adminApi = {
     seed: (days: number) => adminClient.post<any>("/admin/daily-challenge/seed", { days }),
     entries: (date: string) =>
       adminClient.get<any>(`/admin/daily-challenge/entries?date=${encodeURIComponent(date)}`),
+  },
+
+  mysteryBox: {
+    listBoxes: () => adminClient.get<any>("/admin/mystery-box"),
+    createBox: (data: any) => adminClient.post<any>("/admin/mystery-box", data),
+    updateBox: (id: string, data: any) => adminClient.put<any>(`/admin/mystery-box/${id}`, data),
+    deleteBox: (id: string) => adminClient.delete<any>(`/admin/mystery-box/${id}`),
+
+    listRewards: (boxId: string) => adminClient.get<any>(`/admin/mystery-box/${boxId}/rewards`),
+    createReward: (boxId: string, data: any) =>
+      adminClient.post<any>(`/admin/mystery-box/${boxId}/rewards`, data),
+    updateReward: (rewardId: string, data: any) =>
+      adminClient.put<any>(`/admin/mystery-box/rewards/${rewardId}`, data),
+    deleteReward: (rewardId: string) =>
+      adminClient.delete<any>(`/admin/mystery-box/rewards/${rewardId}`),
   },
 };

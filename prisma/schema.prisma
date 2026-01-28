@@ -32,6 +32,7 @@ model User {
   activityLogs      ActivityLog[]
   inventory         UserInventory[]
   dailyChallengeEntries DailyChallengeEntry[]
+  mysteryBoxOpenings MysteryBoxOpening[]
 }
 
 // ... existing models ...
@@ -216,4 +217,58 @@ model DailyChallengeEntry {
   @@index([dailyChallengeId])
   @@index([userId])
   @@index([completedAt])
+}
+
+model MysteryBox {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Int
+  rarity      String   @default("COMMON") // 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY'
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  rewards     MysteryBoxReward[]
+  openings    MysteryBoxOpening[]
+
+  @@index([isActive])
+  @@index([rarity])
+}
+
+model MysteryBoxReward {
+  id            String     @id @default(cuid())
+  mysteryBoxId  String
+  mysteryBox    MysteryBox @relation(fields: [mysteryBoxId], references: [id], onDelete: Cascade)
+
+  type          String     // 'GEMS' | 'STORE_ITEM'
+  value         String     // JSON string: e.g. { "amount": 50 } or { "itemId": "..." }
+  rarity        String     @default("COMMON")
+  weight        Int        @default(1) // weighted random selection
+  isActive      Boolean    @default(true)
+  createdAt     DateTime   @default(now())
+
+  openings      MysteryBoxOpening[]
+
+  @@index([mysteryBoxId])
+  @@index([isActive])
+  @@index([rarity])
+}
+
+model MysteryBoxOpening {
+  id            String          @id @default(cuid())
+  userId        String
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  mysteryBoxId  String
+  mysteryBox    MysteryBox      @relation(fields: [mysteryBoxId], references: [id], onDelete: Cascade)
+
+  rewardId      String
+  reward        MysteryBoxReward @relation(fields: [rewardId], references: [id], onDelete: Cascade)
+
+  rewardData    String          // JSON string of resolved reward (e.g. gems amount, item details)
+  createdAt     DateTime        @default(now())
+
+  @@index([userId, createdAt])
+  @@index([mysteryBoxId, createdAt])
 }
