@@ -4,6 +4,7 @@ import { getAuthToken } from '@/lib/auth-token';
 import { validateAnswer } from '@/lib/utils/riddle-validator';
 import { DAILY_CHALLENGE_CONFIG, getStreakBonus } from '@/lib/constants/daily-challenge';
 import { GAME_CONFIG } from '@/lib/constants/game-config';
+import type { DifficultyLevel } from '@/types/riddle';
 
 /**
  * POST /api/daily-challenge/submit
@@ -67,7 +68,13 @@ export async function POST(request: NextRequest) {
       ? JSON.parse(challenge.riddle.answer as string)
       : challenge.riddle.answer;
     const isCorrect = validateAnswer(answer, {
-      ...challenge.riddle,
+      id: challenge.riddle.id,
+      question: challenge.riddle.question,
+      difficulty: challenge.riddle.difficulty as DifficultyLevel,
+      category: challenge.riddle.category ?? undefined,
+      hint1: challenge.riddle.hint1 ?? undefined,
+      hint2: challenge.riddle.hint2 ?? undefined,
+      tags: challenge.riddle.tags ? JSON.parse(challenge.riddle.tags as string) : [],
       answer: riddleAnswer,
     });
 

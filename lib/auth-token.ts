@@ -22,3 +22,17 @@ export function verifyAuthToken(token: string): { userId: string; type?: string 
     return null;
   }
 }
+
+/**
+ * Extract and verify a Bearer token from a request-like object.
+ * Used by API routes that accept `Authorization: Bearer <token>`.
+ */
+export function getAuthToken(req: {
+  headers: { get: (name: string) => string | null };
+}): { userId: string; type?: string } | null {
+  const authHeader = req.headers.get('authorization');
+  if (!authHeader?.startsWith('Bearer ')) return null;
+  const token = authHeader.slice('Bearer '.length).trim();
+  if (!token) return null;
+  return verifyAuthToken(token);
+}

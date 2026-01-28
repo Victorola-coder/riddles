@@ -7,6 +7,7 @@ import { Settings, Save } from "lucide-react";
 import { Button, Input, Skeleton } from "@/app/components/ui";
 import { adminApi, ApiClientError } from "@/lib/api";
 import { GAME_CONFIG } from "@/lib/constants/game-config";
+import { DIFFICULTY_MODIFIERS } from "@/lib/constants/difficulty-modifiers";
 import { getAdminToken } from "@/lib/admin-auth";
 
 export default function SettingsPage() {
@@ -324,6 +325,28 @@ export default function SettingsPage() {
                 className="w-full bg-[#0f0f0f] border border-[#FFFFFF1A] rounded-lg px-3 py-2 text-sm text-white"
               />
             </div>
+          </div>
+        </div>
+
+        {/* Difficulty Modifiers (read-only) */}
+        <div className="bg-[#161616] rounded-lg p-6 border border-[#FFFFFF1A]">
+          <h2 className="text-xl font-bold mb-2">Difficulty Modifiers</h2>
+          <p className="text-sm text-gray-400 mb-4">
+            These modifiers are currently configured in code (read-only) and apply gem multipliers during gameplay.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {Object.entries(DIFFICULTY_MODIFIERS).map(([key, mod]) => (
+              <div
+                key={key}
+                className="bg-[#0f0f0f] border border-[#FFFFFF1A] rounded-lg p-4"
+              >
+                <p className="text-white font-medium">{mod.label}</p>
+                <p className="text-xs text-gray-400 mt-1">{mod.description}</p>
+                <p className="text-sm text-yellow-400 mt-3 font-mono">
+                  {mod.gemMultiplier}x gems
+                </p>
+              </div>
+            ))}
           </div>
         </div>
 

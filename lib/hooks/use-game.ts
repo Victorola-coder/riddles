@@ -43,7 +43,11 @@ export function useGameSession(userId?: string) {
     refetchOnReconnect: false,
     retry: (failureCount, error) => {
       // Only retry once and only for network errors, not for API errors
-      if (failureCount < 1 && error instanceof Error && !error.message.includes("Failed to fetch game session")) {
+      if (
+        failureCount < 1 &&
+        error instanceof Error &&
+        !error.message.includes("Failed to fetch game session")
+      ) {
         return true;
       }
       return false;
@@ -54,7 +58,7 @@ export function useGameSession(userId?: string) {
   // Use dataUpdatedAt and query.data as dependencies to avoid infinite loops
   const { dataUpdatedAt, data } = query;
   const sessionRef = useRef<string | null>(null);
-  
+
   useEffect(() => {
     if (data?.session) {
       const serverSession = data.session;
@@ -240,7 +244,10 @@ export function useRecordAttempt() {
 /**
  * Get user's attempt history
  */
-export function useAttempts(userId: string, options?: { riddleId?: string; limit?: number }) {
+export function useAttempts(
+  userId: string,
+  options?: { riddleId?: string; limit?: number },
+) {
   return useQuery({
     queryKey: ["game", "attempts", userId, options?.riddleId, options?.limit],
     queryFn: async () => {

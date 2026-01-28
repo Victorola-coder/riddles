@@ -170,4 +170,20 @@ export const adminApi = {
   updateRiddle: (id: string, data: any) =>
     adminClient.patch(`/admin/riddles?id=${id}`, data),
   deleteRiddle: (id: string) => adminClient.delete(`/admin/riddles?id=${id}`),
+
+  dailyChallenge: {
+    list: (params: { from?: string; to?: string }) => {
+      const searchParams = new URLSearchParams();
+      if (params.from) searchParams.append("from", params.from);
+      if (params.to) searchParams.append("to", params.to);
+      const qs = searchParams.toString();
+      return adminClient.get<any>(`/admin/daily-challenge${qs ? `?${qs}` : ""}`);
+    },
+    upsert: (data: { date: string; riddleId: string; bonusGems?: number }) =>
+      adminClient.post<any>("/admin/daily-challenge", data),
+    delete: (id: string) => adminClient.delete(`/admin/daily-challenge?id=${id}`),
+    seed: (days: number) => adminClient.post<any>("/admin/daily-challenge/seed", { days }),
+    entries: (date: string) =>
+      adminClient.get<any>(`/admin/daily-challenge/entries?date=${encodeURIComponent(date)}`),
+  },
 };
