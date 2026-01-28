@@ -220,3 +220,102 @@ export function useDeleteRiddle() {
     },
   });
 }
+
+/**
+ * Daily Challenge (Admin)
+ */
+export function useAdminDailyChallenges(params: { from: string; to: string }) {
+  return useQuery({
+    queryKey: ["admin", "daily-challenge", "list", params.from, params.to],
+    queryFn: async () => {
+      return await adminApi.dailyChallenge.list(params);
+    },
+    staleTime: STALE_TIME,
+    gcTime: CACHE_TIME,
+    refetchOnWindowFocus: true,
+    retry: 1,
+  });
+}
+
+export function useAdminUpsertDailyChallenge() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: { date: string; riddleId: string; bonusGems?: number }) => {
+      try {
+        return await adminApi.dailyChallenge.upsert(data);
+      } catch (error) {
+        const message =
+          error instanceof ApiClientError ? error.message : "Failed to save daily challenge";
+        throw new Error(message);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "daily-challenge"] });
+      toast.success("Daily challenge saved");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to save daily challenge");
+    },
+  });
+}
+
+export function useAdminDeleteDailyChallenge() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      try {
+        return await adminApi.dailyChallenge.delete(id);
+      } catch (error) {
+        const message =
+          error instanceof ApiClientError ? error.message : "Failed to delete daily challenge";
+        throw new Error(message);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "daily-challenge"] });
+      toast.success("Daily challenge deleted");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to delete daily challenge");
+    },
+  });
+}
+
+export function useAdminSeedDailyChallenges() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (days: number) => {
+      try {
+        return await adminApi.dailyChallenge.seed(days);
+      } catch (error) {
+        const message =
+          error instanceof ApiClientError ? error.message : "Failed to seed daily challenges";
+        throw new Error(message);
+      }
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "daily-challenge"] });
+      toast.success(data.message || "Seeded daily challenges");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to seed daily challenges");
+    },
+  });
+}
+
+export function useAdminDailyChallengeEntries(date: string, enabled = true) {
+  return useQuery({
+    queryKey: ["admin", "daily-challenge", "entries", date],
+    queryFn: async () => {
+      return await adminApi.dailyChallenge.entries(date);
+    },
+    enabled: enabled && !!date,
+    staleTime: 30_000,
+    gcTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: true,
+    retry: 1,
+  });
+}

@@ -190,4 +190,60 @@ export const adminApi = {
   riddles: {
     seedRiddles: () => api.post<{ success: boolean; message: string }>("/api/admin/riddles/seed", {}, { requireAuth: true }),
   },
+
+  /**
+   * Daily Challenge (Admin)
+   */
+  dailyChallenge: {
+    list: (params: { from?: string; to?: string }) =>
+      api.get<{
+        challenges: Array<{
+          id: string;
+          date: string; // YYYY-MM-DD
+          riddleId: string;
+          bonusGems: number;
+          riddle: { id: string; question: string; difficulty: string; isActive: boolean };
+        }>;
+      }>("/api/admin/daily-challenge", { params, requireAuth: true }),
+
+    upsert: (data: { date: string; riddleId: string; bonusGems?: number }) =>
+      api.post<{
+        challenge: {
+          id: string;
+          date: string;
+          riddleId: string;
+          bonusGems: number;
+          riddle: { id: string; question: string; difficulty: string; isActive: boolean };
+        };
+      }>("/api/admin/daily-challenge", data, { requireAuth: true }),
+
+    delete: (id: string) =>
+      api.delete<{ success: boolean }>("/api/admin/daily-challenge", {
+        params: { id },
+        requireAuth: true,
+      }),
+
+    seed: (days: number) =>
+      api.post<{ message: string; created: number; total: number }>(
+        "/api/admin/daily-challenge/seed",
+        { days },
+        { requireAuth: true }
+      ),
+
+    entries: (date: string) =>
+      api.get<{
+        entries: Array<{
+          id: string;
+          userId: string;
+          username: string | null;
+          email: string | null;
+          isCorrect: boolean;
+          solveTimeMs: number | null;
+          completedAt: string;
+        }>;
+      }>("/api/admin/daily-challenge/entries", {
+        params: { date },
+        requireAuth: true,
+      }),
+  },
 };

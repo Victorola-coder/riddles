@@ -16,6 +16,7 @@ import {
   Tag,
   User,
   Gem,
+  Calendar,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -42,7 +43,10 @@ const navGroups: NavGroup[] = [
   {
     label: "Content",
     icon: HelpCircle,
-    items: [{ href: "/admin/riddles", label: "Riddles", icon: HelpCircle }],
+    items: [
+      { href: "/admin/riddles", label: "Riddles", icon: HelpCircle },
+      { href: "/admin/daily-challenge", label: "Daily Challenge", icon: Calendar },
+    ],
   },
   {
     label: "Users",

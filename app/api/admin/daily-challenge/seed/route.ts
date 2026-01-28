@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyAdminAuth } from '@/lib/admin-auth';
+import { requireAdminAuth } from '@/lib/admin-auth-server';
 
 /**
  * POST /api/admin/daily-challenge/seed
@@ -9,7 +9,7 @@ import { verifyAdminAuth } from '@/lib/admin-auth';
  */
 export async function POST(request: NextRequest) {
   try {
-    const admin = await verifyAdminAuth(request);
+    const admin = requireAdminAuth(request);
     if (!admin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
