@@ -137,11 +137,19 @@ export function useLogin() {
 /**
  * Logout user
  * Clears auth state and queries, calls server to clear session
+ * Returns a logout function that accepts an optional router for navigation
+ * 
+ * Usage in components:
+ *   const logout = useLogout();
+ *   const router = useRouter();
+ *   await logout(router); // Pass router for fast client-side navigation
+ * 
+ * Or use router.push directly in components for better control
  */
 export function useLogout() {
   const queryClient = useQueryClient();
 
-  return async () => {
+  return async (router?: { push: (path: string) => void }) => {
     try {
       // Call server to clear session and cookies
       await authApi.logout();
@@ -152,8 +160,14 @@ export function useLogout() {
       // Always clear client state
       clearAuthToken();
       queryClient.clear();
-      // Redirect to login
-      window.location.href = "/auth";
+      // Use Next.js router for fast client-side navigation if provided
+      if (router) {
+        router.push("/auth");
+      } else if (typeof window !== "undefined") {
+        // Fallback: use replace instead of href (doesn't add to history, slightly faster)
+        // Components should pass router for optimal performance
+        window.location.replace("/auth");
+      }
     }
   };
 }

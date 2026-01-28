@@ -73,8 +73,8 @@ export default function LoginPage() {
       queryClient.invalidateQueries({ queryKey: ["user", "me"] });
       queryClient.invalidateQueries({ queryKey: ["game", "session"] });
 
-      // Use window.location for reliable redirect (bypasses Next.js router issues)
-      window.location.href = "/game";
+      // Use Next.js router for fast client-side navigation
+      router.push("/game");
     } catch (error: any) {
       let message =
         error instanceof ApiClientError
