@@ -57,25 +57,36 @@ export function useGameSession(userId?: string) {
   
   useEffect(() => {
     if (data?.session) {
-      // Only update if session data actually changed to prevent infinite loops
+      const serverSession = data.session;
       const sessionKey = JSON.stringify({
-        currentRiddleId: data.session.currentRiddleId,
-        solvedRiddles: data.session.solvedRiddles,
-        skippedRiddles: data.session.skippedRiddles,
-        userGems: data.session.userGems,
-        currentLevel: data.session.currentLevel,
+        currentRiddleId: serverSession.currentRiddleId,
+        solvedRiddles: serverSession.solvedRiddles,
+        skippedRiddles: serverSession.skippedRiddles,
+        userGems: serverSession.userGems,
+        currentLevel: serverSession.currentLevel,
       });
-      
+
       if (sessionRef.current !== sessionKey) {
         sessionRef.current = sessionKey;
-        useGameStore.setState({
-          currentRiddleId: data.session.currentRiddleId || null,
-          solvedRiddles: data.session.solvedRiddles || [],
-          skippedRiddles: data.session.skippedRiddles || [],
-          userGems: data.session.userGems || 0,
-          currentLevel: data.session.currentLevel || 1,
-          hintsUsed: data.session.hintsUsed || {},
-        });
+
+        // Prefer whichever source has more progress (more riddles solved)
+        // to avoid overwriting fresh localStorage state with stale server data
+        const localState = useGameStore.getState();
+        const serverSolved = (serverSession.solvedRiddles || []).length;
+        const localSolved = (localState.solvedRiddles || []).length;
+
+        if (serverSolved >= localSolved) {
+          useGameStore.setState({
+            currentRiddleId: serverSession.currentRiddleId || null,
+            solvedRiddles: serverSession.solvedRiddles || [],
+            skippedRiddles: serverSession.skippedRiddles || [],
+            userGems: serverSession.userGems || 0,
+            currentLevel: serverSession.currentLevel || 1,
+            hintsUsed: serverSession.hintsUsed || {},
+          });
+        }
+        // If local has more progress, keep local state — the auto-save
+        // will sync it to the server shortly
       }
     }
   }, [dataUpdatedAt, data]);
@@ -148,19 +159,14 @@ export function useSolveRiddle() {
         throw new Error(message);
       }
     },
-    onSuccess: (response, variables) => {
+    onSuccess: (response) => {
       if (response.correct) {
-        // Update Zustand stores from server response (following adesina.io pattern)
-        const { solveRiddle, earnGems } = useGameStore.getState();
-        const { incrementTotalSolved, addGemsEarned, updateStreak } = useUserStore.getState();
-
-        solveRiddle(variables.riddleId, response.gemsEarned);
-        earnGems(response.gemsEarned);
-        incrementTotalSolved();
-        addGemsEarned(response.gemsEarned);
+        // Gems and stats are already updated optimistically in the game page.
+        // Only update streak (not tracked optimistically) and refresh queries
+        // so the server-authoritative state syncs back.
+        const { updateStreak } = useUserStore.getState();
         updateStreak();
 
-        // Invalidate queries to refetch fresh data
         queryClient.invalidateQueries({ queryKey: ["game", "session"] });
         queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
       }

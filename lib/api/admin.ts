@@ -186,4 +186,8 @@ export const adminApi = {
       
     seedItems: () => api.post<{ success: boolean; message: string }>("/api/admin/store/seed", {}, { requireAuth: true }),
   },
+  
+  riddles: {
+    seedRiddles: () => api.post<{ success: boolean; message: string }>("/api/admin/riddles/seed", {}, { requireAuth: true }),
+  },
 };

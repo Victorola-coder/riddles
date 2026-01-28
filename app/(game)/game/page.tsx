@@ -126,6 +126,8 @@ export default function GamePage() {
   const tickTimer = useGameStore((state) => state.tickTimer);
   const isTimerActive = useGameStore((state) => state.isTimerActive);
   const timeLeft = useGameStore((state) => state.timeLeft);
+  const totalTime = useGameStore((state) => state.totalTime);
+  const currentLevel = useGameStore((state) => state.currentLevel);
   const spendGems = useGameStore((state) => state.spendGems);
 
   // User store actions - individual selectors (actions are stable references)
@@ -448,6 +450,65 @@ export default function GamePage() {
     return () => clearInterval(interval);
   }, [isTimerActive, tickTimer]);
 
+  // Auto-save game state to server on key changes (debounced)
+  const autoSaveTimer = useRef<NodeJS.Timeout | null>(null);
+  const lastSavedState = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!userId || !currentRiddleId) return;
+
+    const stateKey = JSON.stringify({
+      currentRiddleId,
+      solvedRiddles,
+      skippedRiddles,
+      userGems,
+      currentLevel,
+    });
+
+    // Skip if nothing changed since last save
+    if (lastSavedState.current === stateKey) return;
+
+    // Debounce: save 1.5s after last change
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+    autoSaveTimer.current = setTimeout(() => {
+      lastSavedState.current = stateKey;
+      updateSessionMutation.mutate({
+        userId,
+        currentRiddleId: currentRiddleId || undefined,
+        solvedRiddles,
+        skippedRiddles,
+        userGems,
+        currentLevel,
+      });
+    }, 1500);
+
+    return () => {
+      if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+    };
+  }, [userId, currentRiddleId, solvedRiddles, skippedRiddles, userGems, currentLevel, updateSessionMutation]);
+
+  // Save on page unload as a safety net
+  useEffect(() => {
+    const handleUnload = () => {
+      if (!userId || !currentRiddleId) return;
+      const { solvedRiddles, skippedRiddles, userGems, currentLevel, currentRiddleId: riddleId } =
+        useGameStore.getState();
+      // Use sendBeacon for reliable delivery during unload
+      const payload = JSON.stringify({
+        userId,
+        currentRiddleId: riddleId,
+        solvedRiddles,
+        skippedRiddles,
+        userGems,
+        currentLevel,
+      });
+      navigator.sendBeacon('/api/game/session', payload);
+    };
+
+    window.addEventListener('beforeunload', handleUnload);
+    return () => window.removeEventListener('beforeunload', handleUnload);
+  }, [userId, currentRiddleId]);
+
   // Memoize hint check to avoid repeated calls
   const usedNoHints = useMemo(() => {
     if (!currentRiddle) return false;
@@ -564,20 +625,33 @@ export default function GamePage() {
             }, 500);
           }
 
-          // Update session with next riddle immediately (no loader overlay)
+          // Update session with next riddle immediately - instant transition
+          // Use store state (already updated optimistically) instead of adding gems again
+          const currentStoreState = useGameStore.getState();
           if (nextRiddle) {
+            // Update store immediately for instant transition
+            useGameStore.setState({
+              currentRiddleId: nextRiddle.id,
+            });
+            
+            // Sync with backend in background (non-blocking)
             updateSessionMutation.mutate({
               userId,
               currentRiddleId: nextRiddle.id,
-              solvedRiddles: [...solvedRiddles, currentRiddle.id],
-              userGems: userGems + gemsEarned,
+              solvedRiddles: currentStoreState.solvedRiddles,
+              userGems: currentStoreState.userGems, // Use store state, not adding again
             });
           } else {
             // All riddles solved
+            useGameStore.setState({
+              currentRiddleId: null,
+            });
+            
+            // Sync with backend in background (non-blocking)
             updateSessionMutation.mutate({
               userId,
-              solvedRiddles: [...solvedRiddles, currentRiddle.id],
-              userGems: userGems + gemsEarned,
+              solvedRiddles: currentStoreState.solvedRiddles,
+              userGems: currentStoreState.userGems, // Use store state, not adding again
               currentRiddleId: undefined,
             });
           }
@@ -766,7 +840,7 @@ export default function GamePage() {
       currentRiddle.id,
     ]);
 
-    // Update store immediately (optimistic update)
+    // INSTANT SKIP - update store immediately for instant transition
     useGameStore.setState((state) => ({
       skippedRiddles: [...state.skippedRiddles, currentRiddle.id],
       userGems: state.userGems - skipCost,
@@ -777,13 +851,14 @@ export default function GamePage() {
     // Show toast immediately
     toast.info("Riddle skipped");
 
-    // Sync with backend in background (non-blocking)
+    // Sync with backend in background (non-blocking) - use store state
+    const currentStoreState = useGameStore.getState();
     updateSessionMutation.mutate(
       {
         userId,
-        skippedRiddles: [...skippedRiddles, currentRiddle.id],
+        skippedRiddles: currentStoreState.skippedRiddles,
         currentRiddleId: nextRiddle?.id,
-        userGems: userGems - skipCost,
+        userGems: currentStoreState.userGems, // Use store state
       },
       {
         onError: (error) => {
@@ -814,12 +889,28 @@ export default function GamePage() {
 
   // Handle timer expiration - deduct gems, reveal answer, and auto-advance
   const hasTimedOut = useRef(false);
+  const timerWasInitialized = useRef(false);
+  
   useEffect(() => {
     // Check if this riddle even has a timer (easy mode has no timer)
     const hasTimer = currentRiddle && GAME_CONFIG.TIMER[currentRiddle.difficulty] > 0;
     
+    // Track if timer was initialized for this riddle
+    // Timer is considered initialized if it has a totalTime > 0 (was set up)
+    if (hasTimer && totalTime > 0) {
+      timerWasInitialized.current = true;
+    }
+    
+    // Only trigger timeout if:
+    // 1. Riddle has a timer
+    // 2. Timer was actually initialized (totalTime > 0 means timer was set up)
+    // 3. Timer is no longer active
+    // 4. Time has reached 0
+    // 5. Timer was running before (not just uninitialized)
     if (
       hasTimer && // Only trigger timeout if riddle has a timer
+      totalTime > 0 && // Timer was actually initialized (not just default 0 state)
+      timerWasInitialized.current && // Additional safety check
       !isTimerActive &&
       timeLeft === 0 &&
       currentRiddle &&
@@ -900,13 +991,15 @@ export default function GamePage() {
       }, 5000);
     }
 
-    // Reset timeout flag when riddle changes
+    // Reset timeout flag and timer initialization flag when riddle changes
     if (currentRiddleId) {
       hasTimedOut.current = false;
+      timerWasInitialized.current = false;
     }
   }, [
     isTimerActive,
     timeLeft,
+    totalTime,
     currentRiddle,
     currentRiddleId,
     revealedHints.answer,
