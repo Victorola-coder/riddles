@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdminAuth } from "@/lib/admin-auth-server";
-import { logRiddleCreated } from "@/lib/activity-logger";
+import { logActivity } from "@/lib/activity-logger";
 
 /**
  * POST /api/admin/riddle-creator/:id/approve
@@ -103,12 +103,15 @@ export async function POST(
     });
 
     // Log activity
-    await logRiddleCreated(
-      approvedRiddle.id,
-      approvedRiddle.question,
-      "user",
-      userRiddle.authorId
-    );
+    await logActivity({
+      type: 'riddle_created',
+      category: 'user',
+      title: 'User Riddle Approved',
+      description: approvedRiddle.question,
+      metadata: { riddleId: approvedRiddle.id, question: approvedRiddle.question },
+      riddleId: approvedRiddle.id,
+      userId: userRiddle.authorId,
+    });
 
     return NextResponse.json(
       {
@@ -147,8 +150,8 @@ export async function DELETE(
     }
 
     const { id } = await context.params;
-    const body = await req.json().catch(() => ({}));
-    const { reason } = body as { reason?: string };
+    const { searchParams } = new URL(req.url);
+    const reason = searchParams.get("reason") || undefined;
 
     const userRiddle = await prisma.userRiddle.findUnique({
       where: { id },

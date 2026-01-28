@@ -6,8 +6,8 @@ import {
   useAdminApproveRiddle,
   useAdminRejectRiddle,
 } from "@/lib/hooks/use-admin";
-import { Button } from "@/app/components/ui/button";
-import { Input } from "@/app/components/ui/input";
+import Button from "@/app/components/ui/button";
+import Input from "@/app/components/ui/input";
 import { Skeleton, AlertDialog } from "@/app/components/ui";
 import { CheckCircle2, XCircle, Clock, User, ThumbsUp, ThumbsDown } from "lucide-react";
 import Modal from "@/app/components/ui/modal";
@@ -287,7 +287,7 @@ export default function AdminRiddleCreatorPage() {
             </label>
             <Input
               value={rejectionReason}
-              onChange={(e) => setRejectionReason(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRejectionReason(e.target.value)}
               placeholder="e.g., Too similar to existing riddle"
               className="bg-[#0f0f0f] border-[#FFFFFF1A]"
             />

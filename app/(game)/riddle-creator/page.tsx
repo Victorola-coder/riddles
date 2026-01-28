@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/components/ui/tabs";
-import { Button } from "@/app/components/ui/button";
-import { Input } from "@/app/components/ui/input";
+import Tabs from "@/app/components/ui/tabs";
+import Button from "@/app/components/ui/button";
+import Input from "@/app/components/ui/input";
 import { Skeleton } from "@/app/components/ui";
 import {
   useUserRiddles,
@@ -114,15 +114,20 @@ export default function RiddleCreatorPage() {
         </div>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="browse">Browse</TabsTrigger>
-            <TabsTrigger value="submit">Submit</TabsTrigger>
-            <TabsTrigger value="my-riddles">My Riddles</TabsTrigger>
-          </TabsList>
+        <Tabs
+          tabs={[
+            { label: "Browse", value: "browse" },
+            { label: "Submit", value: "submit" },
+            { label: "My Riddles", value: "my-riddles" },
+          ]}
+          defaultValue={activeTab}
+          onChange={setActiveTab}
+          className="mb-6"
+        />
 
-          {/* Browse Tab */}
-          <TabsContent value="browse" className="space-y-4">
+        {/* Tab Content */}
+        {activeTab === "browse" && (
+          <div className="space-y-4">
             {/* Filters */}
             <div className="flex flex-wrap gap-4 items-center mb-6">
               <select
@@ -267,10 +272,11 @@ export default function RiddleCreatorPage() {
                 )}
               </>
             )}
-          </TabsContent>
+          </div>
+        )}
 
-          {/* Submit Tab */}
-          <TabsContent value="submit">
+        {activeTab === "submit" && (
+          <div>
             <div className="bg-[#161616] rounded-lg border border-[#FFFFFF1A] p-6">
               {!user ? (
                 <div className="text-center py-12">
@@ -307,10 +313,11 @@ export default function RiddleCreatorPage() {
                 </>
               )}
             </div>
-          </TabsContent>
+          </div>
+        )}
 
-          {/* My Riddles Tab */}
-          <TabsContent value="my-riddles">
+        {activeTab === "my-riddles" && (
+          <div>
             {!user ? (
               <div className="text-center py-12 bg-[#161616] rounded-lg border border-[#FFFFFF1A]">
                 <p className="text-lg font-medium text-white mb-4">
@@ -397,8 +404,8 @@ export default function RiddleCreatorPage() {
                 ))}
               </div>
             )}
-          </TabsContent>
-        </Tabs>
+          </div>
+        )}
 
         {/* Submit Modal */}
         <Modal
@@ -413,7 +420,7 @@ export default function RiddleCreatorPage() {
               </label>
               <Input
                 value={formData.question}
-                onChange={(e) =>
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setFormData({ ...formData, question: e.target.value })
                 }
                 placeholder="What has keys but no locks?"
@@ -428,7 +435,7 @@ export default function RiddleCreatorPage() {
               </label>
               <Input
                 value={formData.answer}
-                onChange={(e) =>
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setFormData({ ...formData, answer: e.target.value })
                 }
                 placeholder="keyboard, piano"
@@ -443,7 +450,7 @@ export default function RiddleCreatorPage() {
               </label>
               <select
                 value={formData.difficulty}
-                onChange={(e) =>
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                   setFormData({
                     ...formData,
                     difficulty: e.target.value as "easy" | "medium" | "hard",
@@ -464,7 +471,7 @@ export default function RiddleCreatorPage() {
               </label>
               <Input
                 value={formData.category}
-                onChange={(e) =>
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setFormData({ ...formData, category: e.target.value })
                 }
                 placeholder="Nature, Technology, etc."
@@ -478,7 +485,7 @@ export default function RiddleCreatorPage() {
               </label>
               <Input
                 value={formData.hint1}
-                onChange={(e) =>
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setFormData({ ...formData, hint1: e.target.value })
                 }
                 placeholder="First letter or custom hint"
@@ -492,7 +499,7 @@ export default function RiddleCreatorPage() {
               </label>
               <Input
                 value={formData.hint2}
-                onChange={(e) =>
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setFormData({ ...formData, hint2: e.target.value })
                 }
                 placeholder="Word length or custom hint"
@@ -506,7 +513,7 @@ export default function RiddleCreatorPage() {
               </label>
               <Input
                 value={formData.tags}
-                onChange={(e) =>
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setFormData({ ...formData, tags: e.target.value })
                 }
                 placeholder="funny, logic, wordplay"

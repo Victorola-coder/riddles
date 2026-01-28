@@ -315,10 +315,14 @@ export const adminApi = {
         { requireAuth: true }
       ),
 
-    reject: (id: string, reason?: string) =>
-      api.delete<{ success: boolean }>(
-        `/api/admin/riddle-creator/${id}`,
-        { body: { reason }, requireAuth: true }
-      ),
+    reject: (id: string, reason?: string) => {
+      const searchParams = new URLSearchParams();
+      if (reason) searchParams.append("reason", reason);
+      const qs = searchParams.toString();
+      return api.delete<{ success: boolean }>(
+        `/api/admin/riddle-creator/${id}${qs ? `?${qs}` : ""}`,
+        { requireAuth: true }
+      );
+    },
   },
 };
