@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminApi } from "@/lib/api/admin";
-import { Skeleton } from "@/app/components/ui";
+import { Skeleton, ConfirmationModal } from "@/app/components/ui";
 import Button from "@/app/components/ui/button";
 import Modal from "@/app/components/ui/modal";
 import { toast } from "sonner";
@@ -24,6 +24,8 @@ export default function AdminStorePage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<StoreItem | null>(null);
+  const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // ... (formData state)
   const [formData, setFormData] = useState<CreateStoreItemData>({
@@ -118,9 +120,16 @@ export default function AdminStorePage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this item?")) {
-      deleteMutation.mutate(id);
+  const handleDelete = (id: string) => {
+    setDeleteItemId(id);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = () => {
+    if (deleteItemId) {
+      deleteMutation.mutate(deleteItemId);
+      setShowDeleteModal(false);
+      setDeleteItemId(null);
     }
   };
 
@@ -410,6 +419,22 @@ export default function AdminStorePage() {
           </div>
         </form>
       </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setDeleteItemId(null);
+        }}
+        onConfirm={confirmDelete}
+        title="Delete Store Item"
+        description="Are you sure you want to delete this item? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="error"
+        loading={deleteMutation.isPending}
+      />
     </div>
   );
 }

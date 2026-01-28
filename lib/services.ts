@@ -174,6 +174,15 @@ export async function getActivityLogsPaginated(options: {
       description: activity.description,
       timestamp: activity.createdAt.toISOString(),
       metadata: activity.metadata ? JSON.parse(activity.metadata) : null,
+      user: activity.user ? {
+        id: activity.user.id,
+        email: activity.user.email,
+        username: activity.user.username,
+      } : null,
+      riddle: activity.riddle ? {
+        id: activity.riddle.id,
+        question: activity.riddle.question,
+      } : null,
     })),
     total,
     page,

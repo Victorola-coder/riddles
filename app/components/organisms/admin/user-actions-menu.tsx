@@ -12,6 +12,9 @@ import {
 } from "lucide-react";
 import { adminApi } from "@/lib/api/admin";
 import { useQueryClient } from "@tanstack/react-query";
+import { ConfirmationModal } from "@/app/components/ui";
+import Modal from "@/app/components/ui/modal";
+import { Input } from "@/app/components/ui";
 
 interface UserActionsMenuProps {
   user: {
@@ -26,23 +29,20 @@ interface UserActionsMenuProps {
 export function UserActionsMenu({ user, onOpenGemModal }: UserActionsMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const queryClient = useQueryClient();
 
   const handleResetProgress = async () => {
-    if (
-      !confirm(
-        `Are you sure you want to reset all progress for ${user.username || user.email}? This cannot be undone.`
-      )
-    ) {
-      return;
-    }
-
     setIsLoading(true);
     try {
       await adminApi.updateUser(user.id, { action: "reset_progress" });
       toast.success("User progress reset successfully");
       queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
       setIsOpen(false);
+      setShowResetModal(false);
     } catch (error: any) {
       toast.error(error.message || "Failed to reset progress");
     } finally {
@@ -51,40 +51,38 @@ export function UserActionsMenu({ user, onOpenGemModal }: UserActionsMenuProps) 
   };
 
   const handleDeleteUser = async () => {
-    if (
-      !confirm(
-        `Are you sure you want to DELETE ${user.username || user.email}? This will permanently delete their account and all data. This cannot be undone.`
-      )
-    ) {
-      return;
-    }
-
-    // Double confirmation for delete
-    if (
-      !confirm(
-        "This is your final warning. Type DELETE in the next prompt to confirm."
-      )
-    ) {
-      return;
-    }
-
-    const confirmation = prompt('Type "DELETE" to confirm:');
-    if (confirmation !== "DELETE") {
-      toast.error("Deletion cancelled");
-      return;
-    }
-
     setIsLoading(true);
     try {
       await adminApi.deleteUser(user.id);
       toast.success("User deleted successfully");
       queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
       setIsOpen(false);
+      setShowDeleteModal(false);
+      setShowDeleteConfirmModal(false);
+      setDeleteConfirmation("");
     } catch (error: any) {
       toast.error(error.message || "Failed to delete user");
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleDeleteClick = () => {
+    setShowDeleteModal(true);
+    setIsOpen(false);
+  };
+
+  const handleDeleteConfirm = () => {
+    setShowDeleteModal(false);
+    setShowDeleteConfirmModal(true);
+  };
+
+  const handleFinalDelete = () => {
+    if (deleteConfirmation !== "DELETE") {
+      toast.error("Please type DELETE exactly to confirm");
+      return;
+    }
+    handleDeleteUser();
   };
 
   return (
@@ -123,7 +121,10 @@ export function UserActionsMenu({ user, onOpenGemModal }: UserActionsMenuProps) 
             </button>
 
             <button
-              onClick={handleResetProgress}
+              onClick={() => {
+                setShowResetModal(true);
+                setIsOpen(false);
+              }}
               className="w-full px-4 py-2.5 text-left text-sm text-white hover:bg-[#1A1A1A] transition-colors flex items-center gap-2"
               disabled={isLoading}
             >
@@ -134,7 +135,7 @@ export function UserActionsMenu({ user, onOpenGemModal }: UserActionsMenuProps) 
             <div className="border-t border-[#FFFFFF1A]" />
 
             <button
-              onClick={handleDeleteUser}
+              onClick={handleDeleteClick}
               className="w-full px-4 py-2.5 text-left text-sm text-red-400 hover:bg-red-500/10 transition-colors flex items-center gap-2"
               disabled={isLoading}
             >
@@ -144,6 +145,76 @@ export function UserActionsMenu({ user, onOpenGemModal }: UserActionsMenuProps) 
           </div>
         </>
       )}
+
+      {/* Reset Progress Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showResetModal}
+        onClose={() => setShowResetModal(false)}
+        onConfirm={handleResetProgress}
+        title="Reset User Progress"
+        description={`Are you sure you want to reset all progress for ${user.username || user.email}? This cannot be undone.`}
+        confirmText="Reset Progress"
+        cancelText="Cancel"
+        variant="warning"
+        loading={isLoading}
+      />
+
+      {/* Delete User - First Confirmation */}
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteConfirm}
+        title="Delete User Account"
+        description={`Are you sure you want to DELETE ${user.username || user.email}? This will permanently delete their account and all data. This cannot be undone.`}
+        confirmText="Yes, Delete"
+        cancelText="Cancel"
+        variant="error"
+        loading={false}
+      />
+
+      {/* Delete User - Final Confirmation with Input */}
+      <Modal
+        isOpen={showDeleteConfirmModal}
+        onClose={() => {
+          setShowDeleteConfirmModal(false);
+          setDeleteConfirmation("");
+        }}
+        title="Final Confirmation"
+        close={true}
+      >
+        <div className="space-y-4">
+          <p className="text-[var(--text-secondary)]">
+            This is your final warning. Type <span className="font-bold text-red-400">DELETE</span> below to confirm deletion of <span className="font-semibold">{user.username || user.email}</span>.
+          </p>
+          <Input
+            type="text"
+            value={deleteConfirmation}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDeleteConfirmation(e.target.value)}
+            placeholder='Type "DELETE" to confirm'
+            className="w-full"
+            autoFocus
+          />
+          <div className="flex gap-3 justify-end pt-4">
+            <button
+              onClick={() => {
+                setShowDeleteConfirmModal(false);
+                setDeleteConfirmation("");
+              }}
+              disabled={isLoading}
+              className="px-6 py-2 rounded-lg bg-[var(--bg-secondary)] text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)] transition-colors disabled:opacity-50 font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleFinalDelete}
+              disabled={isLoading || deleteConfirmation !== "DELETE"}
+              className="px-6 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+            >
+              {isLoading ? "Deleting..." : "Delete Forever"}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

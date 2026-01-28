@@ -6,7 +6,9 @@ import { useAuthStore } from "@/lib/store/auth";
 import { useUserStore } from "@/lib/store/user-store";
 import { Loader } from "@/app/components/global";
 import Button from "@/app/components/ui/button";
+import { ConfirmationModal } from "@/app/components/ui";
 import { toast } from "sonner";
+import { useState } from "react";
 import { ShoppingBag, Lock, Sparkles, User as UserIcon, Shield, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 import { cardEntranceVariants } from "@/lib/constants/animations";
@@ -25,6 +27,8 @@ export default function ShopPage() {
   const { user } = useAuthStore();
   const { syncWithServer } = useUserStore();
   const queryClient = useQueryClient();
+  const [purchaseItem, setPurchaseItem] = useState<ShopItem | null>(null);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ["store", "items"],
@@ -63,8 +67,15 @@ export default function ShopPage() {
       toast.error("Not enough gems!");
       return;
     }
-    if (confirm(`Purchase ${item.name} for ${item.price} Gems?`)) {
-      buyMutation.mutate(item.id);
+    setPurchaseItem(item);
+    setShowPurchaseModal(true);
+  };
+
+  const confirmPurchase = () => {
+    if (purchaseItem) {
+      buyMutation.mutate(purchaseItem.id);
+      setShowPurchaseModal(false);
+      setPurchaseItem(null);
     }
   };
 
@@ -176,6 +187,22 @@ export default function ShopPage() {
           )}
         </div>
       </div>
+
+      {/* Purchase Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showPurchaseModal}
+        onClose={() => {
+          setShowPurchaseModal(false);
+          setPurchaseItem(null);
+        }}
+        onConfirm={confirmPurchase}
+        title="Confirm Purchase"
+        description={purchaseItem ? `Purchase ${purchaseItem.name} for ${purchaseItem.price} Gems?` : ""}
+        confirmText="Purchase"
+        cancelText="Cancel"
+        variant="info"
+        loading={buyMutation.isPending}
+      />
     </div>
   );
 }

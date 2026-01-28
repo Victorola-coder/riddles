@@ -415,6 +415,15 @@ interface ActivityItem {
   description: string;
   timestamp: string;
   metadata?: Record<string, unknown> | null;
+  user?: {
+    id: string;
+    email: string | null;
+    username: string | null;
+  } | null;
+  riddle?: {
+    id: string;
+    question: string;
+  } | null;
 }
 
 interface ActivityResponse {

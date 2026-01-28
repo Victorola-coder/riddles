@@ -14,6 +14,7 @@ export { default as TextArea } from "./textArea";
 // Foundation components (Phase 1)
 export { Accordion } from "./accordion";
 export { Alert, AlertDialog } from "./alert";
+export { ConfirmationModal } from "./confirmation-modal";
 export { Avatar, AvatarGroup } from "./avatar";
 export { Badge } from "./badge";
 export { Breadcrumbs } from "./breadcrumbs";

@@ -1,7 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { withCors, handleCorsPreflight } from '@/lib/utils/cors';
-import { generateUniqueGuestName } from '@/lib/utils/guest-name-generator';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { withCors, handleCorsPreflight } from "@/lib/utils/cors";
 
 /**
  * OPTIONS /api/game/session
@@ -19,11 +18,11 @@ export async function OPTIONS(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    let userId = searchParams.get('userId');
+    let userId = searchParams.get("userId");
 
     // If no userId provided, treat as guest and generate a guest ID
     // Note: In production, guest ID should come from client-side localStorage
-    if (!userId || userId === 'guest') {
+    if (!userId || userId === "guest") {
       // Generate a guest ID: guest_<timestamp>_<random>
       userId = `guest_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
     }
@@ -34,26 +33,13 @@ export async function GET(request: NextRequest) {
     });
 
     if (!user) {
-      const isGuest = userId.startsWith('guest_');
-      
-      // Generate unique name for guest users
-      let username: string;
-      if (isGuest) {
-        username = await generateUniqueGuestName(async (name) => {
-          const existing = await prisma.user.findUnique({
-            where: { username: name },
-          });
-          return !existing; // Return true if unique (no existing user)
-        });
-      } else {
-        // For non-guest users, use a simple format
-        username = `Player_${userId.slice(0, 8)}`;
-      }
-      
+      const isGuest = userId.startsWith("guest_");
       user = await prisma.user.create({
         data: {
           id: userId,
-          username,
+          username: isGuest
+            ? `Guest_${userId.slice(-8)}`
+            : `Player_${userId.slice(0, 8)}`,
           totalGems: 50,
         },
       });
@@ -83,16 +69,13 @@ export async function GET(request: NextRequest) {
           hintsUsed: session.hintsUsed ? JSON.parse(session.hintsUsed) : {},
         },
       }),
-      request
+      request,
     );
   } catch (error) {
-    console.error('Error fetching session:', error);
+    console.error("Error fetching session:", error);
     return withCors(
-      NextResponse.json(
-        { error: 'Failed to fetch session' },
-        { status: 500 }
-      ),
-      request
+      NextResponse.json({ error: "Failed to fetch session" }, { status: 500 }),
+      request,
     );
   }
 }
@@ -148,16 +131,13 @@ export async function POST(request: NextRequest) {
           hintsUsed: session.hintsUsed ? JSON.parse(session.hintsUsed) : {},
         },
       }),
-      request
+      request,
     );
   } catch (error) {
-    console.error('Error updating session:', error);
+    console.error("Error updating session:", error);
     return withCors(
-      NextResponse.json(
-        { error: 'Failed to update session' },
-        { status: 500 }
-      ),
-      request
+      NextResponse.json({ error: "Failed to update session" }, { status: 500 }),
+      request,
     );
   }
 }

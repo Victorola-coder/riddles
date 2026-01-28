@@ -23,13 +23,12 @@ import { motion } from "framer-motion";
 import { useAuthStore } from "@/lib/store/auth";
 import { removeAuthToken, getAuthToken } from "@/lib/client-auth";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { authApi, ApiClientError, gameApi } from "@/lib/api";
+import { authApi, ApiClientError } from "@/lib/api";
 import { useUserStore } from "@/lib/store/user-store";
 import { Avatar, Button } from "@/app/components/ui";
 import Modal from "@/app/components/ui/modal";
 import { cardEntranceVariants, fadeVariants } from "@/lib/constants/animations";
 import Skeleton from "@/app/components/ui/skeleton";
-import { getGuestId } from "@/lib/utils/guest-session";
 
 const staggerContainer = {
   hidden: {},
@@ -56,7 +55,7 @@ export default function ProfilePage() {
   const currentStreak = useUserStore((state) => state.currentStreak);
   const totalGemsEarned = useUserStore((state) => state.totalGemsEarned);
   const syncWithServer = useUserStore((state) => state.syncWithServer);
-  
+
   const isGuest = !user;
   const currentLevel = user?.currentLevel || 1;
 
@@ -69,7 +68,7 @@ export default function ProfilePage() {
     confirmPassword: "",
   });
 
-  // Fetch user data from server to ensure stats are up to date (for authenticated users)
+  // Fetch user data from server to ensure stats are up to date
   const { data: userData, isLoading: isLoadingUser } = useQuery({
     queryKey: ["user", "profile", user?.id],
     queryFn: async () => {
@@ -87,37 +86,6 @@ export default function ProfilePage() {
     refetchOnWindowFocus: true,
     refetchOnMount: true,
   });
-
-  // Fetch guest user data from game session (for guest users)
-  const [guestUserId] = useState<string | null>(() => {
-    if (typeof window === 'undefined') return null;
-    return isGuest ? getGuestId() : null;
-  });
-
-  const { data: guestSessionData, isLoading: isLoadingGuest } = useQuery<any>({
-    queryKey: ["guest", "session", guestUserId],
-    queryFn: async () => {
-      if (!guestUserId) return null;
-      try {
-        const response = await gameApi.getSession(guestUserId);
-        return response;
-      } catch (error) {
-        console.error("Failed to fetch guest session:", error);
-        return null;
-      }
-    },
-    enabled: isGuest && !!guestUserId,
-    staleTime: 30 * 1000, // 30 seconds
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-  });
-
-  // Get the display username (from userData for authenticated, or guestSessionData for guests)
-  // gameApi.getSession returns { user: {...}, session: {...} }
-  const guestUser = guestSessionData && typeof guestSessionData === 'object' && 'user' in guestSessionData 
-    ? (guestSessionData as any).user 
-    : null;
-  const displayUsername = userData?.username || guestUser?.username || (isGuest ? null : "Guest Adventurer");
 
   // Sync user store with fetched data
   useEffect(() => {
@@ -310,7 +278,7 @@ export default function ProfilePage() {
         <div className="px-6 md:px-8 pb-6 flex flex-col items-center text-center -mt-12 relative">
           <div className="relative mb-4">
             <Avatar
-              alt={displayUsername || user?.email || "Guest"}
+              alt={user?.username || user?.email || "Guest"}
               size="xl"
               className="ring-4 ring-[var(--bg-card)] w-24 h-24 shadow-xl"
             />
@@ -322,7 +290,7 @@ export default function ProfilePage() {
           </div>
 
           <h1 className="text-2xl md:text-3xl font-bold font-cinzel bg-gradient-to-r from-[var(--text-primary)] to-[var(--text-secondary)] bg-clip-text text-transparent">
-            {displayUsername || (isLoadingGuest ? "Loading..." : "Guest Adventurer")}
+            {user?.username || "Guest Adventurer"}
           </h1>
           <p className="text-sm text-[var(--text-muted)] mt-1 flex items-center gap-1.5">
             <Shield size={14} className="text-[var(--accent-primary)]" />
@@ -458,11 +426,10 @@ export default function ProfilePage() {
                       {Object.entries(passwordRequirements).map(([key, valid]) => (
                         <div
                           key={key}
-                          className={`flex items-center gap-2 text-xs transition-colors duration-200 ${
-                            valid
+                          className={`flex items-center gap-2 text-xs transition-colors duration-200 ${valid
                               ? "text-emerald-400"
                               : "text-[var(--text-muted)]"
-                          }`}
+                            }`}
                         >
                           {valid ? (
                             <Check size={12} />

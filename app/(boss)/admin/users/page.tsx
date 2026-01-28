@@ -7,6 +7,7 @@ import { Loader } from "@/app/components/global";
 import { Skeleton } from "@/app/components/ui";
 import { GemModal } from "@/app/components/organisms/admin/gem-modal";
 import { UserActionsMenu } from "@/app/components/organisms/admin/user-actions-menu";
+import { Avatar } from "@/app/components/ui/avatar";
 
 const PAGE_SIZE = 12;
 
@@ -112,9 +113,12 @@ export default function UsersPage() {
                 {Array.from({ length: 8 }).map((_, index) => (
                   <tr key={index} className="hover:bg-[#1A1A1A]">
                     <td className="px-6 py-4">
-                      <div>
-                        <Skeleton className="h-5 w-32 mb-1" />
-                        <Skeleton className="h-3 w-40" />
+                      <div className="flex items-center gap-3">
+                        <Skeleton className="h-10 w-10 rounded-full flex-shrink-0" />
+                        <div>
+                          <Skeleton className="h-5 w-32 mb-1" />
+                          <Skeleton className="h-3 w-40" />
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -182,15 +186,22 @@ export default function UsersPage() {
                   {users.map((user: AdminUser) => (
                     <tr key={user.id} className="hover:bg-[#1A1A1A]">
                       <td className="px-6 py-4">
-                        <div>
-                          <p className="font-medium text-white">
-                            {user.username || user.email || "Anonymous"}
-                          </p>
-                          {user.email && (
-                            <p className="text-gray-400 text-xs">
-                              {user.email}
+                        <div className="flex items-center gap-3">
+                          <Avatar
+                            alt={user.username || user.email || "Anonymous"}
+                            fallback={user.username || user.email || "?"}
+                            size="md"
+                          />
+                          <div>
+                            <p className="font-medium text-white">
+                              {user.username || user.email || "Anonymous"}
                             </p>
-                          )}
+                            {user.email && (
+                              <p className="text-gray-400 text-xs">
+                                {user.email}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">

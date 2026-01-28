@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Activity } from "lucide-react";
+import { Activity, ChevronDown, ChevronRight, User, Mail } from "lucide-react";
 import { useAdminActivity } from "@/lib/hooks/use-admin";
 import { Skeleton } from "@/app/components/ui";
 
@@ -11,6 +11,7 @@ export default function ActivityPage() {
   const [page, setPage] = useState(1);
   const [typeFilter, setTypeFilter] = useState<"admin" | "user" | "">("");
   const [activityTypeFilter, setActivityTypeFilter] = useState("");
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
   const { data, isLoading, isFetching } = useAdminActivity({
     page,
@@ -43,6 +44,16 @@ export default function ActivityPage() {
     if (diffHours < 24) return `${diffHours}h ago`;
     if (diffDays < 7) return `${diffDays}d ago`;
     return date.toLocaleDateString();
+  };
+
+  const toggleExpanded = (id: string) => {
+    const newExpanded = new Set(expandedItems);
+    if (newExpanded.has(id)) {
+      newExpanded.delete(id);
+    } else {
+      newExpanded.add(id);
+    }
+    setExpandedItems(newExpanded);
   };
 
   // Show page immediately - data loads in background
@@ -234,43 +245,124 @@ export default function ActivityPage() {
         ) : (
           <>
             <div className="divide-y divide-[#FFFFFF1A]">
-              {activities.map((activity: ActivityItem) => (
+              {activities.map((activity: ActivityItem) => {
+                const isExpanded = expandedItems.has(activity.id);
+                const hasDetails = activity.user || activity.metadata || activity.riddle;
+                
+                return (
                 <div
                   key={activity.id}
-                  className="p-6 hover:bg-[#1A1A1A] transition-colors"
+                  className="hover:bg-[#1A1A1A] transition-colors"
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2 flex-wrap">
-                        <Activity className="w-5 h-5 text-[#8b5cf6]" />
-                        <h3 className="text-white font-medium">
-                          {activity.title}
-                        </h3>
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            activity.category === "admin"
-                              ? "bg-purple-600/20 text-purple-400 border border-purple-600/30"
-                              : activity.category === "user"
-                              ? "bg-blue-600/20 text-blue-400 border border-blue-600/30"
-                              : "bg-gray-600/20 text-gray-400 border border-gray-600/30"
-                          }`}
-                        >
-                          {activity.category}
-                        </span>
-                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-[#8b5cf6]/20 text-[#8b5cf6] border border-[#8b5cf6]/30">
-                          {activity.type.replace(/_/g, " ")}
-                        </span>
+                  <div className="p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2 flex-wrap">
+                          <Activity className="w-5 h-5 text-[#8b5cf6]" />
+                          <h3 className="text-white font-medium">
+                            {activity.title}
+                          </h3>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              activity.category === "admin"
+                                ? "bg-purple-600/20 text-purple-400 border border-purple-600/30"
+                                : activity.category === "user"
+                                ? "bg-blue-600/20 text-blue-400 border border-blue-600/30"
+                                : "bg-gray-600/20 text-gray-400 border border-gray-600/30"
+                            }`}
+                          >
+                            {activity.category}
+                          </span>
+                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-[#8b5cf6]/20 text-[#8b5cf6] border border-[#8b5cf6]/30">
+                            {activity.type.replace(/_/g, " ")}
+                          </span>
+                        </div>
+                        <p className="text-gray-400 text-sm ml-8">
+                          {activity.description}
+                        </p>
+                        <p className="text-gray-500 text-xs mt-2 ml-8">
+                          {formatTime(activity.timestamp)}
+                        </p>
                       </div>
-                      <p className="text-gray-400 text-sm ml-8">
-                        {activity.description}
-                      </p>
-                      <p className="text-gray-500 text-xs mt-2 ml-8">
-                        {formatTime(activity.timestamp)}
-                      </p>
+                      
+                      {hasDetails && (
+                        <button
+                          onClick={() => toggleExpanded(activity.id)}
+                          className="ml-4 p-2 hover:bg-[#FFFFFF1A] rounded-lg transition-colors"
+                          title="View details"
+                        >
+                          {isExpanded ? (
+                            <ChevronDown className="w-5 h-5 text-gray-400" />
+                          ) : (
+                            <ChevronRight className="w-5 h-5 text-gray-400" />
+                          )}
+                        </button>
+                      )}
                     </div>
+                    
+                    {/* Expanded Details */}
+                    {isExpanded && hasDetails && (
+                      <div className="mt-4 ml-8 p-4 bg-[#0f0f0f] rounded-lg border border-[#FFFFFF1A] space-y-3">
+                        {/* User Info */}
+                        {activity.user && (
+                          <div className="space-y-2">
+                            <h4 className="text-sm font-semibold text-white flex items-center gap-2">
+                              <User className="w-4 h-4 text-purple-400" />
+                              User Information
+                            </h4>
+                            <div className="pl-6 space-y-1 text-sm">
+                              {activity.user.username && (
+                                <p className="text-gray-300">
+                                  <span className="text-gray-500">Username:</span> {activity.user.username}
+                                </p>
+                              )}
+                              {activity.user.email && (
+                                <p className="text-gray-300 flex items-center gap-2">
+                                  <Mail className="w-3 h-3 text-gray-500" />
+                                  {activity.user.email}
+                                </p>
+                              )}
+                              <p className="text-gray-400 text-xs">
+                                <span className="text-gray-500">ID:</span> {activity.user.id}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Riddle Info */}
+                        {activity.riddle && (
+                          <div className="space-y-2">
+                            <h4 className="text-sm font-semibold text-white">Riddle</h4>
+                            <div className="pl-6 text-sm">
+                              <p className="text-gray-300 italic">"{activity.riddle.question}"</p>
+                              <p className="text-gray-400 text-xs mt-1">
+                                <span className="text-gray-500">ID:</span> {activity.riddle.id}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Metadata */}
+                        {activity.metadata && Object.keys(activity.metadata).length > 0 && (
+                          <div className="space-y-2">
+                            <h4 className="text-sm font-semibold text-white">Additional Details</h4>
+                            <div className="pl-6 space-y-1 text-sm">
+                              {Object.entries(activity.metadata).map(([key, value]) => (
+                                <p key={key} className="text-gray-300">
+                                  <span className="text-gray-500 capitalize">{key.replace(/_/g, " ")}:</span>{" "}
+                                  <span className="font-mono text-xs">
+                                    {typeof value === "object" ? JSON.stringify(value) : String(value)}
+                                  </span>
+                                </p>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
 
             {/* Pagination */}
