@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Gem } from 'lucide-react';
 import { formatGemCount } from '@/lib/utils/gem-calculator';
@@ -17,15 +17,17 @@ export const GemCounter: React.FC<GemCounterProps> = ({
   showAnimation = true,
   size = 'md',
 }) => {
-  const [prevGems, setPrevGems] = useState(gems);
+  const prevGemsRef = useRef(gems);
   const [animationKey, setAnimationKey] = useState(0);
+  const [direction, setDirection] = useState<'up' | 'down'>('up');
 
   useEffect(() => {
-    if (gems !== prevGems && showAnimation) {
+    if (gems !== prevGemsRef.current && showAnimation) {
+      setDirection(gems > prevGemsRef.current ? 'up' : 'down');
       setAnimationKey((prev) => prev + 1);
-      setPrevGems(gems);
+      prevGemsRef.current = gems;
     }
-  }, [gems, prevGems, showAnimation]);
+  }, [gems, showAnimation]);
 
   const sizeStyles = {
     sm: 'text-sm gap-1',
@@ -39,14 +41,14 @@ export const GemCounter: React.FC<GemCounterProps> = ({
     lg: 28,
   };
 
-  const isIncrement = gems > prevGems;
+  const isUp = direction === 'up';
 
   return (
     <motion.div
       className={`flex items-center ${sizeStyles[size]} font-inter font-semibold`}
       key={animationKey}
       variants={showAnimation ? gemCounterVariants : undefined}
-      animate={showAnimation ? (isIncrement ? 'increment' : 'decrement') : undefined}
+      animate={showAnimation ? (isUp ? 'increment' : 'decrement') : undefined}
     >
       <Gem
         size={iconSizes[size]}
@@ -56,9 +58,9 @@ export const GemCounter: React.FC<GemCounterProps> = ({
       <AnimatePresence mode="wait">
         <motion.span
           key={gems}
-          initial={{ opacity: 0, y: isIncrement ? 10 : -10 }}
+          initial={{ opacity: 0, y: isUp ? 10 : -10 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: isIncrement ? -10 : 10 }}
+          exit={{ opacity: 0, y: isUp ? -10 : 10 }}
           transition={{ duration: 0.2 }}
           className="text-gold"
         >

@@ -2,7 +2,7 @@
 
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
-import { CheckCircle2, XCircle, Loader2, Trophy } from "lucide-react";
+import { CheckCircle2, XCircle, Loader2, Trophy, Gem } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -158,7 +158,7 @@ export default function GamePage() {
   }>({});
   const [wrongAttempts, setWrongAttempts] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoadingNextRiddle, setIsLoadingNextRiddle] = useState(false);
+  const [gemAnimation, setGemAnimation] = useState<{ amount: number; key: number } | null>(null);
   const startTimeRef = useRef<number>(Date.now());
 
   // Convert API riddle to app riddle format - optimized map for O(1) lookup
@@ -412,9 +412,6 @@ export default function GamePage() {
     ) {
       processedRiddleId.current = currentRiddleId;
 
-      // Hide loader when new riddle is ready
-      setIsLoadingNextRiddle(false);
-
       setRevealedHints({});
       setShowError(false);
       setWrongAttempts(0);
@@ -504,6 +501,9 @@ export default function GamePage() {
             resetPerfectStreak();
           }
 
+          // Floating gem animation
+          setGemAnimation({ amount: gemsEarned, key: Date.now() });
+
           // Confetti animation immediately
           confetti({
             particleCount: 100,
@@ -564,42 +564,22 @@ export default function GamePage() {
             }, 500);
           }
 
-          // Show loader for next riddle transition
-          setIsLoadingNextRiddle(true);
-
-          // Update session with next riddle immediately
+          // Update session with next riddle immediately (no loader overlay)
           if (nextRiddle) {
-            updateSessionMutation.mutate(
-              {
-                userId,
-                currentRiddleId: nextRiddle.id,
-                solvedRiddles: [...solvedRiddles, currentRiddle.id],
-                userGems: userGems + gemsEarned,
-              },
-              {
-                onSettled: () => {
-                  // Hide loader after a brief delay for smooth transition
-                  setTimeout(() => {
-                    setIsLoadingNextRiddle(false);
-                  }, 500);
-                },
-              }
-            );
+            updateSessionMutation.mutate({
+              userId,
+              currentRiddleId: nextRiddle.id,
+              solvedRiddles: [...solvedRiddles, currentRiddle.id],
+              userGems: userGems + gemsEarned,
+            });
           } else {
             // All riddles solved
-            updateSessionMutation.mutate(
-              {
-                userId,
-                solvedRiddles: [...solvedRiddles, currentRiddle.id],
-                userGems: userGems + gemsEarned,
-                currentRiddleId: undefined,
-              },
-              {
-                onSettled: () => {
-                  setIsLoadingNextRiddle(false);
-                },
-              }
-            );
+            updateSessionMutation.mutate({
+              userId,
+              solvedRiddles: [...solvedRiddles, currentRiddle.id],
+              userGems: userGems + gemsEarned,
+              currentRiddleId: undefined,
+            });
           }
 
           // Sync with backend in background (non-blocking)
@@ -786,9 +766,6 @@ export default function GamePage() {
       currentRiddle.id,
     ]);
 
-    // Show loader for transition
-    setIsLoadingNextRiddle(true);
-
     // Update store immediately (optimistic update)
     useGameStore.setState((state) => ({
       skippedRiddles: [...state.skippedRiddles, currentRiddle.id],
@@ -809,12 +786,6 @@ export default function GamePage() {
         userGems: userGems - skipCost,
       },
       {
-        onSettled: () => {
-          // Hide loader after transition
-          setTimeout(() => {
-            setIsLoadingNextRiddle(false);
-          }, 500);
-        },
         onError: (error) => {
           // If server fails, revert optimistic update
           console.error("Server skip sync failed:", error);
@@ -824,7 +795,6 @@ export default function GamePage() {
             currentRiddleId: currentRiddle.id, // Revert to current riddle
           }));
           toast.error("Failed to skip riddle");
-          setIsLoadingNextRiddle(false);
         },
       }
     );
@@ -1076,28 +1046,21 @@ export default function GamePage() {
 
   return (
     <div className="w-full max-w-4xl mx-auto flex flex-col gap-8 relative">
-      {/* Next Riddle Loader Overlay */}
+      {/* Floating Gem Animation */}
       <AnimatePresence>
-        {isLoadingNextRiddle && (
+        {gemAnimation && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-[var(--bg-primary)]/95 backdrop-blur-md z-50 flex flex-col items-center justify-center gap-4 rounded-2xl"
+            key={gemAnimation.key}
+            initial={{ opacity: 1, y: 0, scale: 0.8 }}
+            animate={{ opacity: [1, 1, 0], y: -80, scale: [0.8, 1.2, 1] }}
+            transition={{ duration: 1.2, ease: "easeOut", times: [0, 0.4, 1] }}
+            onAnimationComplete={() => setGemAnimation(null)}
+            className="absolute top-4 right-4 z-50 pointer-events-none flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--accent-secondary)]/20 backdrop-blur-sm border border-[var(--accent-secondary)]/30"
           >
-            <Loader2 className="w-12 h-12 animate-spin text-[var(--accent-primary)]" />
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center space-y-2"
-            >
-              <p className="text-xl font-cinzel text-[var(--text-primary)]">
-                Loading Next Riddle...
-              </p>
-              <p className="text-sm text-[var(--text-secondary)] font-inter">
-                Get ready for the next challenge!
-              </p>
-            </motion.div>
+            <Gem className="w-5 h-5 text-[var(--accent-secondary)] fill-[var(--accent-secondary)]" />
+            <span className="text-lg font-bold font-cinzel text-[var(--accent-secondary)]">
+              +{gemAnimation.amount}
+            </span>
           </motion.div>
         )}
       </AnimatePresence>
