@@ -73,6 +73,45 @@ export async function POST(req: NextRequest) {
     });
 
     if (isCorrect) {
+      // Check if this riddle was created by a user (for creator earnings)
+      const userRiddle = await prisma.userRiddle.findUnique({
+        where: { approvedRiddleId: riddleId },
+        select: { authorId: true, id: true },
+      });
+
+      // Award creator 2 gems if this is a user-submitted riddle
+      const creatorReward = 2;
+      if (userRiddle && userRiddle.authorId !== userId) {
+        // Award creator gems
+        await prisma.user.update({
+          where: { id: userRiddle.authorId },
+          data: {
+            totalGems: { increment: creatorReward },
+          },
+        });
+
+        // Update creator's game session if exists
+        const creatorSession = await prisma.gameSession.findUnique({
+          where: { userId: userRiddle.authorId },
+        });
+        if (creatorSession) {
+          await prisma.gameSession.update({
+            where: { userId: userRiddle.authorId },
+            data: {
+              userGems: { increment: creatorReward },
+            },
+          });
+        }
+
+        // Increment play count for the user riddle
+        await prisma.userRiddle.update({
+          where: { id: userRiddle.id },
+          data: {
+            playCount: { increment: 1 },
+          },
+        });
+      }
+
       // Update user stats
       await prisma.user.update({
         where: { id: userId },

@@ -319,3 +319,83 @@ export function useAdminDailyChallengeEntries(date: string, enabled = true) {
     retry: 1,
   });
 }
+
+/**
+ * Riddle Creator (Admin)
+ */
+export function useAdminUserRiddles(params?: {
+  status?: string;
+  page?: number;
+  pageSize?: number;
+}) {
+  return useQuery({
+    queryKey: ["admin", "riddle-creator", params],
+    queryFn: async () => {
+      try {
+        return await adminApi.riddleCreator.list(params);
+      } catch (error) {
+        const message =
+          error instanceof ApiClientError
+            ? error.message
+            : "Failed to fetch user riddles";
+        throw new Error(message);
+      }
+    },
+    staleTime: STALE_TIME,
+    gcTime: CACHE_TIME,
+    refetchOnWindowFocus: true,
+    retry: 1,
+  });
+}
+
+export function useAdminApproveRiddle() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      try {
+        return await adminApi.riddleCreator.approve(id);
+      } catch (error) {
+        const message =
+          error instanceof ApiClientError
+            ? error.message
+            : "Failed to approve riddle";
+        throw new Error(message);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "riddle-creator"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "riddles"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "stats"] });
+      toast.success("Riddle approved and added to game!");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to approve riddle");
+    },
+  });
+}
+
+export function useAdminRejectRiddle() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, reason }: { id: string; reason?: string }) => {
+      try {
+        return await adminApi.riddleCreator.reject(id, reason);
+      } catch (error) {
+        const message =
+          error instanceof ApiClientError
+            ? error.message
+            : "Failed to reject riddle";
+        throw new Error(message);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "riddle-creator"] });
+      toast.success("Riddle rejected");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to reject riddle");
+    },
+  });
+}

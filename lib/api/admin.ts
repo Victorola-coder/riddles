@@ -291,4 +291,34 @@ export const adminApi = {
         { requireAuth: true }
       ),
   },
+
+  /**
+   * Riddle Creator (Admin)
+   */
+  riddleCreator: {
+    list: (params?: { status?: string; page?: number; pageSize?: number }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.status) searchParams.append("status", params.status);
+      if (params?.page) searchParams.append("page", String(params.page));
+      if (params?.pageSize) searchParams.append("pageSize", String(params.pageSize));
+      const qs = searchParams.toString();
+      return api.get<{
+        riddles: any[];
+        meta: { total: number; page: number; pageSize: number; totalPages: number };
+      }>(`/api/admin/riddle-creator${qs ? `?${qs}` : ""}`, { requireAuth: true });
+    },
+
+    approve: (id: string) =>
+      api.post<{ success: boolean; riddle: any }>(
+        `/api/admin/riddle-creator/${id}`,
+        {},
+        { requireAuth: true }
+      ),
+
+    reject: (id: string, reason?: string) =>
+      api.delete<{ success: boolean }>(
+        `/api/admin/riddle-creator/${id}`,
+        { body: { reason }, requireAuth: true }
+      ),
+  },
 };

@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Gamepad2, TrendingUp, Layers, User, ShoppingBag, Trophy, Gift } from "lucide-react";
+import { Gamepad2, TrendingUp, Layers, User, ShoppingBag, Trophy, Gift, PenTool } from "lucide-react";
 import { motion } from "framer-motion";
 
 export const MobileNav = () => {
@@ -24,6 +24,11 @@ export const MobileNav = () => {
       label: "Mystery",
       href: "/mystery-boxes",
       icon: Gift,
+    },
+    {
+      label: "Create",
+      href: "/riddle-creator",
+      icon: PenTool,
     },
     {
       label: "Ranks",

@@ -46,6 +46,7 @@ const navGroups: NavGroup[] = [
     items: [
       { href: "/admin/riddles", label: "Riddles", icon: HelpCircle },
       { href: "/admin/daily-challenge", label: "Daily Challenge", icon: Calendar },
+      { href: "/admin/riddle-creator", label: "Community Riddles", icon: User },
     ],
   },
   {

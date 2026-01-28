@@ -154,6 +154,30 @@ export const gameApi = {
     history: (userId: string) =>
       client.get<{ openings: any[] }>(`/mystery-box/history?userId=${encodeURIComponent(userId)}`),
   },
+
+  riddleCreator: {
+    list: (params?: { status?: string; sort?: string; page?: number; pageSize?: number }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.status) searchParams.append("status", params.status);
+      if (params?.sort) searchParams.append("sort", params.sort);
+      if (params?.page) searchParams.append("page", String(params.page));
+      if (params?.pageSize) searchParams.append("pageSize", String(params.pageSize));
+      const qs = searchParams.toString();
+      return client.get<any>(`/riddle-creator${qs ? `?${qs}` : ""}`);
+    },
+    submit: (data: {
+      question: string;
+      answer: string | string[];
+      difficulty: string;
+      category?: string;
+      hint1?: string;
+      hint2?: string;
+      tags?: string | string[];
+    }) => client.post<any>("/riddle-creator", data),
+    vote: (data: { userRiddleId: string; value: 1 | -1 }) =>
+      client.post<any>("/riddle-creator/vote", data),
+    myRiddles: () => client.get<any>("/riddle-creator/my-riddles"),
+  },
 };
 
 export const adminApi = {
