@@ -38,6 +38,8 @@ import { soundManager } from "@/lib/utils/sound-manager";
 import { getGuestId } from "@/lib/utils/guest-session";
 import { GAME_CONFIG } from "@/lib/constants/game-config";
 import { validateAnswer } from "@/lib/utils/riddle-validator";
+import { ModifierSelector } from "@/app/components/organisms/game/ModifierSelector";
+import { getGemMultiplier, type ModifierKey } from "@/lib/constants/difficulty-modifiers";
 import type { Riddle } from "@/types/riddle";
 
 // Constants
@@ -145,6 +147,7 @@ export default function GamePage() {
     totalTime,
     currentLevel,
     spendGems,
+    activeModifier,
   } = useGameStore(
     useShallow((state) => ({
       currentRiddleId: state.currentRiddleId,
@@ -158,6 +161,7 @@ export default function GamePage() {
       totalTime: state.totalTime,
       currentLevel: state.currentLevel,
       spendGems: state.spendGems,
+      activeModifier: state.activeModifier,
     }))
   );
 
@@ -451,8 +455,9 @@ export default function GamePage() {
       startTimeRef.current = Date.now();
       updateStreak();
 
-      // Initialize timer based on difficulty
-      const timerDuration = GAME_CONFIG.TIMER[currentRiddle.difficulty];
+      // Initialize timer based on difficulty (halve for HALF_TIMER modifier)
+      const baseDuration = GAME_CONFIG.TIMER[currentRiddle.difficulty];
+      const timerDuration = activeModifier === 'HALF_TIMER' ? Math.round(baseDuration / 2) : baseDuration;
       if (timerDuration > 0) {
         useGameStore.setState({
           timeLeft: timerDuration,
@@ -561,8 +566,9 @@ export default function GamePage() {
 
         // INSTANT CLIENT-SIDE VALIDATION for immediate feedback
         const isCorrect = validateAnswer(answer, currentRiddle);
+        const multiplier = getGemMultiplier(activeModifier);
         const gemsEarned = isCorrect
-          ? GAME_CONFIG.GEM_REWARDS[currentRiddle.difficulty]
+          ? Math.round(GAME_CONFIG.GEM_REWARDS[currentRiddle.difficulty] * multiplier)
           : 0;
 
         // Show instant feedback (optimistic update)
@@ -694,6 +700,7 @@ export default function GamePage() {
               userId,
               riddleId: currentRiddle.id,
               answer,
+              modifier: activeModifier || undefined,
             },
             {
               onError: (error) => {

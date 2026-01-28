@@ -53,6 +53,7 @@ export const gameApi = {
     userId: string;
     riddleId: string;
     answer: string;
+    modifier?: string;
   }) =>
     api.post<{
       correct: boolean;

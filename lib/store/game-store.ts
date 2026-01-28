@@ -31,6 +31,7 @@ const initialState: GameState = {
   userGems: GAME_CONFIG.INITIAL_GEMS,
   currentLevel: GAME_CONFIG.INITIAL_LEVEL,
   hintsUsed: {},
+  activeModifier: null,
 };
 
 const getLevelDuration = (level: number, difficulty: string): number => {

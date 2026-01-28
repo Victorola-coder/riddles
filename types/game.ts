@@ -1,3 +1,5 @@
+export type ModifierKey = 'NO_HINTS' | 'HALF_TIMER' | 'REVERSE';
+
 export type GameState = {
   currentRiddleId: string | null;
   solvedRiddles: string[]; // Array of solved riddle IDs
@@ -7,6 +9,7 @@ export type GameState = {
   hintsUsed: {
     [riddleId: string]: number[]; // Which hints used per riddle (1, 2, 3)
   };
+  activeModifier: ModifierKey | null;
 };
 
 export type HintLevel = 1 | 2 | 3;

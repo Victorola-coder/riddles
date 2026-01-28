@@ -148,6 +148,7 @@ export function useSolveRiddle() {
       userId: string;
       riddleId: string;
       answer: string;
+      modifier?: string;
     }) => {
       try {
         return await gameApi.solveRiddle(data);

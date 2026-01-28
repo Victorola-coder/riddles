@@ -2,15 +2,22 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { logRiddleSolved } from '@/lib/activity-logger';
 import { GAME_CONFIG } from '@/lib/constants/game-config';
+import { getGemMultiplier } from '@/lib/constants/difficulty-modifiers';
+import type { ModifierKey } from '@/types/game';
 
 /**
  * POST /api/game/solve
- * Body: { userId: string, riddleId: string, answer: string }
+ * Body: { userId: string, riddleId: string, answer: string, modifier?: ModifierKey }
  */
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { userId, riddleId, answer } = body;
+    const { userId, riddleId, answer, modifier } = body as {
+      userId: string;
+      riddleId: string;
+      answer: string;
+      modifier?: ModifierKey;
+    };
 
     if (!userId || !riddleId || !answer) {
       return NextResponse.json(
@@ -35,10 +42,10 @@ export async function POST(req: NextRequest) {
         answer.toLowerCase().trim() === correctAnswer.toLowerCase().trim()
     );
 
-    // Calculate gems
-    const gemsEarned = isCorrect
-      ? GAME_CONFIG.GEM_REWARDS[riddle.difficulty as 'easy' | 'medium' | 'hard']
-      : 0;
+    // Calculate gems (apply modifier multiplier)
+    const baseGems = GAME_CONFIG.GEM_REWARDS[riddle.difficulty as 'easy' | 'medium' | 'hard'];
+    const multiplier = getGemMultiplier(modifier || null);
+    const gemsEarned = isCorrect ? Math.round(baseGems * multiplier) : 0;
 
     // Get or create user
     let user = await prisma.user.findUnique({ where: { id: userId } });
@@ -61,6 +68,7 @@ export async function POST(req: NextRequest) {
         answerGiven: answer,
         gemsEarned,
         gemsSpent: 0,
+        modifier: modifier || null,
       },
     });
 

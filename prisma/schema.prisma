@@ -114,6 +114,7 @@ model RiddleAttempt {
   gemsEarned    Int       @default(0)
   gemsSpent     Int       @default(0)
   timeSpent     Int?      // Time in seconds
+  modifier      String?   // 'NO_HINTS' | 'HALF_TIMER' | 'REVERSE'
   createdAt     DateTime  @default(now())
   
   @@index([userId])
