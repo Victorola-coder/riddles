@@ -94,7 +94,7 @@ export default function ProfilePage() {
     return isGuest ? getGuestId() : null;
   });
 
-  const { data: guestSessionData, isLoading: isLoadingGuest } = useQuery({
+  const { data: guestSessionData, isLoading: isLoadingGuest } = useQuery<any>({
     queryKey: ["guest", "session", guestUserId],
     queryFn: async () => {
       if (!guestUserId) return null;
@@ -113,7 +113,11 @@ export default function ProfilePage() {
   });
 
   // Get the display username (from userData for authenticated, or guestSessionData for guests)
-  const displayUsername = userData?.username || guestSessionData?.user?.username || (isGuest ? null : "Guest Adventurer");
+  // gameApi.getSession returns { user: {...}, session: {...} }
+  const guestUser = guestSessionData && typeof guestSessionData === 'object' && 'user' in guestSessionData 
+    ? (guestSessionData as any).user 
+    : null;
+  const displayUsername = userData?.username || guestUser?.username || (isGuest ? null : "Guest Adventurer");
 
   // Sync user store with fetched data
   useEffect(() => {
@@ -306,7 +310,7 @@ export default function ProfilePage() {
         <div className="px-6 md:px-8 pb-6 flex flex-col items-center text-center -mt-12 relative">
           <div className="relative mb-4">
             <Avatar
-              alt={user?.username || user?.email || "Guest"}
+              alt={displayUsername || user?.email || "Guest"}
               size="xl"
               className="ring-4 ring-[var(--bg-card)] w-24 h-24 shadow-xl"
             />

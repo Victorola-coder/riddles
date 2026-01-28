@@ -8,9 +8,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  // directUrl is optional - only needed for connection pooling with Prisma Migrate
-  // Temporarily commented out - using DATABASE_URL for db push
-  // directUrl = env("DIRECT_URL")
+  // directUrl = env("DIRECT_URL") — use DIRECT_URL override for db push
 }
 
 model User {
