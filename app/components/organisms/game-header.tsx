@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Avatar } from "../ui";
 import { useAuthStore } from "@/lib/store/auth";
-import { Trophy, Award, TrendingUp, ShoppingBag, Calendar } from "lucide-react";
+import { Trophy, Award, TrendingUp, ShoppingBag, Calendar, Gift } from "lucide-react";
 import { useUserStore } from "@/lib/store/user-store";
 import {
   GemCounter,
@@ -98,6 +98,21 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
         />
         <span className="text-xs font-inter text-white/80 group-hover:text-white">
           Daily
+        </span>
+      </Link>
+
+      {/* Mystery Boxes Link (Desktop Only) */}
+      <Link
+        href="/mystery-boxes"
+        className="hidden md:flex items-center gap-1 px-3 py-1.5 rounded-lg bg-purple/10 hover:bg-purple/20 transition-colors cursor-pointer group"
+        title="Mystery Boxes"
+      >
+        <Gift
+          className="text-purple group-hover:scale-110 transition-transform"
+          size={18}
+        />
+        <span className="text-xs font-inter text-white/80 group-hover:text-white">
+          Mystery
         </span>
       </Link>
 

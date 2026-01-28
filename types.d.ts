@@ -545,3 +545,89 @@ interface LeaderboardEntry {
   currentStreak: number;
   isCurrentUser?: boolean;
 }
+
+// ============================================
+// Mystery Box Types
+// ============================================
+
+type MysteryBoxRarity = 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY';
+type MysteryBoxRewardType = 'GEMS' | 'STORE_ITEM';
+
+interface MysteryBox {
+  id: string;
+  name: string;
+  description?: string | null;
+  price: number;
+  rarity: MysteryBoxRarity;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  rewards?: MysteryBoxReward[];
+  _count?: {
+    rewards: number;
+    openings: number;
+  };
+}
+
+interface MysteryBoxReward {
+  id: string;
+  mysteryBoxId: string;
+  type: MysteryBoxRewardType;
+  value: string; // JSON string
+  rarity: MysteryBoxRarity;
+  weight: number;
+  isActive: boolean;
+  createdAt: string;
+}
+
+interface MysteryBoxOpening {
+  id: string;
+  userId: string;
+  mysteryBoxId: string;
+  rewardId: string;
+  rewardData: string; // JSON string
+  createdAt: string;
+  mysteryBox?: MysteryBox;
+  reward?: MysteryBoxReward;
+}
+
+interface CreateMysteryBoxData {
+  name: string;
+  description?: string;
+  price: number;
+  rarity: MysteryBoxRarity;
+}
+
+interface UpdateMysteryBoxData {
+  name?: string;
+  description?: string;
+  price?: number;
+  rarity?: MysteryBoxRarity;
+  isActive?: boolean;
+}
+
+interface CreateMysteryBoxRewardData {
+  mysteryBoxId: string;
+  type: MysteryBoxRewardType;
+  value: string;
+  rarity: MysteryBoxRarity;
+  weight: number;
+}
+
+interface UpdateMysteryBoxRewardData {
+  type?: MysteryBoxRewardType;
+  value?: string;
+  rarity?: MysteryBoxRarity;
+  weight?: number;
+  isActive?: boolean;
+}
+
+interface OpenMysteryBoxResult {
+  opening: MysteryBoxOpening;
+  reward: {
+    type: MysteryBoxRewardType;
+    rarity: MysteryBoxRarity;
+    data: any; // Parsed JSON
+  };
+  userGems: number;
+}

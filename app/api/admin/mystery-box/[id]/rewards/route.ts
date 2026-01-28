@@ -8,14 +8,15 @@ import { requireAdminAuth } from "@/lib/admin-auth-server";
  */
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const admin = requireAdminAuth(req);
     if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+    const { id } = await context.params;
     const rewards = await prisma.mysteryBoxReward.findMany({
-      where: { mysteryBoxId: params.id },
+      where: { mysteryBoxId: id },
       orderBy: [{ isActive: "desc" }, { rarity: "asc" }, { weight: "desc" }],
     });
 
@@ -28,12 +29,13 @@ export async function GET(
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const admin = requireAdminAuth(req);
     if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+    const { id } = await context.params;
     const body: unknown = await req.json();
     const data = body as {
       type?: string;
@@ -52,7 +54,7 @@ export async function POST(
 
     const reward = await prisma.mysteryBoxReward.create({
       data: {
-        mysteryBoxId: params.id,
+        mysteryBoxId: id,
         type: data.type,
         value: data.value,
         rarity: data.rarity || "COMMON",

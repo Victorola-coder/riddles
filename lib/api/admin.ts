@@ -241,9 +241,54 @@ export const adminApi = {
           solveTimeMs: number | null;
           completedAt: string;
         }>;
-      }>("/api/admin/daily-challenge/entries", {
+      }>(" /api/admin/daily-challenge/entries", {
         params: { date },
         requireAuth: true,
       }),
+  },
+
+  /**
+   * Mystery Boxes (Admin)
+   */
+  mysteryBoxes: {
+    list: () =>
+      api.get<{ boxes: MysteryBox[] }>("/api/admin/mystery-boxes", { requireAuth: true }),
+
+    create: (data: CreateMysteryBoxData) =>
+      api.post<{ box: MysteryBox }>("/api/admin/mystery-boxes", data, { requireAuth: true }),
+
+    update: (id: string, data: UpdateMysteryBoxData) =>
+      api.put<{ box: MysteryBox }>(`/api/admin/mystery-boxes/${id}`, data, { requireAuth: true }),
+
+    delete: (id: string) =>
+      api.delete<{ success: boolean }>(`/api/admin/mystery-boxes/${id}`, { requireAuth: true }),
+
+    seed: () =>
+      api.post<{ message: string; created: number }>(
+        "/api/admin/mystery-boxes/seed",
+        {},
+        { requireAuth: true }
+      ),
+
+    // Rewards
+    addReward: (data: CreateMysteryBoxRewardData) =>
+      api.post<{ reward: MysteryBoxReward }>(
+        "/api/admin/mystery-boxes/rewards",
+        data,
+        { requireAuth: true }
+      ),
+
+    updateReward: (id: string, data: UpdateMysteryBoxRewardData) =>
+      api.put<{ reward: MysteryBoxReward }>(
+        `/api/admin/mystery-boxes/rewards/${id}`,
+        data,
+        { requireAuth: true }
+      ),
+
+    deleteReward: (id: string) =>
+      api.delete<{ success: boolean }>(
+        `/api/admin/mystery-boxes/rewards/${id}`,
+        { requireAuth: true }
+      ),
   },
 };

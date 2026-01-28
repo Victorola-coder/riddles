@@ -216,16 +216,34 @@ export async function POST(req: NextRequest) {
       });
     });
 
+    const rewardForClient: OpenMysteryBoxResult["reward"] = {
+      type: (resolvedReward.type as RewardType) === "STORE_ITEM" ? "STORE_ITEM" : "GEMS",
+      rarity:
+        (typeof resolvedReward.rarity === "string"
+          ? (resolvedReward.rarity as MysteryBoxRarity)
+          : "COMMON"),
+      data: resolvedReward,
+    };
+
     return NextResponse.json(
       {
         success: true,
         userId,
         box: { id: box.id, name: box.name, rarity: box.rarity, price: box.price },
-        reward: resolvedReward,
+        reward: rewardForClient,
         gemsSpent,
         gemsGained,
         newGems,
-        opening: { id: opening.id, createdAt: opening.createdAt.toISOString() },
+        // Back-compat + UI convenience
+        userGems: newGems,
+        opening: {
+          id: opening.id,
+          userId,
+          mysteryBoxId: box.id,
+          rewardId: picked.id,
+          rewardData: JSON.stringify(resolvedReward),
+          createdAt: opening.createdAt.toISOString(),
+        },
       },
       { status: 200 }
     );

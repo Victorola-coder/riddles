@@ -15,10 +15,10 @@ export async function GET(req: NextRequest) {
       orderBy: [{ isActive: "desc" }, { createdAt: "desc" }],
       include: {
         rewards: {
-          select: { id: true, isActive: true },
+          orderBy: [{ isActive: "desc" }, { rarity: "asc" }, { weight: "desc" }],
         },
         _count: {
-          select: { openings: true },
+          select: { rewards: true, openings: true },
         },
       },
     });
@@ -34,9 +34,20 @@ export async function GET(req: NextRequest) {
           isActive: b.isActive,
           createdAt: b.createdAt.toISOString(),
           updatedAt: b.updatedAt.toISOString(),
-          rewardsTotal: b.rewards.length,
-          rewardsActive: b.rewards.filter((r) => r.isActive).length,
-          openingsCount: b._count.openings,
+          rewards: b.rewards.map((r) => ({
+            id: r.id,
+            mysteryBoxId: r.mysteryBoxId,
+            type: r.type,
+            value: r.value,
+            rarity: r.rarity,
+            weight: r.weight,
+            isActive: r.isActive,
+            createdAt: r.createdAt.toISOString(),
+          })),
+          _count: {
+            rewards: b._count.rewards,
+            openings: b._count.openings,
+          },
         })),
       },
       { status: 200 }

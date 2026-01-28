@@ -3,7 +3,8 @@
 import { toast } from "sonner";
 import { useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { gameApi, ApiClientError } from "@/lib/api";
+import { gameApi } from "@/lib/api/game";
+import { ApiClientError } from "@/lib/api/client";
 import { useGameStore } from "@/lib/store/game-store";
 import { useUserStore } from "@/lib/store/user-store";
 
@@ -13,26 +14,28 @@ const STALE_TIME = 5 * 60 * 1000; // 5 minutes
 const ATTEMPTS_STALE_TIME = 2 * 60 * 1000; // 2 minutes
 const ATTEMPTS_CACHE_TIME = 5 * 60 * 1000; // 5 minutes
 
+type GameSessionResponse = Awaited<ReturnType<typeof gameApi.getSession>>;
+
 /**
  * Get or create game session
  * Syncs server state to Zustand store
  */
 export function useGameSession(userId?: string) {
-  const query = useQuery({
+  const query = useQuery<GameSessionResponse | null>({
     queryKey: ["game", "session", userId],
     queryFn: async () => {
       try {
         const response = await gameApi.getSession(userId);
         return response;
       } catch (error) {
-        // Log error but don't throw to prevent query from failing repeatedly
+        // Log error but don't throw: session sync is non-critical and
+        // throwing here can cause retry loops + cascading re-renders.
         const message =
           error instanceof ApiClientError
             ? error.message
             : "Failed to fetch game session";
         console.error("Game session fetch error:", message, error);
-        // Return a default structure instead of throwing to prevent infinite retries
-        throw new Error(message);
+        return null;
       }
     },
     enabled: !!userId,
@@ -41,17 +44,7 @@ export function useGameSession(userId?: string) {
     refetchOnWindowFocus: false,
     refetchOnMount: true,
     refetchOnReconnect: false,
-    retry: (failureCount, error) => {
-      // Only retry once and only for network errors, not for API errors
-      if (
-        failureCount < 1 &&
-        error instanceof Error &&
-        !error.message.includes("Failed to fetch game session")
-      ) {
-        return true;
-      }
-      return false;
-    },
+    retry: false,
   });
 
   // Sync server data to Zustand store when query succeeds

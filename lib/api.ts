@@ -210,6 +210,8 @@ export const adminApi = {
     updateBox: (id: string, data: any) => adminClient.put<any>(`/admin/mystery-box/${id}`, data),
     deleteBox: (id: string) => adminClient.delete<any>(`/admin/mystery-box/${id}`),
 
+    seed: () => adminClient.post<any>("/admin/mystery-box/seed", {}),
+
     listRewards: (boxId: string) => adminClient.get<any>(`/admin/mystery-box/${boxId}/rewards`),
     createReward: (boxId: string, data: any) =>
       adminClient.post<any>(`/admin/mystery-box/${boxId}/rewards`, data),

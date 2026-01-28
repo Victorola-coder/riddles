@@ -4,13 +4,13 @@ import { requireAdminAuth } from "@/lib/admin-auth-server";
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const admin = requireAdminAuth(req);
     if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { id } = params;
+    const { id } = await context.params;
     const body: unknown = await req.json();
     const data = body as {
       name?: string;
@@ -45,13 +45,13 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const admin = requireAdminAuth(req);
     if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { id } = params;
+    const { id } = await context.params;
     await prisma.mysteryBox.delete({ where: { id } });
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
