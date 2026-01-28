@@ -14,15 +14,19 @@ import {
   ChevronRight,
   ShoppingBag,
   Tag,
+  User,
+  Gem,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import Modal from "@/app/components/ui/modal";
 import Button from "@/app/components/ui/button";
 import { Loader } from "@/app/components/global";
+import { Skeleton } from "@/app/components/ui";
 import { ReactNode, useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { getAdminToken, removeAdminToken } from "@/lib/admin-auth";
+import { useAuthStore } from "@/lib/store/auth";
 
 // NavGroup type is now in types.d.ts
 
@@ -66,6 +70,10 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const [openGroups, setOpenGroups] = useState<Set<string>>(
     new Set(navGroups.map((group) => group.label))
   );
+  
+  // Get user data for profile display
+  const user = useAuthStore((state) => state.user);
+  const isInitializing = useAuthStore((state) => state.isInitializing);
 
   useEffect(() => {
     // Don't check auth on login page
@@ -131,13 +139,24 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         <h1 className="text-lg font-bold bg-gradient-to-r from-[#8b5cf6] to-[#fbbf24] bg-clip-text text-transparent">
           Admin
         </h1>
-        <button
-          onClick={() => setShowLogoutConfirm(true)}
-          className="px-3 py-1.5 bg-[#ef4444] text-white rounded-lg text-sm hover:bg-[#ef4444]/80 transition-colors flex items-center gap-2"
-        >
-          <LogOut className="w-4 h-4" />
-          <span className="hidden sm:inline">Logout</span>
-        </button>
+        <div className="flex items-center gap-2">
+          {/* User Profile */}
+          {isInitializing ? (
+            <Skeleton className="h-8 w-24 rounded-lg" />
+          ) : user ? (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-[#FFFFFF0A] rounded-lg border border-[#FFFFFF1A]">
+              <User className="w-4 h-4 text-purple-400" />
+              <span className="text-sm text-white hidden sm:inline">{user.username || 'Admin'}</span>
+            </div>
+          ) : null}
+          <button
+            onClick={() => setShowLogoutConfirm(true)}
+            className="px-3 py-1.5 bg-[#ef4444] text-white rounded-lg text-sm hover:bg-[#ef4444]/80 transition-colors flex items-center gap-2"
+          >
+            <LogOut className="w-4 h-4" />
+            <span className="hidden sm:inline">Logout</span>
+          </button>
+        </div>
       </div>
 
       <div className="flex min-h-screen flex-col md:flex-row">
@@ -239,8 +258,34 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               </ul>
             </nav>
 
-            {/* Desktop Logout */}
-            <div className="hidden md:block px-6 py-4 border-t border-[#FFFFFF1A]">
+            {/* Desktop User Profile & Logout */}
+            <div className="hidden md:block px-6 py-4 border-t border-[#FFFFFF1A] space-y-3">
+              {/* User Profile */}
+              {isInitializing ? (
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-10 w-full rounded-lg" />
+                </div>
+              ) : user ? (
+                <div className="p-3 bg-[#FFFFFF0A] rounded-lg border border-[#FFFFFF1A]">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-yellow-500 flex items-center justify-center">
+                      <User className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-white truncate">
+                        {user.username || 'Admin'}
+                      </p>
+                      <div className="flex items-center gap-1 text-xs text-gray-400">
+                        <Gem className="w-3 h-3 text-yellow-500" />
+                        <span>{user.totalGems || 0} gems</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+              
+              {/* Logout Button */}
               <button
                 onClick={() => {
                   setShowLogoutConfirm(true);

@@ -199,14 +199,8 @@ export function useGetHint() {
         throw new Error(message);
       }
     },
-    onSuccess: (response) => {
-      // Update Zustand store with gems spent (following adesina.io pattern)
-      if (response.gemsSpent > 0) {
-        const { spendGems } = useGameStore.getState();
-        spendGems(response.gemsSpent);
-      }
-
-      // Invalidate session to get updated gems
+    onSuccess: () => {
+      // Gems already spent optimistically in game/page.tsx — just refresh session
       queryClient.invalidateQueries({ queryKey: ["game", "session"] });
     },
     onError: (error: Error, variables) => {

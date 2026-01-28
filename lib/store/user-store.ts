@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { UserState } from '@/types/user';
-import { ACHIEVEMENTS, getAchievementById } from '@/lib/constants/achievements';
+import { ACHIEVEMENTS } from '@/lib/constants/achievements';
 import { toast } from 'sonner';
 import confetti from 'canvas-confetti';
 import { authApi } from '@/lib/api';
@@ -14,7 +14,6 @@ interface UserStore extends UserState {
   
   // Achievement methods
   checkAchievements: () => void;
-  unlockAchievement: (id: string) => void;
   getUnlockedAchievements: () => typeof ACHIEVEMENTS;
   getLockedAchievements: () => typeof ACHIEVEMENTS;
   getAchievementProgress: (id: string) => number;
@@ -192,32 +191,6 @@ export const useUserStore = create<UserStore>()(
            }));
         }
       },
-
-      unlockAchievement: (id: string) => {
-        const achievement = getAchievementById(id);
-        if (!achievement) return;
-
-        // Add to unlocked achievements
-        set((state) => ({
-          achievements: [...state.achievements, id],
-          totalGemsEarned: state.totalGemsEarned + achievement.reward,
-        }));
-
-        // Show celebration
-        soundManager.play('achievement');
-        confetti({
-          particleCount: 150,
-          spread: 100,
-          origin: { y: 0.6 },
-          colors: ['#8b5cf6', '#fbbf24', '#10b981'],
-        });
-
-        toast.success(
-          `🏆 ${achievement.name} Unlocked! ${achievement.description} (+${achievement.reward} gems)`,
-          { duration: 5000 }
-        );
-      },
-
 
       getUnlockedAchievements: () => {
         const unlockedIds = get().achievements;

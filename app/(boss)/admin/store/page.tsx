@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminApi } from "@/lib/api/admin";
-import { Loader } from "@/app/components/global";
+import { Skeleton } from "@/app/components/ui";
 import Button from "@/app/components/ui/button";
 import Modal from "@/app/components/ui/modal";
 import { toast } from "sonner";
@@ -140,14 +140,6 @@ export default function AdminStorePage() {
       )
     : [];
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-96">
-        <Loader />
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -194,7 +186,35 @@ export default function AdminStorePage() {
 
       {/* Items Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredItems.map((item: StoreItem) => (
+        {isLoading ? (
+          // Skeleton loaders
+          Array.from({ length: 6 }).map((_, index) => (
+            <div
+              key={index}
+              className="bg-[#FFFFFF0A] border border-[#FFFFFF1A] rounded-xl p-4"
+            >
+              <div className="flex justify-between items-start mb-3">
+                <Skeleton className="w-10 h-10 rounded-lg" />
+                <div className="flex gap-2">
+                  <Skeleton className="w-8 h-8 rounded-lg" />
+                  <Skeleton className="w-8 h-8 rounded-lg" />
+                </div>
+              </div>
+              <Skeleton className="h-6 w-3/4 mb-2" />
+              <Skeleton className="h-4 w-full mb-3" />
+              <div className="flex gap-2 mb-4">
+                <Skeleton className="h-5 w-16 rounded" />
+                <Skeleton className="h-5 w-16 rounded" />
+              </div>
+              <div className="flex justify-between items-center pt-3 border-t border-[#FFFFFF1A]">
+                <Skeleton className="h-8 w-24" />
+                <Skeleton className="h-3 w-20" />
+              </div>
+            </div>
+          ))
+        ) : (
+          <>
+            {filteredItems.map((item: StoreItem) => (
           <div
             key={item.id}
             className="bg-[#FFFFFF0A] border border-[#FFFFFF1A] rounded-xl p-4 hover:border-purple-500/50 transition-colors"
@@ -244,11 +264,13 @@ export default function AdminStorePage() {
           </div>
         ))}
 
-        {filteredItems.length === 0 && (
+        {filteredItems.length === 0 && !isLoading && (
           <div className="col-span-full flex flex-col items-center justify-center py-12 text-gray-400 border border-dashed border-[#FFFFFF1A] rounded-xl">
             <ShoppingBag className="w-12 h-12 mb-3 opacity-20" />
             <p>No items found</p>
           </div>
+        )}
+          </>
         )}
       </div>
 

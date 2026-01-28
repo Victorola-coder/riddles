@@ -144,10 +144,7 @@ export const useGameStore = create<GameStore>()(
         userGems: state.userGems,
         currentLevel: state.currentLevel,
         hintsUsed: state.hintsUsed,
-        // Persist timer state so it doesn't disappear on refresh
-        timeLeft: state.timeLeft,
-        totalTime: state.totalTime,
-        isTimerActive: state.isTimerActive,
+        // Timer state is ephemeral — persisting it causes stale values on return
       }),
     }
   )

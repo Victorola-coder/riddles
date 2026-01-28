@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withCors, handleCorsPreflight } from '@/lib/utils/cors';
+import { generateUniqueGuestName } from '@/lib/utils/guest-name-generator';
 
 /**
  * OPTIONS /api/game/session
@@ -34,12 +35,25 @@ export async function GET(request: NextRequest) {
 
     if (!user) {
       const isGuest = userId.startsWith('guest_');
+      
+      // Generate unique name for guest users
+      let username: string;
+      if (isGuest) {
+        username = await generateUniqueGuestName(async (name) => {
+          const existing = await prisma.user.findUnique({
+            where: { username: name },
+          });
+          return !existing; // Return true if unique (no existing user)
+        });
+      } else {
+        // For non-guest users, use a simple format
+        username = `Player_${userId.slice(0, 8)}`;
+      }
+      
       user = await prisma.user.create({
         data: {
           id: userId,
-          username: isGuest 
-            ? `Guest_${userId.slice(-8)}` 
-            : `Player_${userId.slice(0, 8)}`,
+          username,
           totalGems: 50,
         },
       });
@@ -100,29 +114,29 @@ export async function POST(request: NextRequest) {
       hintsUsed,
     } = body;
 
-    const session = await prisma.gameSession.update({
-      where: { userId },
-      data: {
-        currentRiddleId,
-        solvedRiddles: JSON.stringify(solvedRiddles || []),
-        skippedRiddles: JSON.stringify(skippedRiddles || []),
-        userGems,
-        currentLevel,
-        hintsUsed: JSON.stringify(hintsUsed || {}),
-        lastActivityAt: new Date(),
-      },
-    });
-
-    // Update user stats
-    await prisma.user.update({
-      where: { id: userId },
-      data: {
-        totalGems: userGems,
-        totalRiddlesSolved: solvedRiddles?.length || 0,
-        currentLevel,
-        lastPlayedDate: new Date(),
-      },
-    });
+    const [session] = await prisma.$transaction([
+      prisma.gameSession.update({
+        where: { userId },
+        data: {
+          currentRiddleId,
+          solvedRiddles: JSON.stringify(solvedRiddles || []),
+          skippedRiddles: JSON.stringify(skippedRiddles || []),
+          userGems,
+          currentLevel,
+          hintsUsed: JSON.stringify(hintsUsed || {}),
+          lastActivityAt: new Date(),
+        },
+      }),
+      prisma.user.update({
+        where: { id: userId },
+        data: {
+          totalGems: userGems,
+          totalRiddlesSolved: solvedRiddles?.length || 0,
+          currentLevel,
+          lastPlayedDate: new Date(),
+        },
+      }),
+    ]);
 
     return withCors(
       NextResponse.json({

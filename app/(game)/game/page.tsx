@@ -6,10 +6,25 @@ import { CheckCircle2, XCircle, Loader2, Trophy, Gem } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useShallow } from "zustand/react/shallow";
+import dynamic from "next/dynamic";
 
-import { RiddleCard, AnswerInput, HintPanel } from "@/app/components/organisms";
 import Skeleton from "@/app/components/ui/skeleton";
 import { useGameStore } from "@/lib/store/game-store";
+
+// Dynamic imports for heavy components (framer-motion based)
+const RiddleCard = dynamic(
+  () => import("@/app/components/organisms").then((m) => ({ default: m.RiddleCard })),
+  { loading: () => <Skeleton className="h-64 w-full rounded-xl" /> }
+);
+const AnswerInput = dynamic(
+  () => import("@/app/components/organisms").then((m) => ({ default: m.AnswerInput })),
+  { loading: () => <Skeleton className="h-14 w-full rounded-xl" /> }
+);
+const HintPanel = dynamic(
+  () => import("@/app/components/organisms").then((m) => ({ default: m.HintPanel })),
+  { loading: () => <div className="grid grid-cols-2 md:grid-cols-4 gap-4">{[...Array(4)].map((_, i) => <Skeleton key={i} className="h-16 rounded-xl" />)}</div> }
+);
 import { useUserStore } from "@/lib/store/user-store";
 import { useCurrentUser } from "@/lib/hooks/use-auth";
 import {
@@ -117,18 +132,34 @@ export default function GamePage() {
 
   const riddlesLoading = easyLoading || mediumLoading || hardLoading;
 
-  // Game store state - individual selectors for optimal performance
-  const currentRiddleId = useGameStore((state) => state.currentRiddleId);
-  const solvedRiddles = useGameStore((state) => state.solvedRiddles);
-  const skippedRiddles = useGameStore((state) => state.skippedRiddles);
-  const userGems = useGameStore((state) => state.userGems);
-  const hasUsedHint = useGameStore((state) => state.hasUsedHint);
-  const tickTimer = useGameStore((state) => state.tickTimer);
-  const isTimerActive = useGameStore((state) => state.isTimerActive);
-  const timeLeft = useGameStore((state) => state.timeLeft);
-  const totalTime = useGameStore((state) => state.totalTime);
-  const currentLevel = useGameStore((state) => state.currentLevel);
-  const spendGems = useGameStore((state) => state.spendGems);
+  // Game store state - batched with useShallow to minimize re-renders
+  const {
+    currentRiddleId,
+    solvedRiddles,
+    skippedRiddles,
+    userGems,
+    hasUsedHint,
+    tickTimer,
+    isTimerActive,
+    timeLeft,
+    totalTime,
+    currentLevel,
+    spendGems,
+  } = useGameStore(
+    useShallow((state) => ({
+      currentRiddleId: state.currentRiddleId,
+      solvedRiddles: state.solvedRiddles,
+      skippedRiddles: state.skippedRiddles,
+      userGems: state.userGems,
+      hasUsedHint: state.hasUsedHint,
+      tickTimer: state.tickTimer,
+      isTimerActive: state.isTimerActive,
+      timeLeft: state.timeLeft,
+      totalTime: state.totalTime,
+      currentLevel: state.currentLevel,
+      spendGems: state.spendGems,
+    }))
+  );
 
   // User store actions - individual selectors (actions are stable references)
   const incrementTotalSolved = useUserStore(
@@ -1012,35 +1043,6 @@ export default function GamePage() {
     getNextRiddleInProgression,
   ]);
 
-
-  // Calculate progress per difficulty tier - optimized with Set for O(1) lookups
-  const progressByDifficulty = useMemo(() => {
-    const solvedSet = new Set(solvedRiddles || []);
-
-    // Count solved riddles efficiently - single pass
-    const countSolved = (riddles: typeof easyRiddles) => {
-      let count = 0;
-      for (const riddle of riddles) {
-        if (solvedSet.has(riddle.id)) count++;
-      }
-      return count;
-    };
-
-    return {
-      easy: {
-        solved: countSolved(riddlesByDifficulty.easy),
-        total: riddlesByDifficulty.easy.length,
-      },
-      medium: {
-        solved: countSolved(riddlesByDifficulty.medium),
-        total: riddlesByDifficulty.medium.length,
-      },
-      hard: {
-        solved: countSolved(riddlesByDifficulty.hard),
-        total: riddlesByDifficulty.hard.length,
-      },
-    };
-  }, [solvedRiddles, riddlesByDifficulty]);
 
   // Loading state - wait for userId to be set
   if (!userId || sessionLoading || riddlesLoading) {

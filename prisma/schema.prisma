@@ -82,6 +82,8 @@ model Riddle {
   
   attempts    RiddleAttempt[]
   activityLogs ActivityLog[]
+
+  @@index([difficulty])
 }
 
 model GameSession {
