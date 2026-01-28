@@ -81,7 +81,7 @@ export const HintPanel: React.FC<HintPanelProps> = ({
 
       {/* Skip */}
       <Button
-        variant="ghost"
+        variant="secondary"
         size="md"
         onClick={onSkip}
         disabled={disabled || !canAffordSkip}

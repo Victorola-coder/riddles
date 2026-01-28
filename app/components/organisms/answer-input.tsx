@@ -36,7 +36,7 @@ export const AnswerInput: React.FC<AnswerInputProps> = ({
 
   return (
     <motion.div
-      className="w-full flex gap-3"
+      className="w-full flex flex-col sm:flex-row gap-3"
       variants={showError ? shakeVariants : undefined}
       animate={showError ? 'shake' : undefined}
     >
@@ -48,7 +48,7 @@ export const AnswerInput: React.FC<AnswerInputProps> = ({
         disabled={disabled}
         placeholder={placeholder}
         className={`
-          flex-1 px-6 py-4 rounded-lg font-inter text-lg
+          flex-1 px-4 py-3 sm:px-6 sm:py-4 rounded-lg font-inter text-base sm:text-lg
           bg-midnight-light text-white
           border-2 transition-all duration-200
           focus:outline-none focus:ring-0
@@ -66,7 +66,7 @@ export const AnswerInput: React.FC<AnswerInputProps> = ({
         size="lg"
         onClick={handleSubmit}
         disabled={disabled || !answer.trim()}
-        className="px-8"
+        className="w-full sm:w-auto px-6 sm:px-8"
       >
         <Send size={20} />
         Submit

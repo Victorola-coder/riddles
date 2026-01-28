@@ -51,15 +51,32 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Get hint
-    let hint = '';
+    // Compute a consistent hint based on level
+    // 1 => First letter of the primary answer (or custom hint1 override)
+    // 2 => Word length (e.g. "7 letters") (or custom hint2 override)
+    // 3 => Full answer reveal
+    const answers = JSON.parse(riddle.answer as string) as string[];
+    const primaryAnswer = (answers[0] || "").trim();
+
+    let hint = "";
     if (hintLevel === 1) {
-      hint = riddle.hint1 || '';
+      // Prefer explicit hint1 if provided, otherwise first letter
+      if (riddle.hint1 && riddle.hint1.trim().length > 0) {
+        hint = riddle.hint1.trim();
+      } else if (primaryAnswer) {
+        hint = primaryAnswer.charAt(0).toUpperCase();
+      }
     } else if (hintLevel === 2) {
-      hint = riddle.hint2 || '';
+      // Prefer explicit hint2 if provided, otherwise word length description
+      if (riddle.hint2 && riddle.hint2.trim().length > 0) {
+        hint = riddle.hint2.trim();
+      } else if (primaryAnswer) {
+        const length = primaryAnswer.replace(/\s/g, '').length;
+        hint = `${length} letter${length !== 1 ? 's' : ''}`;
+      }
     } else if (hintLevel === 3) {
-      const answers = JSON.parse(riddle.answer as string) as string[];
-      hint = `The answer is: ${answers[0]}`;
+      // Full answer reveal
+      hint = primaryAnswer ? `The answer is: ${primaryAnswer}` : '';
     }
 
     // Deduct gems
