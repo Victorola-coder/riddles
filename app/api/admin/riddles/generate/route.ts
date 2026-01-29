@@ -1,13 +1,12 @@
-
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { generateRiddles } from "@/lib/gemini";
-import { verifyAdminToken } from "@/lib/auth/verify-token";
+import { requireAdminAuth } from "@/lib/admin-auth-server";
 
 export async function POST(req: NextRequest) {
   try {
-    const adminId = await verifyAdminToken(req);
-    if (!adminId) {
+    const admin = requireAdminAuth(req);
+    if (!admin) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -33,7 +32,7 @@ export async function POST(req: NextRequest) {
              const newRiddle = await prisma.riddle.create({
                 data: {
                     question: r.question,
-                    answer: r.answer,
+                    answer: JSON.stringify([r.answer]), // Store as JSON array string
                     difficulty: r.difficulty,
                     hint1: r.hint1,
                     hint2: r.hint2,

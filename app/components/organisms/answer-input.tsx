@@ -54,10 +54,9 @@ export const AnswerInput: React.FC<AnswerInputProps> = ({
           focus:outline-none focus:ring-0
           disabled:opacity-50 disabled:cursor-not-allowed
           placeholder:text-[var(--text-muted)]
-          ${
-            showError
-              ? 'border-[var(--accent-danger)] bg-red-500/10'
-              : 'border-[var(--border-default)] focus:border-[var(--border-focus)] focus:glow-purple'
+          ${showError
+            ? 'border-[var(--accent-danger)] bg-red-500/10'
+            : 'border-[var(--border-default)] focus:border-[var(--border-focus)] focus:glow-purple'
           }
         `}
       />

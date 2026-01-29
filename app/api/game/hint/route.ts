@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { logHintUsed } from '@/lib/activity-logger';
-import { GAME_CONFIG } from '@/lib/constants/game-config';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { logHintUsed } from "@/lib/activity-logger";
+import { GAME_CONFIG } from "@/lib/constants/game-config";
 
 /**
  * POST /api/game/hint
@@ -14,8 +14,8 @@ export async function POST(req: NextRequest) {
 
     if (!userId || !riddleId || !hintLevel) {
       return NextResponse.json(
-        { error: 'userId, riddleId, and hintLevel are required' },
-        { status: 400 }
+        { error: "userId, riddleId, and hintLevel are required" },
+        { status: 400 },
       );
     }
 
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!riddle) {
-      return NextResponse.json({ error: 'Riddle not found' }, { status: 404 });
+      return NextResponse.json({ error: "Riddle not found" }, { status: 404 });
     }
 
     // Get user
@@ -45,10 +45,7 @@ export async function POST(req: NextRequest) {
     const gemsSpent = GAME_CONFIG.GEM_COSTS[costKey];
 
     if (user.totalGems < gemsSpent) {
-      return NextResponse.json(
-        { error: 'Not enough gems' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Not enough gems" }, { status: 400 });
     }
 
     // Compute a consistent hint based on level
@@ -71,12 +68,12 @@ export async function POST(req: NextRequest) {
       if (riddle.hint2 && riddle.hint2.trim().length > 0) {
         hint = riddle.hint2.trim();
       } else if (primaryAnswer) {
-        const length = primaryAnswer.replace(/\s/g, '').length;
-        hint = `${length} letter${length !== 1 ? 's' : ''}`;
+        const length = primaryAnswer.replace(/\s/g, "").length;
+        hint = `${length} letter${length !== 1 ? "s" : ""}`;
       }
     } else if (hintLevel === 3) {
       // Full answer reveal
-      hint = primaryAnswer ? `The answer is: ${primaryAnswer}` : '';
+      hint = primaryAnswer ? `The answer is: ${primaryAnswer}` : "";
     }
 
     // Deduct gems
@@ -94,12 +91,16 @@ export async function POST(req: NextRequest) {
 
     if (session) {
       // Parse hintsUsed JSON (stored as string in SQLite)
-      const hintsUsedStr = typeof session.hintsUsed === 'string' 
-        ? session.hintsUsed 
-        : JSON.stringify(session.hintsUsed || {});
-      const hintsUsed = JSON.parse(hintsUsedStr || '{}') as Record<string, number[]>;
+      const hintsUsedStr =
+        typeof session.hintsUsed === "string"
+          ? session.hintsUsed
+          : JSON.stringify(session.hintsUsed || {});
+      const hintsUsed = JSON.parse(hintsUsedStr || "{}") as Record<
+        string,
+        number[]
+      >;
       const riddleHints = hintsUsed[riddleId] || [];
-      
+
       if (!riddleHints.includes(hintLevel)) {
         hintsUsed[riddleId] = [...riddleHints, hintLevel];
         await prisma.gameSession.update({
@@ -122,13 +123,13 @@ export async function POST(req: NextRequest) {
         gemsSpent,
         remainingGems: user.totalGems - gemsSpent,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
-    console.error('Failed to process hint:', error);
+    console.error("Failed to process hint:", error);
     return NextResponse.json(
-      { error: 'Failed to process hint' },
-      { status: 500 }
+      { error: "Failed to process hint" },
+      { status: 500 },
     );
   }
 }

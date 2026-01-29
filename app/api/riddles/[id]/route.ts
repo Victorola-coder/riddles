@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
  */
 export async function GET(
   _req: NextRequest,
-  context: { params: { id: string } }
+  context: { params: { id: string } },
 ) {
   try {
     const { id } = context.params;
@@ -46,14 +46,13 @@ export async function GET(
           createdAt: riddle.createdAt.toISOString(),
         },
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error fetching riddle by id:", error);
     return NextResponse.json(
       { error: "Failed to fetch riddle" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

@@ -4,3 +4,4 @@ export { AnswerInput } from './answer-input';
 export { HintPanel } from './hint-panel';
 export { MobileNav } from './mobile-nav';
 export { ModifierSelector } from './game/ModifierSelector';
+export { CongratulationsScreen } from './game/CongratulationsScreen';

@@ -25,6 +25,10 @@ const HintPanel = dynamic(
   () => import("@/app/components/organisms").then((m) => ({ default: m.HintPanel })),
   { loading: () => <div className="grid grid-cols-2 md:grid-cols-4 gap-4">{[...Array(4)].map((_, i) => <Skeleton key={i} className="h-16 rounded-xl" />)}</div> }
 );
+const CongratulationsScreen = dynamic(
+  () => import("@/app/components/organisms").then((m) => ({ default: m.CongratulationsScreen })),
+  { loading: () => <div className="flex items-center justify-center min-h-[400px]"><Loader2 className="w-8 h-8 animate-spin text-purple" /></div> }
+);
 import { useUserStore } from "@/lib/store/user-store";
 import { useCurrentUser } from "@/lib/hooks/use-auth";
 import {
@@ -1142,16 +1146,17 @@ export default function GamePage() {
     );
 
     if (!nextRiddle) {
-      // All riddles completed
+      // All riddles completed - show celebration screen
+      const { currentStreak } = useUserStore.getState();
       return (
-        <div className="text-center">
-          <h1 className="text-4xl font-cinzel text-white mb-4">
-            🎉 Congratulations!
-          </h1>
-          <p className="text-xl text-[var(--text-secondary)] font-inter">
-            You've completed all available riddles!
-          </p>
-        </div>
+        <CongratulationsScreen
+          totalSolved={solvedRiddles?.length || 0}
+          totalGems={userGems}
+          currentStreak={currentStreak}
+          onPlayAgain={() => {
+            useGameStore.getState().resetGame();
+          }}
+        />
       );
     }
 
