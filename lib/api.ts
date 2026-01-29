@@ -244,4 +244,23 @@ export const adminApi = {
     deleteReward: (rewardId: string) =>
       adminClient.delete<any>(`/admin/mystery-box/rewards/${rewardId}`),
   },
+
+  riddleCreator: {
+    list: (params?: { status?: string; page?: number; pageSize?: number }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.status) searchParams.append("status", params.status);
+      if (params?.page) searchParams.append("page", String(params.page));
+      if (params?.pageSize) searchParams.append("pageSize", String(params.pageSize));
+      const qs = searchParams.toString();
+      return adminClient.get<any>(`/admin/riddle-creator${qs ? `?${qs}` : ""}`);
+    },
+    approve: (id: string) =>
+      adminClient.post<any>(`/admin/riddle-creator/${id}`, {}),
+    reject: (id: string, reason?: string) => {
+      const searchParams = new URLSearchParams();
+      if (reason) searchParams.append("reason", reason);
+      const qs = searchParams.toString();
+      return adminClient.delete<any>(`/admin/riddle-creator/${id}${qs ? `?${qs}` : ""}`);
+    },
+  },
 };
