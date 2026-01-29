@@ -189,6 +189,12 @@ export const adminApi = {
   
   riddles: {
     seedRiddles: () => api.post<{ success: boolean; message: string }>("/api/admin/riddles/seed", {}, { requireAuth: true }),
+    generate: (data: { count: number; difficulty?: string; autoActivate?: boolean }) =>
+      api.post<{ message: string; riddles: any[] }>(
+        "/api/admin/riddles/generate",
+        data,
+        { requireAuth: true }
+      ),
   },
 
   /**

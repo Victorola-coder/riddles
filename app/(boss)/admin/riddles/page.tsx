@@ -14,13 +14,18 @@ import {
   Trash2,
   Eye,
   EyeOff,
+  Sparkles,
+  Bot
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import Modal from "@/app/components/ui/modal";
 import Input from "@/app/components/ui/input";
 import Button from "@/app/components/ui/button";
 import { Skeleton, AlertDialog } from "@/app/components/ui";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { adminApi } from "@/lib/api/admin";
+import { toast } from "sonner";
+
 
 const PAGE_SIZE = 12;
 
@@ -37,6 +42,32 @@ export default function RiddlesPage() {
   const [editingRiddle, setEditingRiddle] = useState<AdminRiddle | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [riddleToDelete, setRiddleToDelete] = useState<string | null>(null);
+
+  // AI Generation State
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [aiConfig, setAiConfig] = useState({
+    count: 3,
+    difficulty: "mixed",
+    autoActivate: false
+  });
+
+  const generateRiddlesMutation = useMutation({
+    mutationFn: (data: typeof aiConfig) => adminApi.riddles.generate(data),
+    onSuccess: (data) => {
+      toast.success(data.message);
+      setIsAiModalOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["admin", "riddles"] });
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to generate riddles");
+    }
+  });
+
+  const handleGenerateAi = () => {
+    generateRiddlesMutation.mutate(aiConfig);
+  };
+
+
 
   const {
     data: paginatedRiddles,
@@ -200,7 +231,7 @@ export default function RiddlesPage() {
             )}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 w-full sm:w-auto">
           <button
             onClick={() => refetch()}
             disabled={isFetching}
@@ -208,13 +239,22 @@ export default function RiddlesPage() {
           >
             Refresh
           </button>
-          <button
+          <Button
+            onClick={() => setIsAiModalOpen(true)}
+            variant="secondary"
+            className="flex items-center gap-2 bg-gradient-to-r from-purple-500/20 to-blue-500/20 border-purple-500/50 hover:from-purple-500/30 hover:to-blue-500/30"
+          >
+            <Sparkles size={18} className="text-purple-400" />
+            <span className="hidden sm:inline bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent font-bold">AI Generate</span>
+            <span className="sm:hidden text-purple-400">AI</span>
+          </Button>
+          <Button
             onClick={() => setIsCreateModalOpen(true)}
             className="px-4 py-2 bg-gradient-to-r from-[#8b5cf6] to-[#fbbf24] text-black rounded-lg hover:opacity-90 transition-opacity text-sm font-medium flex items-center gap-2"
           >
             <Plus className="w-4 h-4" />
             Create Riddle
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -743,6 +783,95 @@ export default function RiddlesPage() {
         variant="error"
         loading={deleteRiddle.isPending}
       />
+
+      {/* AI Generation Modal */}
+      <Modal
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+        title="Generate & Import AI Riddles"
+      >
+        <div className="space-y-6">
+          <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4 flex gap-3 items-start">
+            <Bot className="text-purple-400 shrink-0 mt-1" size={24} />
+            <div>
+              <h3 className="text-purple-200 font-semibold mb-1">Powered by Gemini AI</h3>
+              <p className="text-sm text-purple-200/70">
+                Automatically generate unique riddles with hints and difficulty ratings. 
+                Riddles will be saved as inactive so you can review them.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Number of Riddles</label>
+              <select
+                value={aiConfig.count}
+                onChange={(e) => setAiConfig({...aiConfig, count: Number(e.target.value)})}
+                className="w-full bg-[#1A1A1A] border border-[#333] rounded-lg px-3 py-2 text-white outline-none focus:border-purple-500"
+              >
+                <option value={1}>1 Riddle</option>
+                <option value={3}>3 Riddles</option>
+                <option value={5}>5 Riddles</option>
+                <option value={10}>10 Riddles</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Difficulty</label>
+              <select
+                value={aiConfig.difficulty}
+                onChange={(e) => setAiConfig({...aiConfig, difficulty: e.target.value})}
+                className="w-full bg-[#1A1A1A] border border-[#333] rounded-lg px-3 py-2 text-white outline-none focus:border-purple-500"
+              >
+                <option value="mixed">Mixed (Random)</option>
+                <option value="easy">Easy Only</option>
+                <option value="medium">Medium Only</option>
+                <option value="hard">Hard Only</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input 
+              type="checkbox" 
+              id="autoActivate"
+              checked={aiConfig.autoActivate}
+              onChange={(e) => setAiConfig({...aiConfig, autoActivate: e.target.checked})}
+              className="w-4 h-4 rounded border-gray-600 bg-[#1A1A1A] text-purple-600 focus:ring-purple-500"
+            />
+            <label htmlFor="autoActivate" className="text-sm text-gray-300">
+              Auto-activate riddles (skip review)
+            </label>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-[#333]">
+            <Button
+              onClick={() => setIsAiModalOpen(false)}
+              className="bg-transparent hover:bg-[#333] text-gray-300"
+              disabled={generateRiddlesMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleGenerateAi}
+              className="bg-purple-600 hover:bg-purple-700 text-white min-w-[120px]"
+              disabled={generateRiddlesMutation.isPending}
+            >
+              {generateRiddlesMutation.isPending ? (
+                <div className="flex items-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Generating...</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Sparkles size={16} />
+                  <span>Generate</span>
+                </div>
+              )}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
